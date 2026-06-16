@@ -18,10 +18,12 @@ export default function AddressBox({
   active,
   onPick,
   onClear,
+  fullWidth = false,
 }: {
   active: boolean;
   onPick: (loc: { lat: number; lng: number }, label: string) => void;
   onClear: () => void;
+  fullWidth?: boolean;
 }) {
   const [q, setQ] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -97,8 +99,8 @@ export default function AddressBox({
   }
 
   return (
-    <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 6 }}>
-      <div style={{ position: "relative" }}>
+    <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 6, width: fullWidth ? "100%" : undefined }}>
+      <div style={{ position: "relative", flex: fullWidth ? "1" : undefined }}>
         <span
           style={{
             position: "absolute",
@@ -126,7 +128,7 @@ export default function AddressBox({
             borderRadius: 20,
             padding: "7px 13px 7px 28px",
             fontSize: 13,
-            width: 230,
+            width: fullWidth ? "100%" : 230,
             outline: "none",
           }}
         />
@@ -136,7 +138,8 @@ export default function AddressBox({
               position: "absolute",
               top: "calc(100% + 4px)",
               left: 0,
-              width: 300,
+              width: fullWidth ? "100%" : 300,
+              maxWidth: "calc(100vw - 40px)",
               background: "#fff",
               border: "1px solid #e6e6e6",
               borderRadius: 12,

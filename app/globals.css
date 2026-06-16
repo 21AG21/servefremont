@@ -25,3 +25,16 @@ body {
 .leaflet-control-attribution {
   display: none !important;
 }
+
+/* Mobile: filter pills scroll horizontally without wrapping. */
+@media (max-width: 640px) {
+  .filter-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap !important;
+    scrollbar-width: none;
+  }
+  .filter-scroll::-webkit-scrollbar {
+    display: none;
+  }
+}

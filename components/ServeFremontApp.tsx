@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import type { Listing } from "@/lib/listing";
 import { haversineMiles, formatMiles } from "@/lib/distance";
 import AddressBox from "@/components/AddressBox";
+import { useIsMobile } from "@/lib/useIsMobile";
 
 const ListingMap = dynamic(() => import("@/components/ListingMap"), {
   ssr: false,
@@ -59,14 +60,15 @@ export default function ServeFremontApp() {
 
   const [activeAge, setActiveAge] = useState<number | null>(null);
   const [filters, setFilters] = useState<Filters>(EMPTY);
-  const [showMap, setShowMap] = useState(true);
+  const [showMap, setShowMap] = useState(() =>
+    typeof window === "undefined" ? true : window.innerWidth > 640
+  );
   const [activeId, setActiveId] = useState<string | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
 
-  // Address → coordinates, kept only in memory for this session.
-  const [userLoc, setUserLoc] = useState<{ lat: number; lng: number } | null>(
-    null
-  );
+  const isMobile = useIsMobile();
+
+  const [userLoc, setUserLoc] = useState<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -122,7 +124,6 @@ export default function ServeFremontApp() {
     return true;
   });
 
-  // Distance from the visitor to each listing (when an address is set).
   const distances = useMemo(() => {
     const m = new Map<string, number>();
     if (userLoc) {
@@ -135,7 +136,6 @@ export default function ServeFremontApp() {
     return m;
   }, [userLoc, listings]);
 
-  // Rank by distance whenever an address is set — even with filters applied.
   const sorted = useMemo(() => {
     if (!userLoc) return filtered;
     return [...filtered].sort((a, b) => {
@@ -180,6 +180,83 @@ export default function ServeFremontApp() {
     />
   );
 
+  const filterPills = (
+    <>
+      <div
+        style={{
+          display: "flex",
+          background: "#efefef",
+          borderRadius: 9,
+          padding: 3,
+          gap: 2,
+          flexShrink: 0,
+        }}
+      >
+        {AGES.map((a) => {
+          const on = activeAge === a;
+          return (
+            <button
+              key={a}
+              onClick={() => setActiveAge(on ? null : a)}
+              style={{
+                border: "none",
+                borderRadius: 7,
+                padding: "5px 11px",
+                fontSize: 13,
+                fontWeight: on ? 600 : 400,
+                color: on ? "#111" : "#888",
+                background: on ? "#fff" : "transparent",
+                boxShadow: on ? "0 1px 3px rgba(0,0,0,0.12)" : "none",
+                cursor: "pointer",
+              }}
+            >
+              {a}
+            </button>
+          );
+        })}
+      </div>
+
+      {categories.length > 0 && divider}
+      {categories.map((c) => (
+        <span key={`cat-${c}`}>
+          {pill(c, filters.categories.includes(c), () =>
+            setFilters((f) => ({ ...f, categories: toggle(f.categories, c) }))
+          )}
+        </span>
+      ))}
+
+      {divider}
+      {SCHEDULES.map((s) => (
+        <span key={`sch-${s}`}>
+          {pill(s, filters.schedules.includes(s), () =>
+            setFilters((f) => ({ ...f, schedules: toggle(f.schedules, s) }))
+          )}
+        </span>
+      ))}
+
+      {divider}
+      {REQUIREMENTS.map((r) => (
+        <span key={`req-${r.key}`}>
+          {pill(r.label, filters.requirements.includes(r.key), () =>
+            setFilters((f) => ({
+              ...f,
+              requirements: toggle(f.requirements, r.key),
+            }))
+          )}
+        </span>
+      ))}
+
+      {divider}
+      {STATUSES.map((s) => (
+        <span key={`st-${s.key}`}>
+          {pill(s.label, filters.statuses.includes(s.key), () =>
+            setFilters((f) => ({ ...f, statuses: toggle(f.statuses, s.key) }))
+          )}
+        </span>
+      ))}
+    </>
+  );
+
   return (
     <div
       style={{
@@ -192,12 +269,12 @@ export default function ServeFremontApp() {
         background: "#fff",
       }}
     >
-      {/* Single top bar */}
+      {/* Top bar */}
       <div
         style={{
           flexShrink: 0,
           display: "flex",
-          alignItems: "baseline",
+          alignItems: "center",
           justifyContent: "space-between",
           gap: 12,
           padding: "12px 20px",
@@ -208,9 +285,11 @@ export default function ServeFremontApp() {
           <span style={{ fontSize: 19, fontWeight: 800, letterSpacing: "-0.02em" }}>
             ServeFremont
           </span>
-          <span style={{ fontSize: 12, color: "#999" }}>
-            Volunteer spots around Fremont, checked in person
-          </span>
+          {!isMobile && (
+            <span style={{ fontSize: 12, color: "#999" }}>
+              Volunteer spots around Fremont, checked in person
+            </span>
+          )}
         </div>
         <button
           onClick={() => setShowMap((v) => !v)}
@@ -225,7 +304,7 @@ export default function ServeFremontApp() {
             flexShrink: 0,
           }}
         >
-          {showMap ? "Hide map" : "Show map"}
+          {isMobile ? (showMap ? "List" : "Map") : showMap ? "Hide map" : "Show map"}
         </button>
       </div>
 
@@ -233,103 +312,54 @@ export default function ServeFremontApp() {
       <div
         style={{
           flexShrink: 0,
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          flexWrap: "wrap",
           padding: "10px 20px 14px",
           borderBottom: "1px solid #f0f0f0",
         }}
       >
-        {/* Address → distance */}
-        <AddressBox
-          active={!!userLoc}
-          onPick={(loc) => setUserLoc(loc)}
-          onClear={() => setUserLoc(null)}
-        />
-
-        {divider}
-
-        {/* Age segmented control */}
-        <div
-          style={{
-            display: "flex",
-            background: "#efefef",
-            borderRadius: 9,
-            padding: 3,
-            gap: 2,
-          }}
-        >
-          {AGES.map((a) => {
-            const on = activeAge === a;
-            return (
-              <button
-                key={a}
-                onClick={() => setActiveAge(on ? null : a)}
-                style={{
-                  border: "none",
-                  borderRadius: 7,
-                  padding: "5px 11px",
-                  fontSize: 13,
-                  fontWeight: on ? 600 : 400,
-                  color: on ? "#111" : "#888",
-                  background: on ? "#fff" : "transparent",
-                  boxShadow: on ? "0 1px 3px rgba(0,0,0,0.12)" : "none",
-                  cursor: "pointer",
-                }}
-              >
-                {a}
-              </button>
-            );
-          })}
-        </div>
-
-        {categories.length > 0 && divider}
-        {categories.map((c) => (
-          <span key={`cat-${c}`}>
-            {pill(c, filters.categories.includes(c), () =>
-              setFilters((f) => ({ ...f, categories: toggle(f.categories, c) }))
-            )}
-          </span>
-        ))}
-
-        {divider}
-        {SCHEDULES.map((s) => (
-          <span key={`sch-${s}`}>
-            {pill(s, filters.schedules.includes(s), () =>
-              setFilters((f) => ({ ...f, schedules: toggle(f.schedules, s) }))
-            )}
-          </span>
-        ))}
-
-        {divider}
-        {REQUIREMENTS.map((r) => (
-          <span key={`req-${r.key}`}>
-            {pill(r.label, filters.requirements.includes(r.key), () =>
-              setFilters((f) => ({
-                ...f,
-                requirements: toggle(f.requirements, r.key),
-              }))
-            )}
-          </span>
-        ))}
-
-        {divider}
-        {STATUSES.map((s) => (
-          <span key={`st-${s.key}`}>
-            {pill(s.label, filters.statuses.includes(s.key), () =>
-              setFilters((f) => ({ ...f, statuses: toggle(f.statuses, s.key) }))
-            )}
-          </span>
-        ))}
+        {isMobile ? (
+          <>
+            <div style={{ marginBottom: 8 }}>
+              <AddressBox
+                active={!!userLoc}
+                onPick={(loc) => setUserLoc(loc)}
+                onClear={() => setUserLoc(null)}
+                fullWidth
+              />
+            </div>
+            <div
+              className="filter-scroll"
+              style={{ display: "flex", alignItems: "center", gap: 8 }}
+            >
+              {filterPills}
+            </div>
+          </>
+        ) : (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              flexWrap: "wrap",
+            }}
+          >
+            <AddressBox
+              active={!!userLoc}
+              onPick={(loc) => setUserLoc(loc)}
+              onClear={() => setUserLoc(null)}
+            />
+            {divider}
+            {filterPills}
+          </div>
+        )}
       </div>
 
       {/* Body */}
       <div style={{ flex: 1, display: "flex", minHeight: 0 }}>
-        {/* Left column: list OR detail */}
+        {/* Left column: list OR detail — hidden on mobile when map is showing */}
         <div
           style={{
-            flex: showMap ? "38" : "1",
+            flex: showMap && !isMobile ? "38" : "1",
+            display: isMobile && showMap ? "none" : undefined,
             minWidth: 0,
             overflowY: "auto",
             background: detail ? "#fff" : "#f5f5f4",
@@ -360,7 +390,6 @@ export default function ServeFremontApp() {
                 active={l.id === activeId}
                 distance={distances.get(l.id)}
                 onClick={() => {
-                  // First click selects; clicking the selected one opens detail.
                   if (activeId === l.id) setDetailId(l.id);
                   else setActiveId(l.id);
                 }}
@@ -369,9 +398,9 @@ export default function ServeFremontApp() {
           )}
         </div>
 
-        {/* Map */}
+        {/* Map — full width on mobile, 62% on desktop */}
         {showMap && (
-          <div style={{ flex: "62", minWidth: 0, position: "relative" }}>
+          <div style={{ flex: isMobile ? "1" : "62", minWidth: 0, position: "relative" }}>
             <ListingMap
               listings={sorted}
               activeId={activeId}
@@ -592,7 +621,6 @@ function DetailView({
         </p>
       )}
 
-      {/* Facts */}
       <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 0 }}>
         {facts.map(([k, v]) => (
           <div
@@ -612,7 +640,6 @@ function DetailView({
         ))}
       </div>
 
-      {/* Steps to volunteer */}
       <h3 style={{ fontSize: 14, fontWeight: 700, marginTop: 20, marginBottom: 8 }}>
         How to start
       </h3>
