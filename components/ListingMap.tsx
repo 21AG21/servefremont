@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -101,6 +101,7 @@ export default function ListingMap({
   userLoc?: { lat: number; lng: number } | null;
 }) {
   const [directionsOrg, setDirectionsOrg] = useState<string | null>(null);
+  const markerRefs = useRef<Map<string, L.Marker>>(new Map());
 
   const groupsWithCoords = orgGroups.filter(
     (g) => g.lat != null && g.lng != null
@@ -115,6 +116,14 @@ export default function ListingMap({
       setDirectionsOrg(null);
     }
   }, [activeGroup, directionsOrg]);
+
+  // react-leaflet v5 binds the Popup but doesn't auto-open it — open it
+  // imperatively whenever a new directionsOrg is selected.
+  useEffect(() => {
+    if (!directionsOrg) return;
+    const marker = markerRefs.current.get(directionsOrg);
+    marker?.openPopup();
+  }, [directionsOrg]);
 
   return (
     <MapContainer
@@ -150,6 +159,10 @@ export default function ListingMap({
             key={g.orgName}
             position={[g.lat!, g.lng!]}
             icon={numberedIcon(orgIdx, isActive)}
+            ref={(m) => {
+              if (m) markerRefs.current.set(g.orgName, m);
+              else markerRefs.current.delete(g.orgName);
+            }}
             eventHandlers={{
               click: () => {
                 if (isActive) {
