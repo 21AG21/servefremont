@@ -62,6 +62,40 @@ function InvalidateOnLayout() {
   return null;
 }
 
+// Scatter listings that share a coordinate so their pins don't stack.
+// 1 degree latitude ≈ 111 km, so 0.0005 ≈ 55m — close enough to read as
+// "same place" while still being individually clickable at typical zoom.
+const SCATTER_RADIUS = 0.0005;
+
+function scatterPositions(
+  listings: Listing[]
+): Map<string, [number, number]> {
+  const positions = new Map<string, [number, number]>();
+  const groups = new Map<string, Listing[]>();
+  for (const l of listings) {
+    if (l.lat == null || l.lng == null) continue;
+    const key = `${l.lat.toFixed(5)},${l.lng.toFixed(5)}`;
+    const group = groups.get(key) ?? [];
+    group.push(l);
+    groups.set(key, group);
+  }
+  for (const group of groups.values()) {
+    if (group.length === 1) {
+      const l = group[0];
+      positions.set(l.id, [l.lat!, l.lng!]);
+      continue;
+    }
+    group.forEach((l, i) => {
+      const angle = (i / group.length) * Math.PI * 2;
+      positions.set(l.id, [
+        l.lat! + Math.cos(angle) * SCATTER_RADIUS,
+        l.lng! + Math.sin(angle) * SCATTER_RADIUS,
+      ]);
+    });
+  }
+  return positions;
+}
+
 export default function ListingMap({
   listings,
   activeId,
@@ -74,7 +108,9 @@ export default function ListingMap({
   userLoc?: { lat: number; lng: number } | null;
 }) {
   const withCoords = listings.filter((l) => l.lat != null && l.lng != null);
+  const positions = scatterPositions(withCoords);
   const active = withCoords.find((l) => l.id === activeId);
+  const activePos = active ? positions.get(active.id) : undefined;
 
   return (
     <MapContainer
@@ -97,14 +133,14 @@ export default function ListingMap({
 
       {withCoords.map((l) => {
         const n = listings.indexOf(l) + 1;
+        const pos = positions.get(l.id)!;
         return (
           <Marker
             key={l.id}
-            position={[l.lat!, l.lng!]}
+            position={pos}
             icon={numberedIcon(n, l.id === activeId)}
             eventHandlers={{ click: () => onSelect(l.id) }}
           >
-            {/* Name shown on hover */}
             <Tooltip direction="top" offset={[0, -18]}>
               {l.title}
             </Tooltip>
@@ -125,7 +161,7 @@ export default function ListingMap({
         </Marker>
       )}
 
-      {active && <FlyTo lat={active.lat!} lng={active.lng!} />}
+      {activePos && <FlyTo lat={activePos[0]} lng={activePos[1]} />}
     </MapContainer>
   );
 }

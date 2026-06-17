@@ -383,10 +383,11 @@ export default function ServeFremontApp() {
               No opportunities match these filters.
             </p>
           ) : (
-            sorted.map((l) => (
+            sorted.map((l, i) => (
               <ListingRow
                 key={l.id}
                 listing={l}
+                index={i + 1}
                 active={l.id === activeId}
                 distance={distances.get(l.id)}
                 onClick={() => {
@@ -438,11 +439,13 @@ function VerifiedBadge({ verified }: { verified?: string }) {
 
 function ListingRow({
   listing,
+  index,
   active,
   distance,
   onClick,
 }: {
   listing: Listing;
+  index: number;
   active: boolean;
   distance?: number;
   onClick: () => void;
@@ -488,22 +491,44 @@ function ListingRow({
           alignItems: "flex-start",
         }}
       >
-        <div>
-          <div
+        <div style={{ display: "flex", gap: 10, alignItems: "flex-start", minWidth: 0 }}>
+          <span
             style={{
+              flexShrink: 0,
+              width: 28,
+              height: 28,
+              borderRadius: "50%",
+              background: active ? "#111" : "#555",
+              color: "#fff",
+              fontSize: 12,
               fontWeight: 700,
-              fontSize: 17,
-              color: "#111",
-              lineHeight: 1.25,
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              border: "2px solid #fff",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.18)",
+              marginTop: 2,
             }}
           >
-            {listing.title}
-          </div>
-          {listing.org && (
-            <div style={{ color: "#999", fontSize: 13, marginTop: 3 }}>
-              {listing.org.replace(" - Placeholder", "")}
+            {index}
+          </span>
+          <div style={{ minWidth: 0 }}>
+            <div
+              style={{
+                fontWeight: 700,
+                fontSize: 17,
+                color: "#111",
+                lineHeight: 1.25,
+              }}
+            >
+              {listing.title}
             </div>
-          )}
+            {listing.org && (
+              <div style={{ color: "#999", fontSize: 13, marginTop: 3 }}>
+                {listing.org.replace(" - Placeholder", "")}
+              </div>
+            )}
+          </div>
         </div>
         <VerifiedBadge verified={listing.verified} />
       </div>
