@@ -15,7 +15,13 @@ import type { Listing } from "@/lib/listing";
 
 const CENTER: [number, number] = [37.553, -121.982];
 
-// 36px filled circle, white 3px border, drop shadow, white bold number.
+type OrgGroup = {
+  orgName: string;
+  listings: Listing[];
+  lat?: number;
+  lng?: number;
+};
+
 function numberedIcon(n: number, active: boolean): L.DivIcon {
   return L.divIcon({
     className: "",
@@ -31,7 +37,6 @@ function numberedIcon(n: number, active: boolean): L.DivIcon {
   });
 }
 
-// Red dot for the visitor's own location.
 function userIcon(): L.DivIcon {
   return L.divIcon({
     className: "",
@@ -44,7 +49,6 @@ function userIcon(): L.DivIcon {
   });
 }
 
-// Fly to and zoom in on the active listing.
 function FlyTo({ lat, lng }: { lat: number; lng: number }) {
   const map = useMap();
   useEffect(() => {
@@ -62,55 +66,23 @@ function InvalidateOnLayout() {
   return null;
 }
 
-// Scatter listings that share a coordinate so their pins don't stack.
-// 1 degree latitude ≈ 111 km, so 0.0005 ≈ 55m — close enough to read as
-// "same place" while still being individually clickable at typical zoom.
-const SCATTER_RADIUS = 0.0005;
-
-function scatterPositions(
-  listings: Listing[]
-): Map<string, [number, number]> {
-  const positions = new Map<string, [number, number]>();
-  const groups = new Map<string, Listing[]>();
-  for (const l of listings) {
-    if (l.lat == null || l.lng == null) continue;
-    const key = `${l.lat.toFixed(5)},${l.lng.toFixed(5)}`;
-    const group = groups.get(key) ?? [];
-    group.push(l);
-    groups.set(key, group);
-  }
-  for (const group of groups.values()) {
-    if (group.length === 1) {
-      const l = group[0];
-      positions.set(l.id, [l.lat!, l.lng!]);
-      continue;
-    }
-    group.forEach((l, i) => {
-      const angle = (i / group.length) * Math.PI * 2;
-      positions.set(l.id, [
-        l.lat! + Math.cos(angle) * SCATTER_RADIUS,
-        l.lng! + Math.sin(angle) * SCATTER_RADIUS,
-      ]);
-    });
-  }
-  return positions;
-}
-
 export default function ListingMap({
-  listings,
+  orgGroups,
   activeId,
   onSelect,
   userLoc,
 }: {
-  listings: Listing[];
+  orgGroups: OrgGroup[];
   activeId: string | null;
   onSelect: (id: string) => void;
   userLoc?: { lat: number; lng: number } | null;
 }) {
-  const withCoords = listings.filter((l) => l.lat != null && l.lng != null);
-  const positions = scatterPositions(withCoords);
-  const active = withCoords.find((l) => l.id === activeId);
-  const activePos = active ? positions.get(active.id) : undefined;
+  const groupsWithCoords = orgGroups.filter(
+    (g) => g.lat != null && g.lng != null
+  );
+  const activeGroup = groupsWithCoords.find((g) =>
+    g.listings.some((l) => l.id === activeId)
+  );
 
   return (
     <MapContainer
@@ -131,23 +103,25 @@ export default function ListingMap({
       />
       <InvalidateOnLayout />
 
-      {withCoords.map((l) => {
-        const n = listings.indexOf(l) + 1;
-        const pos = positions.get(l.id)!;
+      {groupsWithCoords.map((g) => {
+        const orgIdx = orgGroups.indexOf(g) + 1;
+        const isActive = g.listings.some((l) => l.id === activeId);
+        const count = g.listings.length;
         return (
           <Marker
-            key={l.id}
-            position={pos}
-            icon={numberedIcon(n, l.id === activeId)}
-            eventHandlers={{ click: () => onSelect(l.id) }}
+            key={g.orgName}
+            position={[g.lat!, g.lng!]}
+            icon={numberedIcon(orgIdx, isActive)}
+            eventHandlers={{ click: () => onSelect(g.listings[0].id) }}
           >
             <Tooltip direction="top" offset={[0, -18]}>
-              {l.title}
+              {g.orgName}
+              {count > 1 ? ` · ${count} opportunities` : ""}
             </Tooltip>
             <Popup closeButton={false}>
-              <strong>{l.title}</strong>
+              <strong>{g.orgName}</strong>
               <br />
-              {l.org.replace(" - Placeholder", "")}
+              {count} opportunit{count === 1 ? "y" : "ies"}
             </Popup>
           </Marker>
         );
@@ -161,7 +135,7 @@ export default function ListingMap({
         </Marker>
       )}
 
-      {activePos && <FlyTo lat={activePos[0]} lng={activePos[1]} />}
+      {activeGroup && <FlyTo lat={activeGroup.lat!} lng={activeGroup.lng!} />}
     </MapContainer>
   );
 }

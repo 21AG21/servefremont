@@ -137,7 +137,13 @@ export default function ServeFremontApp() {
   }, [userLoc, listings]);
 
   const sorted = useMemo(() => {
-    if (!userLoc) return filtered;
+    if (!userLoc) {
+      return [...filtered].sort(
+        (a, b) =>
+          (a.org || "").localeCompare(b.org || "") ||
+          a.title.localeCompare(b.title)
+      );
+    }
     return [...filtered].sort((a, b) => {
       const da = distances.get(a.id);
       const db = distances.get(b.id);
@@ -147,6 +153,32 @@ export default function ServeFremontApp() {
       return da - db;
     });
   }, [filtered, userLoc, distances]);
+
+  type OrgGroup = {
+    orgName: string;
+    listings: Listing[];
+    lat?: number;
+    lng?: number;
+  };
+
+  const orgGroups = useMemo<OrgGroup[]>(() => {
+    const seen = new Map<string, OrgGroup>();
+    const order: string[] = [];
+    for (const l of sorted) {
+      const name = (l.org || "Other").replace(" - Placeholder", "");
+      if (!seen.has(name)) {
+        seen.set(name, {
+          orgName: name,
+          listings: [],
+          lat: l.lat ?? undefined,
+          lng: l.lng ?? undefined,
+        });
+        order.push(name);
+      }
+      seen.get(name)!.listings.push(l);
+    }
+    return order.map((n) => seen.get(n)!);
+  }, [sorted]);
 
   const detail = detailId ? listings.find((l) => l.id === detailId) : null;
 
@@ -383,19 +415,36 @@ export default function ServeFremontApp() {
               No opportunities match these filters.
             </p>
           ) : (
-            sorted.map((l, i) => (
-              <ListingRow
-                key={l.id}
-                listing={l}
-                index={i + 1}
-                active={l.id === activeId}
-                distance={distances.get(l.id)}
-                onClick={() => {
-                  if (activeId === l.id) setDetailId(l.id);
-                  else setActiveId(l.id);
-                }}
-              />
-            ))
+            orgGroups.map((group, gi) => {
+              const orgActive = group.listings.some((l) => l.id === activeId);
+              const orgDistance =
+                group.lat != null && group.lng != null && userLoc
+                  ? distances.get(group.listings[0].id)
+                  : undefined;
+              return (
+                <div key={group.orgName} style={{ marginBottom: 18 }}>
+                  <OrgHeader
+                    index={gi + 1}
+                    name={group.orgName}
+                    count={group.listings.length}
+                    distance={orgDistance}
+                    active={orgActive}
+                  />
+                  {group.listings.map((l) => (
+                    <ListingRow
+                      key={l.id}
+                      listing={l}
+                      active={l.id === activeId}
+                      distance={distances.get(l.id)}
+                      onClick={() => {
+                        if (activeId === l.id) setDetailId(l.id);
+                        else setActiveId(l.id);
+                      }}
+                    />
+                  ))}
+                </div>
+              );
+            })
           )}
         </div>
 
@@ -403,7 +452,7 @@ export default function ServeFremontApp() {
         {showMap && (
           <div style={{ flex: isMobile ? "1" : "62", minWidth: 0, position: "relative" }}>
             <ListingMap
-              listings={sorted}
+              orgGroups={orgGroups}
               activeId={activeId}
               onSelect={setActiveId}
               userLoc={userLoc}
@@ -437,15 +486,77 @@ function VerifiedBadge({ verified }: { verified?: string }) {
   );
 }
 
+function OrgHeader({
+  index,
+  name,
+  count,
+  distance,
+  active,
+}: {
+  index: number;
+  name: string;
+  count: number;
+  distance?: number;
+  active: boolean;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "8px 4px 10px",
+      }}
+    >
+      <span
+        style={{
+          flexShrink: 0,
+          width: 28,
+          height: 28,
+          borderRadius: "50%",
+          background: active ? "#111" : "#555",
+          color: "#fff",
+          fontSize: 12,
+          fontWeight: 700,
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          border: "2px solid #fff",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.18)",
+        }}
+      >
+        {index}
+      </span>
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <div
+          style={{
+            fontSize: 14,
+            fontWeight: 700,
+            color: "#111",
+            letterSpacing: "-0.01em",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {name}
+        </div>
+        <div style={{ fontSize: 11, color: "#999", marginTop: 1 }}>
+          {count} opportunit{count === 1 ? "y" : "ies"}
+          {distance != null ? ` · ${formatMiles(distance)}` : ""}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ListingRow({
   listing,
-  index,
   active,
   distance,
   onClick,
 }: {
   listing: Listing;
-  index: number;
   active: boolean;
   distance?: number;
   onClick: () => void;
@@ -470,16 +581,17 @@ function ListingRow({
       onClick={onClick}
       style={{
         display: "block",
-        width: "100%",
+        width: "calc(100% - 14px)",
         textAlign: "left",
         font: "inherit",
         color: "#111",
         cursor: "pointer",
         background: "#fff",
         border: `1.5px solid ${active ? "#111" : "#ececec"}`,
-        borderRadius: 16,
-        padding: "16px 18px",
-        marginBottom: 10,
+        borderRadius: 12,
+        padding: "12px 14px",
+        marginBottom: 6,
+        marginLeft: 14,
         boxShadow: active ? "0 1px 4px rgba(0,0,0,0.06)" : "none",
       }}
     >
@@ -491,44 +603,16 @@ function ListingRow({
           alignItems: "flex-start",
         }}
       >
-        <div style={{ display: "flex", gap: 10, alignItems: "flex-start", minWidth: 0 }}>
-          <span
-            style={{
-              flexShrink: 0,
-              width: 28,
-              height: 28,
-              borderRadius: "50%",
-              background: active ? "#111" : "#555",
-              color: "#fff",
-              fontSize: 12,
-              fontWeight: 700,
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              border: "2px solid #fff",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.18)",
-              marginTop: 2,
-            }}
-          >
-            {index}
-          </span>
-          <div style={{ minWidth: 0 }}>
-            <div
-              style={{
-                fontWeight: 700,
-                fontSize: 17,
-                color: "#111",
-                lineHeight: 1.25,
-              }}
-            >
-              {listing.title}
-            </div>
-            {listing.org && (
-              <div style={{ color: "#999", fontSize: 13, marginTop: 3 }}>
-                {listing.org.replace(" - Placeholder", "")}
-              </div>
-            )}
-          </div>
+        <div
+          style={{
+            fontWeight: 700,
+            fontSize: 16,
+            color: "#111",
+            lineHeight: 1.25,
+            minWidth: 0,
+          }}
+        >
+          {listing.title}
         </div>
         <VerifiedBadge verified={listing.verified} />
       </div>
