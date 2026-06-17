@@ -93,7 +93,7 @@ export async function GET() {
         description: str(f.Description),
         onboarding: str(f.Onboarding),
         onboardingTime: str(f.Onboarding_Time),
-        howToStartUrl: str(f.How_To_Start_Url),
+        howToStartUrl: str(f.How_To_Start_UTL) ?? str(f.How_To_Start_Url),
         transitNotes: str(f.Transit_Notes),
         address: org ? str(org.Address) : undefined,
         website: org ? str(org.Website) : undefined,

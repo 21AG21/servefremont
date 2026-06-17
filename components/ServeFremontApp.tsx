@@ -13,7 +13,7 @@ const ListingMap = dynamic(() => import("@/components/ListingMap"), {
 });
 
 const AGES = [13, 14, 15, 16, 17, 18];
-const SCHEDULES = ["Recurring", "One-time", "Drop-in"];
+const SCHEDULES = ["Shifts", "Drop-in", "Events", "Flexible/Remote"];
 const REQUIREMENTS: { key: string; label: string }[] = [
   { key: "signs", label: "Signs hour forms" },
   { key: "transit", label: "Near transit" },

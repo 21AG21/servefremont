@@ -153,7 +153,7 @@ function toOpportunity(
     onboarding: str(f.Onboarding),
     onboardingTime: str(f.Onboarding_Time),
     costNotes: str(f.Cost_Notes),
-    howToStartUrl: str(f.How_To_Start_Url),
+    howToStartUrl: str(f.How_To_Start_UTL) ?? str(f.How_To_Start_Url),
     verifiedAt: str(f.Verified_At),
   };
 }
