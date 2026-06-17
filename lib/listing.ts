@@ -5,6 +5,10 @@ export type Listing = {
   org: string;
   category: string[];
   ageMin?: number;
+  ageMax?: number;
+  shiftLengthHours?: number;
+  scheduleNotes?: string;
+  nextSession?: string;
   lat?: number;
   lng?: number;
   verified?: string; // formatted, e.g. "Jun 2026"

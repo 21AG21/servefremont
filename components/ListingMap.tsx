@@ -5,7 +5,6 @@ import {
   MapContainer,
   TileLayer,
   Marker,
-  Popup,
   Tooltip,
   useMap,
 } from "react-leaflet";
@@ -118,11 +117,6 @@ export default function ListingMap({
               {g.orgName}
               {count > 1 ? ` · ${count} opportunities` : ""}
             </Tooltip>
-            <Popup closeButton={false}>
-              <strong>{g.orgName}</strong>
-              <br />
-              {count} opportunit{count === 1 ? "y" : "ies"}
-            </Popup>
           </Marker>
         );
       })}

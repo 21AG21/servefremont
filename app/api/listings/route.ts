@@ -99,6 +99,10 @@ export async function GET() {
               ? selectNames(org.Categories)
               : [],
           ageMin: num(f.AgeMin) ?? num(f.Min_Age),
+          ageMax: num(f.Max_Age),
+          shiftLengthHours: num(f.Shift_Length_Hours),
+          scheduleNotes: str(f.Schedule_Notes),
+          nextSession: str(f.Next_Session),
           lat: num(f.Lat) ?? (org ? num(org.Lat) ?? num(org.Latitude) : undefined),
           lng: num(f.Lng) ?? (org ? num(org.Lng) ?? num(org.Longitude) : undefined),
           verified:

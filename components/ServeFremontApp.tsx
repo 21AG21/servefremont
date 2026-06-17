@@ -98,8 +98,10 @@ export default function ServeFremontApp() {
   ).sort();
 
   const filtered = listings.filter((l) => {
-    if (activeAge != null && l.ageMin != null && l.ageMin > activeAge)
-      return false;
+    if (activeAge != null) {
+      if (l.ageMin != null && l.ageMin > activeAge) return false;
+      if (l.ageMax != null && l.ageMax < activeAge) return false;
+    }
     if (
       filters.categories.length &&
       !filters.categories.some((c) => l.category.includes(c))
@@ -623,7 +625,15 @@ function ListingRow({
             {t}
           </span>
         ))}
-        {listing.ageMin != null && <span style={tagStyle}>{listing.ageMin}+</span>}
+        {(listing.ageMin != null || listing.ageMax != null) && (
+          <span style={tagStyle}>
+            {listing.ageMin != null && listing.ageMax != null
+              ? `${listing.ageMin}–${listing.ageMax}`
+              : listing.ageMin != null
+                ? `${listing.ageMin}+`
+                : `≤${listing.ageMax}`}
+          </span>
+        )}
         {listing.schedule && <span style={tagStyle}>{listing.schedule}</span>}
         {listing.nearTransit && (
           <span
@@ -677,6 +687,67 @@ function ListingRow({
   );
 }
 
+function formatAge(min?: number, max?: number): string {
+  if (min != null && max != null) return `${min}–${max} years`;
+  if (min != null) return `${min}+`;
+  if (max != null) return `Up to ${max}`;
+  return "Any age";
+}
+
+// 1.5 → "1–2 hours" (treat fractional values as a range).
+function formatShiftHours(h?: number): string | undefined {
+  if (h == null) return undefined;
+  if (Number.isInteger(h)) return `${h} hour${h === 1 ? "" : "s"}`;
+  const lo = Math.floor(h);
+  const hi = Math.ceil(h);
+  return `${lo}–${hi} hours`;
+}
+
+function Section({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div style={{ marginTop: 22 }}>
+      <h3
+        style={{
+          fontSize: 11,
+          fontWeight: 700,
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+          color: "#888",
+          margin: "0 0 8px",
+        }}
+      >
+        {title}
+      </h3>
+      {children}
+    </div>
+  );
+}
+
+function FactRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        gap: 12,
+        padding: "9px 0",
+        borderBottom: "1px solid #f0f0f0",
+        fontSize: 13,
+        alignItems: "flex-start",
+      }}
+    >
+      <span style={{ color: "#777", flexShrink: 0 }}>{label}</span>
+      <span style={{ color: "#111", textAlign: "right" }}>{value}</span>
+    </div>
+  );
+}
+
 function DetailView({
   listing,
   distance,
@@ -690,25 +761,10 @@ function DetailView({
   const startUrl = listing.howToStartUrl ?? listing.website;
   const link = (url: string) =>
     url.startsWith("http") ? url : `https://${url}`;
-
-  const facts: [string, string][] = [];
-  facts.push([
-    "Age",
-    listing.ageMin != null ? `${listing.ageMin} and up` : "Not listed",
-  ]);
-  if (listing.schedule) facts.push(["Schedule", listing.schedule]);
-  facts.push([
-    "Hour forms",
-    listing.signsHourForms ? "Signs school hour forms" : "Does not sign forms",
-  ]);
-  facts.push(["Accepting", listing.accepting ? "Yes, now" : "Waitlist"]);
-  if (listing.nearTransit) facts.push(["Transit", listing.transitNotes ?? "Near transit"]);
-  if (listing.groupsOK) facts.push(["Groups", "Groups or clubs welcome"]);
-  if (distance != null) facts.push(["Distance", `${formatMiles(distance)} away`]);
-  if (listing.address) facts.push(["Address", listing.address]);
+  const shiftLen = formatShiftHours(listing.shiftLengthHours);
 
   return (
-    <div style={{ padding: "16px 20px" }}>
+    <div style={{ padding: "16px 20px 28px" }}>
       <button
         onClick={onBack}
         style={{
@@ -724,6 +780,7 @@ function DetailView({
         ← Back to list
       </button>
 
+      {/* Title block */}
       <div
         style={{
           display: "flex",
@@ -732,7 +789,7 @@ function DetailView({
           alignItems: "flex-start",
         }}
       >
-        <div>
+        <div style={{ minWidth: 0 }}>
           <h2 style={{ fontSize: 22, fontWeight: 800, margin: 0, lineHeight: 1.2 }}>
             {listing.title}
           </h2>
@@ -743,7 +800,29 @@ function DetailView({
         <VerifiedBadge verified={listing.verified} />
       </div>
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 12 }}>
+      {/* Status row: accepting + categories */}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 6,
+          marginTop: 12,
+          alignItems: "center",
+        }}
+      >
+        <span
+          style={{
+            border: `1px solid ${listing.accepting ? "#d0ecd8" : "#f1e1c4"}`,
+            background: listing.accepting ? "#eef7f0" : "#fbf3e3",
+            color: listing.accepting ? "#1a7a34" : "#8a5a1d",
+            borderRadius: 20,
+            padding: "4px 10px",
+            fontSize: 12,
+            fontWeight: 600,
+          }}
+        >
+          {listing.accepting ? "Accepting now" : "Waitlist"}
+        </span>
         {listing.category.map((t) => (
           <span
             key={t}
@@ -760,87 +839,141 @@ function DetailView({
         ))}
       </div>
 
+      {/* Next-session callout */}
+      {listing.nextSession && (
+        <div
+          style={{
+            marginTop: 14,
+            padding: "10px 12px",
+            background: "#fff8e6",
+            border: "1px solid #f0dfa6",
+            borderRadius: 10,
+            fontSize: 13,
+            color: "#6b5417",
+          }}
+        >
+          <strong style={{ color: "#3a2f08" }}>Next session:</strong>{" "}
+          {listing.nextSession}
+        </div>
+      )}
+
+      {/* Description */}
       {listing.description && (
         <p style={{ fontSize: 14, lineHeight: 1.6, color: "#333", marginTop: 16 }}>
           {listing.description}
         </p>
       )}
 
-      <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 0 }}>
-        {facts.map(([k, v]) => (
-          <div
-            key={k}
+      {/* Who can volunteer */}
+      <Section title="Who can volunteer">
+        <FactRow label="Age" value={formatAge(listing.ageMin, listing.ageMax)} />
+        <FactRow
+          label="Signs school hour forms"
+          value={listing.signsHourForms ? "Yes" : "No"}
+        />
+        {listing.groupsOK && (
+          <FactRow label="Groups / clubs" value="Welcome" />
+        )}
+      </Section>
+
+      {/* When & where */}
+      <Section title="When & where">
+        {listing.schedule && (
+          <FactRow label="Schedule" value={listing.schedule} />
+        )}
+        {listing.scheduleNotes && (
+          <FactRow label="Details" value={listing.scheduleNotes} />
+        )}
+        {shiftLen && <FactRow label="Shift length" value={shiftLen} />}
+        {listing.address && (
+          <FactRow label="Address" value={listing.address} />
+        )}
+        {listing.nearTransit && (
+          <FactRow
+            label="Transit"
+            value={listing.transitNotes ?? "Near transit"}
+          />
+        )}
+        {distance != null && (
+          <FactRow label="Distance" value={`${formatMiles(distance)} away`} />
+        )}
+      </Section>
+
+      {/* How to start */}
+      <Section title="How to start">
+        <ol
+          style={{
+            margin: "0 0 10px",
+            paddingLeft: 20,
+            fontSize: 13.5,
+            lineHeight: 1.7,
+            color: "#222",
+          }}
+        >
+          {listing.howToStartSteps && listing.howToStartSteps.length > 0 ? (
+            listing.howToStartSteps.map((step, i) => (
+              <li key={i} style={{ marginBottom: 4 }}>
+                {step}
+              </li>
+            ))
+          ) : (
+            <>
+              <li>Reach out to {org || "the organization"} to introduce yourself.</li>
+              {listing.accepting ? (
+                <li>They&apos;re accepting volunteers now — go ahead and sign up.</li>
+              ) : (
+                <li>They&apos;re currently waitlisting — ask to be added.</li>
+              )}
+            </>
+          )}
+        </ol>
+        {listing.onboardingTime && (
+          <p
             style={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: 12,
-              padding: "9px 0",
-              borderBottom: "1px solid #f0f0f0",
-              fontSize: 13,
+              fontSize: 12,
+              color: "#777",
+              margin: "0 0 4px",
             }}
           >
-            <span style={{ color: "#999" }}>{k}</span>
-            <span style={{ color: "#111", textAlign: "right" }}>{v}</span>
-          </div>
-        ))}
-      </div>
-
-      <h3 style={{ fontSize: 14, fontWeight: 700, marginTop: 20, marginBottom: 8 }}>
-        How to start
-      </h3>
-      <ol style={{ margin: 0, paddingLeft: 18, fontSize: 13, lineHeight: 1.7, color: "#333" }}>
-        {listing.howToStartSteps && listing.howToStartSteps.length > 0 ? (
-          listing.howToStartSteps.map((step, i) => <li key={i}>{step}</li>)
+            Time to get started: {listing.onboardingTime}
+          </p>
+        )}
+        {startUrl ? (
+          <a
+            href={link(startUrl)}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "block",
+              textAlign: "center",
+              marginTop: 12,
+              background: "#111",
+              color: "#fff",
+              borderRadius: 9,
+              padding: "11px 0",
+              fontSize: 14,
+              fontWeight: 600,
+              textDecoration: "none",
+            }}
+          >
+            Open sign-up page →
+          </a>
         ) : (
-          <>
-            <li>Reach out to {org || "the organization"} to introduce yourself.</li>
-            {listing.accepting ? (
-              <li>They&apos;re accepting volunteers now — go ahead and sign up.</li>
-            ) : (
-              <li>They&apos;re currently waitlisting — ask to be added.</li>
-            )}
-          </>
+          <p
+            style={{
+              marginTop: 12,
+              padding: "11px 14px",
+              border: "1px dashed #ddd",
+              borderRadius: 9,
+              fontSize: 13,
+              color: "#999",
+              textAlign: "center",
+            }}
+          >
+            Contact the organization directly to begin.
+          </p>
         )}
-        {listing.onboardingTime && (
-          <li>Time to get started: {listing.onboardingTime}.</li>
-        )}
-      </ol>
-
-      {startUrl ? (
-        <a
-          href={link(startUrl)}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: "block",
-            textAlign: "center",
-            marginTop: 18,
-            background: "#111",
-            color: "#fff",
-            borderRadius: 9,
-            padding: "11px 0",
-            fontSize: 14,
-            fontWeight: 600,
-            textDecoration: "none",
-          }}
-        >
-          How to start →
-        </a>
-      ) : (
-        <p
-          style={{
-            marginTop: 18,
-            padding: "11px 14px",
-            border: "1px dashed #ddd",
-            borderRadius: 9,
-            fontSize: 13,
-            color: "#999",
-            textAlign: "center",
-          }}
-        >
-          Contact the organization directly to begin.
-        </p>
-      )}
+      </Section>
     </div>
   );
 }
