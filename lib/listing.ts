@@ -18,6 +18,7 @@ export type Listing = {
   description?: string;
   onboarding?: string;
   onboardingTime?: string;
+  howToStartSteps?: string[];
   howToStartUrl?: string;
   transitNotes?: string;
   address?: string;

@@ -22,6 +22,21 @@ function isYes(v: unknown): boolean {
 function arr(v: unknown): string[] {
   return Array.isArray(v) ? (v as string[]) : [];
 }
+// Airtable returns multipleSelects as either string[] or [{name}].
+function selectNames(v: unknown): string[] {
+  if (!Array.isArray(v)) return [];
+  return (v as unknown[])
+    .map((x) => (typeof x === "string" ? x : (x as { name?: string })?.name))
+    .filter((x): x is string => typeof x === "string" && x.length > 0);
+}
+// Multilinetext → array of non-empty trimmed lines.
+function lines(v: unknown): string[] {
+  if (typeof v !== "string") return [];
+  return v
+    .split(/\r?\n/)
+    .map((s) => s.replace(/^\s*[-•*\d]+[.)]?\s*/, "").trim())
+    .filter(Boolean);
+}
 function formatMonthYear(iso?: string): string | undefined {
   if (!iso) return undefined;
   const d = new Date(iso);
@@ -63,42 +78,49 @@ export async function GET() {
 
     const orgsById = new Map(orgs.map((o) => [o.id, o.fields]));
 
-    const listings: Listing[] = opps.map((rec) => {
-      const f = rec.fields;
-      const orgLink = arr(f.Organization)[0];
-      const org = orgLink ? orgsById.get(orgLink) : undefined;
+    const listings: Listing[] = opps
+      .filter((rec) => {
+        const status = str(rec.fields.Status);
+        return !status || status.toLowerCase() === "active";
+      })
+      .map((rec) => {
+        const f = rec.fields;
+        const orgLink = arr(f.Organization)[0];
+        const org = orgLink ? orgsById.get(orgLink) : undefined;
+        const signs = str(f.Signs_Hour_Forms)?.toLowerCase();
 
-      return {
-        id: rec.id,
-        title: str(f.Title) ?? "(untitled)",
-        org: (org && str(org.Name)) ?? "",
-        // Category lives on the org; also accept a Category field on the opp.
-        category: arr(f.Category).length
-          ? arr(f.Category)
-          : org
-            ? arr(org.Categories)
-            : [],
-        ageMin: num(f.AgeMin) ?? num(f.Min_Age),
-        lat: num(f.Lat) ?? (org ? num(org.Lat) ?? num(org.Latitude) : undefined),
-        lng: num(f.Lng) ?? (org ? num(org.Lng) ?? num(org.Longitude) : undefined),
-        verified:
-          formatMonthYear(str(f.VerifiedDate)) ??
-          formatMonthYear(str(f.Verified_At)),
-        distance: str(f.Distance),
-        accepting: isYes(f.Accepting),
-        schedule: str(f.Schedule) ?? str(f.Schedule_Type),
-        signsHourForms: isYes(f.Signs_Hour_Forms),
-        nearTransit: !!str(f.Transit_Notes) || isYes(f.Near_Transit),
-        groupsOK: isYes(f.Group_Friendly) || isYes(f.Groups_OK),
-        description: str(f.Description),
-        onboarding: str(f.Onboarding),
-        onboardingTime: str(f.Onboarding_Time),
-        howToStartUrl: str(f.How_To_Start_UTL) ?? str(f.How_To_Start_Url),
-        transitNotes: str(f.Transit_Notes),
-        address: org ? str(org.Address) : undefined,
-        website: org ? str(org.Website) : undefined,
-      };
-    });
+        return {
+          id: rec.id,
+          title: str(f.Title) ?? "(untitled)",
+          org: (org && str(org.Name)) ?? "",
+          category: selectNames(f.Category).length
+            ? selectNames(f.Category)
+            : org
+              ? selectNames(org.Categories)
+              : [],
+          ageMin: num(f.AgeMin) ?? num(f.Min_Age),
+          lat: num(f.Lat) ?? (org ? num(org.Lat) ?? num(org.Latitude) : undefined),
+          lng: num(f.Lng) ?? (org ? num(org.Lng) ?? num(org.Longitude) : undefined),
+          verified:
+            formatMonthYear(str(f.VerifiedDate)) ??
+            formatMonthYear(str(f.Verified_At)),
+          distance: str(f.Distance),
+          accepting: isYes(f.Accepting),
+          schedule: str(f.Schedule) ?? str(f.Schedule_Type),
+          // "Yes" and "Own Letter" both effectively get the volunteer credit.
+          signsHourForms: signs === "yes" || signs === "own letter",
+          nearTransit: !!str(f.Transit_Notes) || isYes(f.Near_Transit),
+          groupsOK: isYes(f.Group_Friendly) || isYes(f.Groups_OK),
+          description: str(f.Description),
+          onboarding: selectNames(f.Onboarding).join(", ") || undefined,
+          onboardingTime: str(f.Onboarding_Time),
+          howToStartSteps: lines(f.How_To_Start_Steps),
+          howToStartUrl: str(f.How_To_Start_UTL) ?? str(f.How_To_Start_Url),
+          transitNotes: str(f.Transit_Notes),
+          address: org ? str(org.Address) : undefined,
+          website: org ? str(org.Website) : undefined,
+        };
+      });
 
     return Response.json({ listings });
   } catch {

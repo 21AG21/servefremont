@@ -150,7 +150,12 @@ function toOpportunity(
       ? (f.Walkable_From as string[])
       : [],
     groupFriendly: isYes(f.Group_Friendly),
-    onboarding: str(f.Onboarding),
+    onboarding: (Array.isArray(f.Onboarding)
+      ? (f.Onboarding as Array<string | { name?: string }>)
+          .map((x) => (typeof x === "string" ? x : x?.name ?? ""))
+          .filter(Boolean)
+          .join(", ")
+      : str(f.Onboarding)),
     onboardingTime: str(f.Onboarding_Time),
     costNotes: str(f.Cost_Notes),
     howToStartUrl: str(f.How_To_Start_UTL) ?? str(f.How_To_Start_Url),

@@ -625,6 +625,42 @@ function ListingRow({
         ))}
         {listing.ageMin != null && <span style={tagStyle}>{listing.ageMin}+</span>}
         {listing.schedule && <span style={tagStyle}>{listing.schedule}</span>}
+        {listing.nearTransit && (
+          <span
+            style={{
+              ...tagStyle,
+              border: "1px solid #cfe1f2",
+              background: "#eff6fc",
+              color: "#1f5fa3",
+            }}
+          >
+            🚌 Near transit
+          </span>
+        )}
+        {listing.signsHourForms && (
+          <span
+            style={{
+              ...tagStyle,
+              border: "1px solid #d0ecd8",
+              background: "#eef7f0",
+              color: "#1a7a34",
+            }}
+          >
+            Signs hours
+          </span>
+        )}
+        {listing.groupsOK && (
+          <span
+            style={{
+              ...tagStyle,
+              border: "1px solid #ecd9f5",
+              background: "#f7eef9",
+              color: "#7a3994",
+            }}
+          >
+            Groups OK
+          </span>
+        )}
       </div>
 
       {notes.length > 0 && (
@@ -753,17 +789,20 @@ function DetailView({
         How to start
       </h3>
       <ol style={{ margin: 0, paddingLeft: 18, fontSize: 13, lineHeight: 1.7, color: "#333" }}>
-        {listing.onboarding ? (
-          <li>{listing.onboarding}</li>
+        {listing.howToStartSteps && listing.howToStartSteps.length > 0 ? (
+          listing.howToStartSteps.map((step, i) => <li key={i}>{step}</li>)
         ) : (
-          <li>Reach out to {org || "the organization"} to introduce yourself.</li>
+          <>
+            <li>Reach out to {org || "the organization"} to introduce yourself.</li>
+            {listing.accepting ? (
+              <li>They&apos;re accepting volunteers now — go ahead and sign up.</li>
+            ) : (
+              <li>They&apos;re currently waitlisting — ask to be added.</li>
+            )}
+          </>
         )}
-        {listing.onboardingTime && <li>Time to get started: {listing.onboardingTime}.</li>}
-        <li>Bring your school hour form if you need it signed.</li>
-        {listing.accepting ? (
-          <li>They&apos;re accepting volunteers now — go ahead and sign up.</li>
-        ) : (
-          <li>They&apos;re currently waitlisting — ask to be added.</li>
+        {listing.onboardingTime && (
+          <li>Time to get started: {listing.onboardingTime}.</li>
         )}
       </ol>
 
