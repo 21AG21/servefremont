@@ -12,10 +12,9 @@ const ListingMap = dynamic(() => import("@/components/ListingMap"), {
   loading: () => <div style={center("var(--sf-text-muted)")}>Loading map…</div>,
 });
 
-// Where the "Report a problem" link in the detail view sends the user. Mailto
-// today; swap to a Google Form URL once one is set up — only this constant
-// needs to change.
-const REPORT_PROBLEM_URL = "mailto:gandhi.kunal@gmail.com";
+// Where the "Report a problem" link in the detail view sends the user.
+const REPORT_PROBLEM_URL =
+  "https://docs.google.com/forms/d/e/1FAIpQLSekWo3JMmGrF6FujRdIr6UQ73W_7aqhus7r4XqJaDkgEv96uQ/viewform";
 
 const AGES = [13, 14, 15, 16, 17, 18];
 const SCHEDULES = ["Shifts", "Drop-in", "Events", "Flexible/Remote"];
