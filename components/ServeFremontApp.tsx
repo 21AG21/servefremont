@@ -328,7 +328,7 @@ export default function ServeFremontApp() {
           </span>
           {!isMobile && (
             <span style={{ fontSize: 12, color: "#999" }}>
-              Volunteer spots around Fremont, checked in person
+              Volunteer spots in Fremont
             </span>
           )}
         </div>
