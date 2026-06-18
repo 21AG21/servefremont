@@ -846,8 +846,10 @@ function DetailView({
 }) {
   const org = listing.org.replace(" - Placeholder", "");
   const startUrl = listing.howToStartUrl ?? listing.website;
+  const isMailto = startUrl?.startsWith("mailto:") ?? false;
+  // Pass mailto: through unchanged; otherwise upgrade a bare domain to https.
   const link = (url: string) =>
-    url.startsWith("http") ? url : `https://${url}`;
+    url.startsWith("http") || url.startsWith("mailto:") ? url : `https://${url}`;
   const shiftLen = formatShiftHours(listing.shiftLengthHours);
 
   return (
@@ -1066,7 +1068,7 @@ function DetailView({
               textDecoration: "none",
             }}
           >
-            Open sign-up page →
+            {isMailto ? "Email to sign up →" : "Open sign-up page →"}
           </a>
         ) : (
           <p
