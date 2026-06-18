@@ -115,6 +115,7 @@ export async function GET() {
           signsHourForms: signs === "yes" || signs === "own letter",
           nearTransit: !!str(f.Transit_Notes) || isYes(f.Near_Transit),
           groupsOK: isYes(f.Group_Friendly) || isYes(f.Groups_OK),
+          priority: f.Priority === true,
           description: str(f.Description),
           onboarding: selectNames(f.Onboarding).join(", ") || undefined,
           onboardingTime: str(f.Onboarding_Time),

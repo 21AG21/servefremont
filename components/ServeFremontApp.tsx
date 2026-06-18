@@ -675,8 +675,17 @@ function ListingRow({
         font: "inherit",
         color: "var(--sf-text)",
         cursor: "pointer",
-        background: "var(--sf-surface)",
-        border: `1.5px solid ${active ? "var(--sf-active-bg)" : "var(--sf-border)"}`,
+        background: listing.priority ? "var(--sf-priority-bg)" : "var(--sf-surface)",
+        border: `1.5px solid ${
+          active
+            ? "var(--sf-active-bg)"
+            : listing.priority
+              ? "var(--sf-priority-border)"
+              : "var(--sf-border)"
+        }`,
+        borderLeft: listing.priority
+          ? "4px solid var(--sf-priority-accent)"
+          : undefined,
         borderRadius: 12,
         padding: "12px 14px",
         marginBottom: 6,
@@ -684,6 +693,26 @@ function ListingRow({
         boxShadow: active ? "0 1px 4px var(--sf-shadow)" : "none",
       }}
     >
+      {listing.priority && (
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 5,
+            background: "var(--sf-priority-accent)",
+            color: "#ffffff",
+            borderRadius: 6,
+            padding: "2px 8px",
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            marginBottom: 8,
+          }}
+        >
+          ★ Top priority
+        </div>
+      )}
       <div
         style={{
           display: "flex",

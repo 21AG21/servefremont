@@ -18,6 +18,7 @@ export type Listing = {
   signsHourForms: boolean;
   nearTransit: boolean;
   groupsOK: boolean;
+  priority: boolean;
   // Detail-page fields
   description?: string;
   onboarding?: string;
