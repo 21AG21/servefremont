@@ -315,7 +315,14 @@ export default function ServeFremontApp() {
           borderBottom: "1px solid #f0f0f0",
         }}
       >
-        <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <img
+            src="/logo.svg"
+            alt=""
+            width={24}
+            height={24}
+            style={{ flexShrink: 0 }}
+          />
           <span style={{ fontSize: 19, fontWeight: 800, letterSpacing: "-0.02em" }}>
             ServeFremont
           </span>
