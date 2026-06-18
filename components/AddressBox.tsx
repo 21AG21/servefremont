@@ -99,20 +99,29 @@ export default function AddressBox({
   }
 
   return (
-    <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 6, width: fullWidth ? "100%" : undefined }}>
-      <div style={{ position: "relative", flex: fullWidth ? "1" : undefined }}>
+    <div
+      style={{
+        position: "relative",
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        width: fullWidth ? "100%" : undefined,
+      }}
+    >
+      <div style={{ position: "relative", flex: fullWidth ? 1 : undefined }}>
         <span
+          aria-hidden
           style={{
             position: "absolute",
-            left: 11,
+            left: 14,
             top: "50%",
             transform: "translateY(-50%)",
-            color: "#bbb",
-            fontSize: 13,
+            color: "var(--sf-text-muted)",
+            fontSize: 14,
             pointerEvents: "none",
           }}
         >
-          ⌕
+          📍
         </span>
         <input
           value={q}
@@ -122,14 +131,16 @@ export default function AddressBox({
             if (e.key === "Enter" && suggestions[0]) pick(suggestions[0]);
             if (e.key === "Escape") setOpen(false);
           }}
-          placeholder="Enter your address…"
+          placeholder="Enter your address to see distances…"
           style={{
-            border: "1.5px solid #e3e3e3",
-            borderRadius: 20,
-            padding: "7px 13px 7px 28px",
+            border: "1.5px solid var(--sf-input-border)",
+            borderRadius: 22,
+            padding: "9px 16px 9px 38px",
             fontSize: 13,
-            width: fullWidth ? "100%" : 230,
+            width: fullWidth ? "100%" : 280,
             outline: "none",
+            background: "var(--sf-surface)",
+            color: "var(--sf-text)",
           }}
         />
         {open && (suggestions.length > 0 || loading) && (
@@ -138,18 +149,25 @@ export default function AddressBox({
               position: "absolute",
               top: "calc(100% + 4px)",
               left: 0,
-              width: fullWidth ? "100%" : 300,
+              right: 0,
+              width: fullWidth ? "100%" : 320,
               maxWidth: "calc(100vw - 40px)",
-              background: "#fff",
-              border: "1px solid #e6e6e6",
+              background: "var(--sf-surface)",
+              border: "1px solid var(--sf-border)",
               borderRadius: 12,
-              boxShadow: "0 6px 24px rgba(0,0,0,0.12)",
+              boxShadow: "0 6px 24px var(--sf-shadow-strong)",
               overflow: "hidden",
               zIndex: 3000,
             }}
           >
             {loading && suggestions.length === 0 ? (
-              <div style={{ padding: "10px 14px", fontSize: 13, color: "#999" }}>
+              <div
+                style={{
+                  padding: "10px 14px",
+                  fontSize: 13,
+                  color: "var(--sf-text-muted)",
+                }}
+              >
                 Searching…
               </div>
             ) : (
@@ -162,11 +180,12 @@ export default function AddressBox({
                     width: "100%",
                     textAlign: "left",
                     border: "none",
-                    borderTop: i === 0 ? "none" : "1px solid #f2f2f2",
-                    background: "#fff",
+                    borderTop:
+                      i === 0 ? "none" : "1px solid var(--sf-border-soft)",
+                    background: "var(--sf-surface)",
                     padding: "10px 14px",
                     fontSize: 13,
-                    color: "#222",
+                    color: "var(--sf-text)",
                     cursor: "pointer",
                   }}
                 >
@@ -186,7 +205,7 @@ export default function AddressBox({
           }}
           style={linkBtn}
         >
-          clear
+          Clear
         </button>
       ) : (
         <button onClick={useMyLocation} style={linkBtn}>
@@ -200,12 +219,12 @@ export default function AddressBox({
           display: "inline-flex",
           alignItems: "center",
           justifyContent: "center",
-          width: 16,
-          height: 16,
+          width: 18,
+          height: 18,
           borderRadius: "50%",
-          border: "1px solid #ccc",
-          color: "#999",
-          fontSize: 10,
+          border: "1px solid var(--sf-input-border)",
+          color: "var(--sf-text-muted)",
+          fontSize: 11,
           cursor: "help",
           flexShrink: 0,
         }}
@@ -219,7 +238,7 @@ export default function AddressBox({
 const linkBtn: React.CSSProperties = {
   border: "none",
   background: "none",
-  color: "#666",
+  color: "var(--sf-text-soft)",
   fontSize: 12,
   cursor: "pointer",
   textDecoration: "underline",

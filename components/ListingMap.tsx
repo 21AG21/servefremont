@@ -36,12 +36,12 @@ const modeButtonStyle: CSSProperties = {
   gap: 4,
   padding: "6px 10px",
   borderRadius: 999,
-  background: "#f3f4f6",
-  color: "#111",
+  background: "var(--sf-pill-track)",
+  color: "var(--sf-text)",
   fontSize: 12,
   fontWeight: 600,
   textDecoration: "none",
-  border: "1px solid #e5e7eb",
+  border: "1px solid var(--sf-input-border)",
   whiteSpace: "nowrap",
 };
 
@@ -94,11 +94,13 @@ export default function ListingMap({
   activeId,
   onSelect,
   userLoc,
+  theme = "light",
 }: {
   orgGroups: OrgGroup[];
   activeId: string | null;
   onSelect: (id: string) => void;
   userLoc?: { lat: number; lng: number } | null;
+  theme?: "light" | "dark";
 }) {
   const [directionsOrg, setDirectionsOrg] = useState<string | null>(null);
   const markerRefs = useRef<Map<string, L.Marker>>(new Map());
@@ -134,12 +136,22 @@ export default function ListingMap({
       attributionControl={false}
     >
       <TileLayer
-        url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"
+        key={`base-${theme}`}
+        url={
+          theme === "dark"
+            ? "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
+            : "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"
+        }
         subdomains="abcd"
       />
       <TileLayer
+        key={`labels-${theme}`}
         pane="shadowPane"
-        url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png"
+        url={
+          theme === "dark"
+            ? "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png"
+            : "https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png"
+        }
         subdomains="abcd"
       />
       <InvalidateOnLayout />
@@ -202,7 +214,7 @@ export default function ListingMap({
                       fontWeight: 700,
                       fontSize: 13,
                       marginBottom: 2,
-                      color: "#111",
+                      color: "var(--sf-text)",
                     }}
                   >
                     {g.orgName}
@@ -211,7 +223,7 @@ export default function ListingMap({
                     <div
                       style={{
                         fontSize: 12,
-                        color: "#555",
+                        color: "var(--sf-text-soft)",
                         marginBottom: 10,
                         lineHeight: 1.35,
                       }}
@@ -222,7 +234,7 @@ export default function ListingMap({
                   <div
                     style={{
                       fontSize: 10,
-                      color: "#888",
+                      color: "var(--sf-text-muted)",
                       marginBottom: 6,
                       textTransform: "uppercase",
                       letterSpacing: 0.6,
@@ -276,9 +288,9 @@ export default function ListingMap({
                       style={{
                         marginTop: 10,
                         paddingTop: 8,
-                        borderTop: "1px solid #eee",
+                        borderTop: "1px solid var(--sf-border)",
                         fontSize: 12,
-                        color: "#444",
+                        color: "var(--sf-text-soft)",
                         lineHeight: 1.4,
                       }}
                     >

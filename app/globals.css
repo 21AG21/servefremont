@@ -15,15 +15,108 @@
   --font-display: var(--font-fraunces);
 }
 
+/* App-wide tokens used by the inline-styled components.
+   Light by default; html[data-theme="dark"] overrides below. */
+:root {
+  --sf-bg: #ffffff;
+  --sf-bg-list: #f5f5f4;
+  --sf-surface: #ffffff;
+  --sf-surface-hover: #fafafa;
+  --sf-text: #111111;
+  --sf-text-soft: #555555;
+  --sf-text-muted: #888888;
+  --sf-text-faint: #bbbbbb;
+  --sf-border: #ececec;
+  --sf-border-soft: #f0f0f0;
+  --sf-input-border: #e3e3e3;
+  --sf-shadow: rgba(0, 0, 0, 0.06);
+  --sf-shadow-strong: rgba(0, 0, 0, 0.18);
+  --sf-active-bg: #111111;
+  --sf-active-text: #ffffff;
+  --sf-callout-bg: #fff8e6;
+  --sf-callout-border: #f0dfa6;
+  --sf-callout-text: #6b5417;
+  --sf-callout-strong: #3a2f08;
+  --sf-green-bg: #eef7f0;
+  --sf-green-border: #d0ecd8;
+  --sf-green-text: #1a7a34;
+  --sf-blue-bg: #eff6fc;
+  --sf-blue-border: #cfe1f2;
+  --sf-blue-text: #1f5fa3;
+  --sf-purple-bg: #f7eef9;
+  --sf-purple-border: #ecd9f5;
+  --sf-purple-text: #7a3994;
+  --sf-warn-bg: #fbf3e3;
+  --sf-warn-border: #f1e1c4;
+  --sf-warn-text: #8a5a1d;
+  --sf-divider: #ececec;
+  --sf-pill-track: #efefef;
+  --sf-popup-bg: #ffffff;
+  --sf-popup-text: #111111;
+}
+
+html[data-theme="dark"] {
+  --sf-bg: #0f1012;
+  --sf-bg-list: #0a0a0b;
+  --sf-surface: #18191c;
+  --sf-surface-hover: #202125;
+  --sf-text: #f3f4f6;
+  --sf-text-soft: #c5c7cc;
+  --sf-text-muted: #8b8e96;
+  --sf-text-faint: #5a5d65;
+  --sf-border: #2a2b30;
+  --sf-border-soft: #1c1d21;
+  --sf-input-border: #2f3137;
+  --sf-shadow: rgba(0, 0, 0, 0.5);
+  --sf-shadow-strong: rgba(0, 0, 0, 0.7);
+  --sf-active-bg: #f3f4f6;
+  --sf-active-text: #0f1012;
+  --sf-callout-bg: #2a2516;
+  --sf-callout-border: #4a3f1d;
+  --sf-callout-text: #e6cc7a;
+  --sf-callout-strong: #f7e5a6;
+  --sf-green-bg: #12251a;
+  --sf-green-border: #1f4a32;
+  --sf-green-text: #7fc99a;
+  --sf-blue-bg: #15263a;
+  --sf-blue-border: #2a4566;
+  --sf-blue-text: #8db6e0;
+  --sf-purple-bg: #2a1a30;
+  --sf-purple-border: #4a2c55;
+  --sf-purple-text: #c89be0;
+  --sf-warn-bg: #2a2113;
+  --sf-warn-border: #4a3d1d;
+  --sf-warn-text: #d9b27a;
+  --sf-divider: #2a2b30;
+  --sf-pill-track: #1c1d21;
+  --sf-popup-bg: #18191c;
+  --sf-popup-text: #f3f4f6;
+}
+
 body {
-  background: var(--color-paper);
-  color: var(--color-ink);
+  background: var(--sf-bg);
+  color: var(--sf-text);
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
 /* Hide the Leaflet attribution control / logo in the map corner. */
 .leaflet-control-attribution {
   display: none !important;
+}
+
+/* Dark-mode Leaflet popups + zoom control. */
+html[data-theme="dark"] .leaflet-popup-content-wrapper,
+html[data-theme="dark"] .leaflet-popup-tip {
+  background: var(--sf-popup-bg);
+  color: var(--sf-popup-text);
+}
+html[data-theme="dark"] .leaflet-popup-close-button {
+  color: var(--sf-text-muted) !important;
+}
+html[data-theme="dark"] .leaflet-control-zoom a {
+  background: var(--sf-surface);
+  color: var(--sf-text);
+  border-color: var(--sf-border);
 }
 
 /* Mobile: filter pills scroll horizontally without wrapping. */

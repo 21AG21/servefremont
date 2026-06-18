@@ -29,6 +29,17 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${fraunces.variable} h-full antialiased`}
     >
+      <head>
+        {/* Set the initial theme before paint so there's no flash. No storage —
+            we always start from the OS preference. The in-app toggle is
+            session-only and resets on reload. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var m=window.matchMedia('(prefers-color-scheme: dark)');document.documentElement.dataset.theme=m.matches?'dark':'light';}catch(e){}})();",
+          }}
+        />
+      </head>
       <body className="min-h-full">
         {children}
         {/* Cookieless analytics (GoatCounter). Off until NEXT_PUBLIC_GOATCOUNTER

@@ -9,8 +9,13 @@ import { useIsMobile } from "@/lib/useIsMobile";
 
 const ListingMap = dynamic(() => import("@/components/ListingMap"), {
   ssr: false,
-  loading: () => <div style={center("#999")}>Loading map…</div>,
+  loading: () => <div style={center("var(--sf-text-muted)")}>Loading map…</div>,
 });
+
+// Where the "Report a problem" link in the detail view sends the user. Mailto
+// today; swap to a Google Form URL once one is set up — only this constant
+// needs to change.
+const REPORT_PROBLEM_URL = "mailto:gandhi.kunal@gmail.com";
 
 const AGES = [13, 14, 15, 16, 17, 18];
 const SCHEDULES = ["Shifts", "Drop-in", "Events", "Flexible/Remote"];
@@ -69,6 +74,29 @@ export default function ServeFremontApp() {
   const isMobile = useIsMobile();
 
   const [userLoc, setUserLoc] = useState<{ lat: number; lng: number } | null>(null);
+
+  // Theme: session-only (no storage). The layout's inline script sets the
+  // initial dataset attribute from the OS preference before paint; we mirror
+  // that here so React's view of theme matches the DOM from the first render.
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    if (typeof document !== "undefined") {
+      return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+    }
+    return "light";
+  });
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
+
+  // Org sections start expanded; user collapses by clicking the header.
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const toggleOrg = (name: string) =>
+    setCollapsed((s) => {
+      const next = new Set(s);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
 
   useEffect(() => {
     let cancelled = false;
@@ -188,12 +216,12 @@ export default function ServeFremontApp() {
     <button
       onClick={onClick}
       style={{
-        border: `1.5px solid ${on ? "#111" : "#e3e3e3"}`,
+        border: `1.5px solid ${on ? "var(--sf-active-bg)" : "var(--sf-input-border)"}`,
         borderRadius: 20,
         padding: "6px 13px",
         fontSize: 13,
-        background: on ? "#111" : "#fff",
-        color: on ? "#fff" : "#555",
+        background: on ? "var(--sf-active-bg)" : "var(--sf-surface)",
+        color: on ? "var(--sf-active-text)" : "var(--sf-text-soft)",
         cursor: "pointer",
         whiteSpace: "nowrap",
       }}
@@ -207,7 +235,7 @@ export default function ServeFremontApp() {
       style={{
         width: 1,
         height: 22,
-        background: "#ececec",
+        background: "var(--sf-divider)",
         margin: "0 4px",
         flexShrink: 0,
       }}
@@ -219,7 +247,7 @@ export default function ServeFremontApp() {
       <div
         style={{
           display: "flex",
-          background: "#efefef",
+          background: "var(--sf-pill-track)",
           borderRadius: 9,
           padding: 3,
           gap: 2,
@@ -238,9 +266,9 @@ export default function ServeFremontApp() {
                 padding: "5px 11px",
                 fontSize: 13,
                 fontWeight: on ? 600 : 400,
-                color: on ? "#111" : "#888",
-                background: on ? "#fff" : "transparent",
-                boxShadow: on ? "0 1px 3px rgba(0,0,0,0.12)" : "none",
+                color: on ? "var(--sf-text)" : "var(--sf-text-muted)",
+                background: on ? "var(--sf-surface)" : "transparent",
+                boxShadow: on ? "0 1px 3px var(--sf-shadow)" : "none",
                 cursor: "pointer",
               }}
             >
@@ -299,8 +327,8 @@ export default function ServeFremontApp() {
         flexDirection: "column",
         overflow: "hidden",
         fontFamily: "system-ui, -apple-system, sans-serif",
-        color: "#111",
-        background: "#fff",
+        color: "var(--sf-text)",
+        background: "var(--sf-bg)",
       }}
     >
       {/* Top bar */}
@@ -312,7 +340,7 @@ export default function ServeFremontApp() {
           justifyContent: "space-between",
           gap: 12,
           padding: "12px 20px",
-          borderBottom: "1px solid #f0f0f0",
+          borderBottom: "1px solid var(--sf-border-soft)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -327,26 +355,60 @@ export default function ServeFremontApp() {
             ServeFremont
           </span>
           {!isMobile && (
-            <span style={{ fontSize: 12, color: "#999" }}>
+            <span style={{ fontSize: 12, color: "var(--sf-text-muted)" }}>
               Volunteer spots in Fremont
             </span>
           )}
         </div>
-        <button
-          onClick={() => setShowMap((v) => !v)}
-          style={{
-            fontSize: 13,
-            border: "1px solid #e0e0e0",
-            borderRadius: 8,
-            padding: "6px 14px",
-            background: "#fff",
-            color: "#555",
-            cursor: "pointer",
-            flexShrink: 0,
-          }}
-        >
-          {isMobile ? (showMap ? "List" : "Map") : showMap ? "Hide map" : "Show map"}
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+          <button
+            onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            style={{
+              fontSize: 15,
+              lineHeight: 1,
+              border: "1px solid var(--sf-input-border)",
+              borderRadius: 8,
+              padding: "6px 10px",
+              background: "var(--sf-surface)",
+              color: "var(--sf-text-soft)",
+              cursor: "pointer",
+            }}
+          >
+            {theme === "dark" ? "☀" : "☾"}
+          </button>
+          <button
+            onClick={() => setShowMap((v) => !v)}
+            style={{
+              fontSize: 13,
+              border: "1px solid var(--sf-input-border)",
+              borderRadius: 8,
+              padding: "6px 14px",
+              background: "var(--sf-surface)",
+              color: "var(--sf-text-soft)",
+              cursor: "pointer",
+            }}
+          >
+            {isMobile ? (showMap ? "List" : "Map") : showMap ? "Hide map" : "Show map"}
+          </button>
+        </div>
+      </div>
+
+      {/* Address bar — its own row, prominent. */}
+      <div
+        style={{
+          flexShrink: 0,
+          padding: "10px 20px 8px",
+          borderBottom: "1px solid var(--sf-border-soft)",
+        }}
+      >
+        <AddressBox
+          active={!!userLoc}
+          onPick={(loc) => setUserLoc(loc)}
+          onClear={() => setUserLoc(null)}
+          fullWidth
+        />
       </div>
 
       {/* Filter bar */}
@@ -354,26 +416,16 @@ export default function ServeFremontApp() {
         style={{
           flexShrink: 0,
           padding: "10px 20px 14px",
-          borderBottom: "1px solid #f0f0f0",
+          borderBottom: "1px solid var(--sf-border-soft)",
         }}
       >
         {isMobile ? (
-          <>
-            <div style={{ marginBottom: 8 }}>
-              <AddressBox
-                active={!!userLoc}
-                onPick={(loc) => setUserLoc(loc)}
-                onClear={() => setUserLoc(null)}
-                fullWidth
-              />
-            </div>
-            <div
-              className="filter-scroll"
-              style={{ display: "flex", alignItems: "center", gap: 8 }}
-            >
-              {filterPills}
-            </div>
-          </>
+          <div
+            className="filter-scroll"
+            style={{ display: "flex", alignItems: "center", gap: 8 }}
+          >
+            {filterPills}
+          </div>
         ) : (
           <div
             style={{
@@ -383,12 +435,6 @@ export default function ServeFremontApp() {
               flexWrap: "wrap",
             }}
           >
-            <AddressBox
-              active={!!userLoc}
-              onPick={(loc) => setUserLoc(loc)}
-              onClear={() => setUserLoc(null)}
-            />
-            {divider}
             {filterPills}
           </div>
         )}
@@ -403,7 +449,7 @@ export default function ServeFremontApp() {
             display: isMobile && showMap ? "none" : undefined,
             minWidth: 0,
             overflowY: "auto",
-            background: detail ? "#fff" : "#f5f5f4",
+            background: detail ? "var(--sf-bg)" : "var(--sf-bg-list)",
             padding: detail ? 0 : 14,
           }}
         >
@@ -414,13 +460,13 @@ export default function ServeFremontApp() {
               onBack={() => setDetailId(null)}
             />
           ) : loading ? (
-            <p style={{ padding: 6, color: "#999", fontSize: 13 }}>
+            <p style={{ padding: 6, color: "var(--sf-text-muted)", fontSize: 13 }}>
               Loading opportunities…
             </p>
           ) : error ? (
-            <p style={{ padding: 6, color: "#999", fontSize: 13 }}>{error}</p>
+            <p style={{ padding: 6, color: "var(--sf-text-muted)", fontSize: 13 }}>{error}</p>
           ) : sorted.length === 0 ? (
-            <p style={{ padding: 6, color: "#999", fontSize: 13 }}>
+            <p style={{ padding: 6, color: "var(--sf-text-muted)", fontSize: 13 }}>
               No opportunities match these filters.
             </p>
           ) : (
@@ -430,6 +476,7 @@ export default function ServeFremontApp() {
                 group.lat != null && group.lng != null && userLoc
                   ? distances.get(group.listings[0].id)
                   : undefined;
+              const isCollapsed = collapsed.has(group.orgName);
               return (
                 <div key={group.orgName} style={{ marginBottom: 18 }}>
                   <OrgHeader
@@ -438,19 +485,22 @@ export default function ServeFremontApp() {
                     count={group.listings.length}
                     distance={orgDistance}
                     active={orgActive}
+                    collapsed={isCollapsed}
+                    onToggle={() => toggleOrg(group.orgName)}
                   />
-                  {group.listings.map((l) => (
-                    <ListingRow
-                      key={l.id}
-                      listing={l}
-                      active={l.id === activeId}
-                      distance={distances.get(l.id)}
-                      onClick={() => {
-                        if (activeId === l.id) setDetailId(l.id);
-                        else setActiveId(l.id);
-                      }}
-                    />
-                  ))}
+                  {!isCollapsed &&
+                    group.listings.map((l) => (
+                      <ListingRow
+                        key={l.id}
+                        listing={l}
+                        active={l.id === activeId}
+                        distance={distances.get(l.id)}
+                        onClick={() => {
+                          if (activeId === l.id) setDetailId(l.id);
+                          else setActiveId(l.id);
+                        }}
+                      />
+                    ))}
                 </div>
               );
             })
@@ -465,6 +515,7 @@ export default function ServeFremontApp() {
               activeId={activeId}
               onSelect={setActiveId}
               userLoc={userLoc}
+              theme={theme}
             />
           </div>
         )}
@@ -479,9 +530,9 @@ function VerifiedBadge({ verified }: { verified?: string }) {
     <span
       style={{
         flexShrink: 0,
-        color: "#1a7a34",
-        background: "#eef7f0",
-        border: "1px solid #d0ecd8",
+        color: "var(--sf-green-text)",
+        background: "var(--sf-green-bg)",
+        border: "1px solid var(--sf-green-border)",
         borderRadius: 6,
         padding: "3px 8px",
         fontSize: 11,
@@ -501,20 +552,33 @@ function OrgHeader({
   count,
   distance,
   active,
+  collapsed,
+  onToggle,
 }: {
   index: number;
   name: string;
   count: number;
   distance?: number;
   active: boolean;
+  collapsed: boolean;
+  onToggle: () => void;
 }) {
   return (
-    <div
+    <button
+      onClick={onToggle}
+      aria-expanded={!collapsed}
       style={{
         display: "flex",
         alignItems: "center",
         gap: 10,
-        padding: "8px 4px 10px",
+        padding: "8px 8px 10px 4px",
+        width: "100%",
+        background: "transparent",
+        border: "none",
+        textAlign: "left",
+        cursor: "pointer",
+        font: "inherit",
+        color: "inherit",
       }}
     >
       <span
@@ -523,15 +587,15 @@ function OrgHeader({
           width: 28,
           height: 28,
           borderRadius: "50%",
-          background: active ? "#111" : "#555",
-          color: "#fff",
+          background: active ? "var(--sf-active-bg)" : "var(--sf-text-soft)",
+          color: active ? "var(--sf-active-text)" : "var(--sf-bg)",
           fontSize: 12,
           fontWeight: 700,
           display: "inline-flex",
           alignItems: "center",
           justifyContent: "center",
-          border: "2px solid #fff",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.18)",
+          border: "2px solid var(--sf-bg-list)",
+          boxShadow: "0 1px 3px var(--sf-shadow-strong)",
         }}
       >
         {index}
@@ -541,7 +605,7 @@ function OrgHeader({
           style={{
             fontSize: 14,
             fontWeight: 700,
-            color: "#111",
+            color: "var(--sf-text)",
             letterSpacing: "-0.01em",
             overflow: "hidden",
             textOverflow: "ellipsis",
@@ -550,12 +614,29 @@ function OrgHeader({
         >
           {name}
         </div>
-        <div style={{ fontSize: 11, color: "#999", marginTop: 1 }}>
+        <div style={{ fontSize: 11, color: "var(--sf-text-muted)", marginTop: 1 }}>
           {count} opportunit{count === 1 ? "y" : "ies"}
           {distance != null ? ` · ${formatMiles(distance)}` : ""}
         </div>
       </div>
-    </div>
+      <span
+        aria-hidden
+        style={{
+          flexShrink: 0,
+          color: "var(--sf-text-muted)",
+          fontSize: 11,
+          width: 16,
+          height: 16,
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          transform: collapsed ? "rotate(-90deg)" : "rotate(0deg)",
+          transition: "transform 120ms ease",
+        }}
+      >
+        ▾
+      </span>
+    </button>
   );
 }
 
@@ -571,12 +652,12 @@ function ListingRow({
   onClick: () => void;
 }) {
   const tagStyle: React.CSSProperties = {
-    border: "1px solid #ececec",
+    border: "1px solid var(--sf-border)",
     borderRadius: 20,
     padding: "4px 10px",
     fontSize: 12,
-    color: "#555",
-    background: "#fff",
+    color: "var(--sf-text-soft)",
+    background: "var(--sf-surface)",
   };
 
   const notes: string[] = [];
@@ -593,15 +674,15 @@ function ListingRow({
         width: "calc(100% - 14px)",
         textAlign: "left",
         font: "inherit",
-        color: "#111",
+        color: "var(--sf-text)",
         cursor: "pointer",
-        background: "#fff",
-        border: `1.5px solid ${active ? "#111" : "#ececec"}`,
+        background: "var(--sf-surface)",
+        border: `1.5px solid ${active ? "var(--sf-active-bg)" : "var(--sf-border)"}`,
         borderRadius: 12,
         padding: "12px 14px",
         marginBottom: 6,
         marginLeft: 14,
-        boxShadow: active ? "0 1px 4px rgba(0,0,0,0.06)" : "none",
+        boxShadow: active ? "0 1px 4px var(--sf-shadow)" : "none",
       }}
     >
       <div
@@ -616,7 +697,7 @@ function ListingRow({
           style={{
             fontWeight: 700,
             fontSize: 16,
-            color: "#111",
+            color: "var(--sf-text)",
             lineHeight: 1.25,
             minWidth: 0,
           }}
@@ -646,9 +727,9 @@ function ListingRow({
           <span
             style={{
               ...tagStyle,
-              border: "1px solid #cfe1f2",
-              background: "#eff6fc",
-              color: "#1f5fa3",
+              border: "1px solid var(--sf-blue-border)",
+              background: "var(--sf-blue-bg)",
+              color: "var(--sf-blue-text)",
             }}
           >
             🚌 Near transit
@@ -658,9 +739,9 @@ function ListingRow({
           <span
             style={{
               ...tagStyle,
-              border: "1px solid #d0ecd8",
-              background: "#eef7f0",
-              color: "#1a7a34",
+              border: "1px solid var(--sf-green-border)",
+              background: "var(--sf-green-bg)",
+              color: "var(--sf-green-text)",
             }}
           >
             Signs hours
@@ -670,9 +751,9 @@ function ListingRow({
           <span
             style={{
               ...tagStyle,
-              border: "1px solid #ecd9f5",
-              background: "#f7eef9",
-              color: "#7a3994",
+              border: "1px solid var(--sf-purple-border)",
+              background: "var(--sf-purple-bg)",
+              color: "var(--sf-purple-text)",
             }}
           >
             Groups OK
@@ -681,12 +762,12 @@ function ListingRow({
       </div>
 
       {notes.length > 0 && (
-        <div style={{ color: "#888", fontSize: 12, marginTop: 8 }}>
+        <div style={{ color: "var(--sf-text-muted)", fontSize: 12, marginTop: 8 }}>
           {notes.join(" · ")}
         </div>
       )}
       {active && (
-        <div style={{ color: "#bbb", fontSize: 11, marginTop: 6 }}>
+        <div style={{ color: "var(--sf-text-faint)", fontSize: 11, marginTop: 6 }}>
           Click again for full details →
         </div>
       )}
@@ -725,7 +806,7 @@ function Section({
           fontWeight: 700,
           textTransform: "uppercase",
           letterSpacing: "0.06em",
-          color: "#888",
+          color: "var(--sf-text-muted)",
           margin: "0 0 8px",
         }}
       >
@@ -744,13 +825,13 @@ function FactRow({ label, value }: { label: string; value: React.ReactNode }) {
         justifyContent: "space-between",
         gap: 12,
         padding: "9px 0",
-        borderBottom: "1px solid #f0f0f0",
+        borderBottom: "1px solid var(--sf-border-soft)",
         fontSize: 13,
         alignItems: "flex-start",
       }}
     >
-      <span style={{ color: "#777", flexShrink: 0 }}>{label}</span>
-      <span style={{ color: "#111", textAlign: "right" }}>{value}</span>
+      <span style={{ color: "var(--sf-text-soft)", flexShrink: 0 }}>{label}</span>
+      <span style={{ color: "var(--sf-text)", textAlign: "right" }}>{value}</span>
     </div>
   );
 }
@@ -777,7 +858,7 @@ function DetailView({
         style={{
           border: "none",
           background: "none",
-          color: "#555",
+          color: "var(--sf-text-soft)",
           fontSize: 13,
           cursor: "pointer",
           padding: 0,
@@ -797,11 +878,21 @@ function DetailView({
         }}
       >
         <div style={{ minWidth: 0 }}>
-          <h2 style={{ fontSize: 22, fontWeight: 800, margin: 0, lineHeight: 1.2 }}>
+          <h2
+            style={{
+              fontSize: 22,
+              fontWeight: 800,
+              margin: 0,
+              lineHeight: 1.2,
+              color: "var(--sf-text)",
+            }}
+          >
             {listing.title}
           </h2>
           {org && (
-            <div style={{ color: "#999", fontSize: 14, marginTop: 4 }}>{org}</div>
+            <div style={{ color: "var(--sf-text-muted)", fontSize: 14, marginTop: 4 }}>
+              {org}
+            </div>
           )}
         </div>
         <VerifiedBadge verified={listing.verified} />
@@ -819,9 +910,15 @@ function DetailView({
       >
         <span
           style={{
-            border: `1px solid ${listing.accepting ? "#d0ecd8" : "#f1e1c4"}`,
-            background: listing.accepting ? "#eef7f0" : "#fbf3e3",
-            color: listing.accepting ? "#1a7a34" : "#8a5a1d",
+            border: `1px solid ${
+              listing.accepting ? "var(--sf-green-border)" : "var(--sf-warn-border)"
+            }`,
+            background: listing.accepting
+              ? "var(--sf-green-bg)"
+              : "var(--sf-warn-bg)",
+            color: listing.accepting
+              ? "var(--sf-green-text)"
+              : "var(--sf-warn-text)",
             borderRadius: 20,
             padding: "4px 10px",
             fontSize: 12,
@@ -834,11 +931,11 @@ function DetailView({
           <span
             key={t}
             style={{
-              border: "1px solid #ececec",
+              border: "1px solid var(--sf-border)",
               borderRadius: 20,
               padding: "4px 10px",
               fontSize: 12,
-              color: "#555",
+              color: "var(--sf-text-soft)",
             }}
           >
             {t}
@@ -852,21 +949,28 @@ function DetailView({
           style={{
             marginTop: 14,
             padding: "10px 12px",
-            background: "#fff8e6",
-            border: "1px solid #f0dfa6",
+            background: "var(--sf-callout-bg)",
+            border: "1px solid var(--sf-callout-border)",
             borderRadius: 10,
             fontSize: 13,
-            color: "#6b5417",
+            color: "var(--sf-callout-text)",
           }}
         >
-          <strong style={{ color: "#3a2f08" }}>Next session:</strong>{" "}
+          <strong style={{ color: "var(--sf-callout-strong)" }}>Next session:</strong>{" "}
           {listing.nextSession}
         </div>
       )}
 
       {/* Description */}
       {listing.description && (
-        <p style={{ fontSize: 14, lineHeight: 1.6, color: "#333", marginTop: 16 }}>
+        <p
+          style={{
+            fontSize: 14,
+            lineHeight: 1.6,
+            color: "var(--sf-text-soft)",
+            marginTop: 16,
+          }}
+        >
           {listing.description}
         </p>
       )}
@@ -914,7 +1018,7 @@ function DetailView({
             paddingLeft: 20,
             fontSize: 13.5,
             lineHeight: 1.7,
-            color: "#222",
+            color: "var(--sf-text)",
           }}
         >
           {listing.howToStartSteps && listing.howToStartSteps.length > 0 ? (
@@ -938,7 +1042,7 @@ function DetailView({
           <p
             style={{
               fontSize: 12,
-              color: "#777",
+              color: "var(--sf-text-soft)",
               margin: "0 0 4px",
             }}
           >
@@ -954,8 +1058,8 @@ function DetailView({
               display: "block",
               textAlign: "center",
               marginTop: 12,
-              background: "#111",
-              color: "#fff",
+              background: "var(--sf-active-bg)",
+              color: "var(--sf-active-text)",
               borderRadius: 9,
               padding: "11px 0",
               fontSize: 14,
@@ -970,10 +1074,10 @@ function DetailView({
             style={{
               marginTop: 12,
               padding: "11px 14px",
-              border: "1px dashed #ddd",
+              border: "1px dashed var(--sf-border)",
               borderRadius: 9,
               fontSize: 13,
-              color: "#999",
+              color: "var(--sf-text-muted)",
               textAlign: "center",
             }}
           >
@@ -981,6 +1085,37 @@ function DetailView({
           </p>
         )}
       </Section>
+
+      {/* Report a problem footer */}
+      <div
+        style={{
+          marginTop: 28,
+          paddingTop: 14,
+          borderTop: "1px solid var(--sf-border-soft)",
+          textAlign: "center",
+        }}
+      >
+        <a
+          href={
+            REPORT_PROBLEM_URL.startsWith("mailto:")
+              ? `${REPORT_PROBLEM_URL}?subject=${encodeURIComponent(
+                  `ServeFremont: problem with "${listing.title}" — ${org}`
+                )}`
+              : `${REPORT_PROBLEM_URL}?usp=pp_url&entry.listing=${encodeURIComponent(
+                  `${listing.title} — ${org}`
+                )}`
+          }
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            fontSize: 12,
+            color: "var(--sf-text-muted)",
+            textDecoration: "underline",
+          }}
+        >
+          Found incorrect info? Report a problem →
+        </a>
+      </div>
     </div>
   );
 }
