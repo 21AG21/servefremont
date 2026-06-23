@@ -447,7 +447,7 @@ export default function ServeFremontApp() {
             flex: showMap && !isMobile ? "38" : "1",
             display: isMobile && showMap ? "none" : undefined,
             minWidth: 0,
-            overflowY: "auto",
+            overflowY: detail ? "hidden" : "auto",
             background: detail ? "var(--sf-bg)" : "var(--sf-bg-list)",
             padding: detail ? 0 : 14,
           }}
@@ -456,6 +456,11 @@ export default function ServeFremontApp() {
             <DetailView
               listing={detail}
               distance={distances.get(detail.id)}
+              orgOppCount={
+                orgGroups.find((g) =>
+                  g.listings.some((l) => l.id === detail.id),
+                )?.listings.length ?? 1
+              }
               onBack={() => setDetailId(null)}
             />
           ) : loading ? (
@@ -676,16 +681,12 @@ function ListingRow({
         color: "var(--sf-text)",
         cursor: "pointer",
         background: listing.priority ? "var(--sf-priority-bg)" : "var(--sf-surface)",
-        border: `1.5px solid ${
-          active
-            ? "var(--sf-active-bg)"
-            : listing.priority
-              ? "var(--sf-priority-border)"
-              : "var(--sf-border)"
-        }`,
+        borderTop: `1.5px solid ${active ? "var(--sf-active-bg)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border)"}`,
+        borderRight: `1.5px solid ${active ? "var(--sf-active-bg)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border)"}`,
+        borderBottom: `1.5px solid ${active ? "var(--sf-active-bg)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border)"}`,
         borderLeft: listing.priority
           ? "4px solid var(--sf-priority-accent)"
-          : undefined,
+          : `1.5px solid ${active ? "var(--sf-active-bg)" : "var(--sf-border)"}`,
         borderRadius: 12,
         padding: "12px 14px",
         marginBottom: 6,
@@ -803,13 +804,6 @@ function ListingRow({
   );
 }
 
-function formatAge(min?: number, max?: number): string {
-  if (min != null && max != null) return `${min}–${max} years`;
-  if (min != null) return `${min}+`;
-  if (max != null) return `Up to ${max}`;
-  return "Any age";
-}
-
 // 1.5 → "1–2 hours" (treat fractional values as a range).
 function formatShiftHours(h?: number): string | undefined {
   if (h == null) return undefined;
@@ -819,332 +813,629 @@ function formatShiftHours(h?: number): string | undefined {
   return `${lo}–${hi} hours`;
 }
 
-function Section({
-  title,
-  children,
+type Tone = "amber" | "teal" | "violet" | "green" | "plain";
+
+// Resolve a tone to (background, border, text) CSS vars.
+function toneColors(tone: Tone): { bg: string; border: string; text: string } {
+  switch (tone) {
+    case "amber":
+      return {
+        bg: "var(--sf-warn-bg)",
+        border: "var(--sf-warn-border)",
+        text: "var(--sf-warn-text)",
+      };
+    case "teal":
+      return {
+        bg: "var(--sf-blue-bg)",
+        border: "var(--sf-blue-border)",
+        text: "var(--sf-blue-text)",
+      };
+    case "violet":
+      return {
+        bg: "var(--sf-purple-bg)",
+        border: "var(--sf-purple-border)",
+        text: "var(--sf-purple-text)",
+      };
+    case "green":
+      return {
+        bg: "var(--sf-green-bg)",
+        border: "var(--sf-green-border)",
+        text: "var(--sf-green-text)",
+      };
+    default:
+      return {
+        bg: "var(--sf-surface)",
+        border: "var(--sf-border)",
+        text: "var(--sf-text-soft)",
+      };
+  }
+}
+
+// Single cell in the 4-up summary bar at the top of the detail view.
+function SumCell({
+  label,
+  value,
+  tone,
 }: {
-  title: string;
-  children: React.ReactNode;
+  label: string;
+  value: string;
+  tone: Tone;
 }) {
+  const c = toneColors(tone);
   return (
-    <div style={{ marginTop: 22 }}>
-      <h3
+    <div
+      style={{
+        flex: 1,
+        minWidth: 0,
+        padding: "10px 8px",
+        borderRight: "1px solid var(--sf-border-soft)",
+        textAlign: "center",
+      }}
+    >
+      <div
         style={{
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: 700,
           textTransform: "uppercase",
           letterSpacing: "0.06em",
-          color: "var(--sf-text-muted)",
-          margin: "0 0 8px",
+          color: c.text,
+          marginBottom: 2,
         }}
       >
-        {title}
-      </h3>
-      {children}
+        {label}
+      </div>
+      <div
+        style={{
+          fontSize: 13,
+          fontWeight: 600,
+          color: "var(--sf-text)",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {value}
+      </div>
     </div>
   );
 }
 
-function FactRow({ label, value }: { label: string; value: React.ReactNode }) {
+// Colored category pill used in the tag row.
+function Pill({ label, tone = "plain" }: { label: string; tone?: Tone }) {
+  const c = toneColors(tone);
   return (
-    <div
+    <span
       style={{
-        display: "flex",
-        justifyContent: "space-between",
-        gap: 12,
-        padding: "9px 0",
-        borderBottom: "1px solid var(--sf-border-soft)",
-        fontSize: 13,
-        alignItems: "flex-start",
+        background: c.bg,
+        border: `1px solid ${c.border}`,
+        color: c.text,
+        borderRadius: 999,
+        padding: "4px 10px",
+        fontSize: 12,
+        fontWeight: 500,
+        whiteSpace: "nowrap",
       }}
     >
-      <span style={{ color: "var(--sf-text-soft)", flexShrink: 0 }}>{label}</span>
-      <span style={{ color: "var(--sf-text)", textAlign: "right" }}>{value}</span>
-    </div>
+      {label}
+    </span>
   );
+}
+
+// Numbered colored dot used in the "How to start" steps.
+function Dot({ tone, n }: { tone: Tone; n: number }) {
+  const c = toneColors(tone);
+  return (
+    <span
+      aria-hidden
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 22,
+        height: 22,
+        borderRadius: 999,
+        background: c.bg,
+        border: `1px solid ${c.border}`,
+        color: c.text,
+        fontSize: 11,
+        fontWeight: 700,
+        flexShrink: 0,
+      }}
+    >
+      {n}
+    </span>
+  );
+}
+
+// Two-letter org initials. "Tri-City Volunteers" → "TC".
+function orgInitials(name: string): string {
+  return name
+    .split(/[\s-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
 }
 
 function DetailView({
   listing,
   distance,
+  orgOppCount,
   onBack,
 }: {
   listing: Listing;
   distance?: number;
+  orgOppCount: number;
   onBack: () => void;
 }) {
+  const [saved, setSaved] = useState(false);
   const org = listing.org.replace(" - Placeholder", "");
   const startUrl = listing.howToStartUrl ?? listing.website;
   const isMailto = startUrl?.startsWith("mailto:") ?? false;
-  // Pass mailto: through unchanged; otherwise upgrade a bare domain to https.
   const link = (url: string) =>
     url.startsWith("http") || url.startsWith("mailto:") ? url : `https://${url}`;
   const shiftLen = formatShiftHours(listing.shiftLengthHours);
 
+  const ageLabel =
+    listing.ageMin != null
+      ? `${listing.ageMin}+`
+      : listing.ageMax != null
+      ? `≤${listing.ageMax}`
+      : "Any";
+
+  const goodToKnow: string[] = [];
+  if (listing.scheduleNotes) goodToKnow.push(listing.scheduleNotes);
+  if (listing.transitNotes) goodToKnow.push(listing.transitNotes);
+  else if (listing.nearTransit) goodToKnow.push("Near transit.");
+  if (listing.onboardingTime)
+    goodToKnow.push(`Time to start: ${listing.onboardingTime}.`);
+  if (shiftLen) goodToKnow.push(`Typical shift: ${shiftLen}.`);
+  if (listing.groupsOK) goodToKnow.push("Groups and clubs welcome.");
+
+  const steps =
+    listing.howToStartSteps && listing.howToStartSteps.length > 0
+      ? listing.howToStartSteps
+      : [
+          `Reach out to ${org || "the organization"} to introduce yourself.`,
+          listing.accepting
+            ? "They're accepting volunteers now — go ahead and sign up."
+            : "They're currently waitlisting — ask to be added.",
+        ];
+  const stepTones: Tone[] = ["green", "teal", "violet", "amber"];
+
+  const ctaLabel = isMailto
+    ? "Email to sign up"
+    : listing.accepting
+    ? "Open sign-up page"
+    : "Join the waitlist";
+
   return (
-    <div style={{ padding: "16px 20px 28px" }}>
-      <button
-        onClick={onBack}
-        style={{
-          border: "none",
-          background: "none",
-          color: "var(--sf-text-soft)",
-          fontSize: 13,
-          cursor: "pointer",
-          padding: 0,
-          marginBottom: 14,
-        }}
-      >
-        ← Back to list
-      </button>
-
-      {/* Title block */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          gap: 10,
-          alignItems: "flex-start",
-        }}
-      >
-        <div style={{ minWidth: 0 }}>
-          <h2
-            style={{
-              fontSize: 22,
-              fontWeight: 800,
-              margin: 0,
-              lineHeight: 1.2,
-              color: "var(--sf-text)",
-            }}
-          >
-            {listing.title}
-          </h2>
-          {org && (
-            <div style={{ color: "var(--sf-text-muted)", fontSize: 14, marginTop: 4 }}>
-              {org}
-            </div>
-          )}
-        </div>
-        <VerifiedBadge verified={listing.verified} />
-      </div>
-
-      {/* Status row: accepting + categories */}
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 6,
-          marginTop: 12,
-          alignItems: "center",
-        }}
-      >
-        <span
-          style={{
-            border: `1px solid ${
-              listing.accepting ? "var(--sf-green-border)" : "var(--sf-warn-border)"
-            }`,
-            background: listing.accepting
-              ? "var(--sf-green-bg)"
-              : "var(--sf-warn-bg)",
-            color: listing.accepting
-              ? "var(--sf-green-text)"
-              : "var(--sf-warn-text)",
-            borderRadius: 20,
-            padding: "4px 10px",
-            fontSize: 12,
-            fontWeight: 600,
-          }}
-        >
-          {listing.accepting ? "Accepting now" : "Waitlist"}
-        </span>
-        {listing.category.map((t) => (
-          <span
-            key={t}
-            style={{
-              border: "1px solid var(--sf-border)",
-              borderRadius: 20,
-              padding: "4px 10px",
-              fontSize: 12,
-              color: "var(--sf-text-soft)",
-            }}
-          >
-            {t}
-          </span>
-        ))}
-      </div>
-
-      {/* Next-session callout */}
-      {listing.nextSession && (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        background: "var(--sf-bg)",
+      }}
+    >
+      {/* Scrollable content */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "14px 20px 24px" }}>
+        {/* Top row: back + verified pill */}
         <div
           style={{
-            marginTop: 14,
-            padding: "10px 12px",
-            background: "var(--sf-callout-bg)",
-            border: "1px solid var(--sf-callout-border)",
-            borderRadius: 10,
-            fontSize: 13,
-            color: "var(--sf-callout-text)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 12,
           }}
         >
-          <strong style={{ color: "var(--sf-callout-strong)" }}>Next session:</strong>{" "}
-          {listing.nextSession}
+          <button
+            onClick={onBack}
+            style={{
+              border: "none",
+              background: "none",
+              color: "var(--sf-text-soft)",
+              fontSize: 13,
+              cursor: "pointer",
+              padding: 0,
+            }}
+          >
+            ← Back to list
+          </button>
+          <VerifiedBadge verified={listing.verified} />
         </div>
-      )}
 
-      {/* Description */}
-      {listing.description && (
-        <p
+        {/* Title */}
+        <h2
           style={{
-            fontSize: 14,
-            lineHeight: 1.6,
-            color: "var(--sf-text-soft)",
-            marginTop: 16,
-          }}
-        >
-          {listing.description}
-        </p>
-      )}
-
-      {/* Who can volunteer */}
-      <Section title="Who can volunteer">
-        <FactRow label="Age" value={formatAge(listing.ageMin, listing.ageMax)} />
-        <FactRow
-          label="Signs school hour forms"
-          value={listing.signsHourForms ? "Yes" : "No"}
-        />
-        {listing.groupsOK && (
-          <FactRow label="Groups / clubs" value="Welcome" />
-        )}
-      </Section>
-
-      {/* When & where */}
-      <Section title="When & where">
-        {listing.schedule && (
-          <FactRow label="Schedule" value={listing.schedule} />
-        )}
-        {listing.scheduleNotes && (
-          <FactRow label="Details" value={listing.scheduleNotes} />
-        )}
-        {shiftLen && <FactRow label="Shift length" value={shiftLen} />}
-        {listing.address && (
-          <FactRow label="Address" value={listing.address} />
-        )}
-        {listing.nearTransit && (
-          <FactRow
-            label="Transit"
-            value={listing.transitNotes ?? "Near transit"}
-          />
-        )}
-        {distance != null && (
-          <FactRow label="Distance" value={`${formatMiles(distance)} away`} />
-        )}
-      </Section>
-
-      {/* How to start */}
-      <Section title="How to start">
-        <ol
-          style={{
-            margin: "0 0 10px",
-            paddingLeft: 20,
-            fontSize: 13.5,
-            lineHeight: 1.7,
+            fontSize: 24,
+            fontWeight: 800,
+            margin: 0,
+            lineHeight: 1.2,
             color: "var(--sf-text)",
           }}
         >
-          {listing.howToStartSteps && listing.howToStartSteps.length > 0 ? (
-            listing.howToStartSteps.map((step, i) => (
-              <li key={i} style={{ marginBottom: 4 }}>
-                {step}
-              </li>
-            ))
-          ) : (
-            <>
-              <li>Reach out to {org || "the organization"} to introduce yourself.</li>
-              {listing.accepting ? (
-                <li>They&apos;re accepting volunteers now — go ahead and sign up.</li>
-              ) : (
-                <li>They&apos;re currently waitlisting — ask to be added.</li>
-              )}
-            </>
-          )}
-        </ol>
-        {listing.onboardingTime && (
-          <p
+          {listing.title}
+        </h2>
+
+        {/* Org line: initials chip + name */}
+        {org && (
+          <div
             style={{
-              fontSize: 12,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              marginTop: 8,
+              fontSize: 13,
               color: "var(--sf-text-soft)",
-              margin: "0 0 4px",
             }}
           >
-            Time to get started: {listing.onboardingTime}
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 22,
+                height: 22,
+                borderRadius: 999,
+                background: "var(--color-brand-soft)",
+                color: "var(--color-brand)",
+                fontSize: 10,
+                fontWeight: 700,
+              }}
+            >
+              {orgInitials(org)}
+            </span>
+            <span>
+              Hosted by <span style={{ color: "var(--sf-text)" }}>{org}</span>
+            </span>
+          </div>
+        )}
+
+        {/* Summary bar */}
+        <div
+          style={{
+            display: "flex",
+            marginTop: 14,
+            border: "1px solid var(--sf-border)",
+            borderRadius: 12,
+            background: "var(--sf-surface)",
+            overflow: "hidden",
+          }}
+        >
+          <SumCell
+            label="Shifts"
+            value={listing.schedule ?? "Flexible"}
+            tone="teal"
+          />
+          <SumCell label="Min age" value={ageLabel} tone="violet" />
+          <SumCell
+            label="Distance"
+            value={distance != null ? formatMiles(distance) : "—"}
+            tone="amber"
+          />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <SumCell
+              label="Hours"
+              value={shiftLen ?? "Flexible"}
+              tone="green"
+            />
+          </div>
+        </div>
+
+        {/* Tag pills */}
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 6,
+            marginTop: 12,
+          }}
+        >
+          {listing.category.map((t) => (
+            <Pill key={t} label={t} tone="plain" />
+          ))}
+          {listing.signsHourForms && <Pill label="Signs hours" tone="green" />}
+          {listing.nearTransit && <Pill label="Near transit" tone="teal" />}
+          {listing.groupsOK && <Pill label="Groups OK" tone="violet" />}
+        </div>
+
+        {/* Next-session callout */}
+        {listing.nextSession && (
+          <div
+            style={{
+              marginTop: 14,
+              padding: "10px 12px",
+              background: "var(--sf-callout-bg)",
+              border: "1px solid var(--sf-callout-border)",
+              borderRadius: 10,
+              fontSize: 13,
+              color: "var(--sf-callout-text)",
+            }}
+          >
+            <strong style={{ color: "var(--sf-callout-strong)" }}>
+              Next session:
+            </strong>{" "}
+            {listing.nextSession}
+          </div>
+        )}
+
+        {/* Description */}
+        {listing.description && (
+          <p
+            style={{
+              fontSize: 14,
+              lineHeight: 1.6,
+              color: "var(--sf-text-soft)",
+              marginTop: 16,
+            }}
+          >
+            {listing.description}
           </p>
         )}
+
+        {/* What to know */}
+        {goodToKnow.length > 0 && (
+          <div style={{ marginTop: 20 }}>
+            <h3
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                color: "var(--sf-text-muted)",
+                margin: "0 0 8px",
+              }}
+            >
+              What to know
+            </h3>
+            <ul
+              style={{
+                margin: 0,
+                padding: 0,
+                listStyle: "none",
+                display: "flex",
+                flexDirection: "column",
+                gap: 8,
+              }}
+            >
+              {goodToKnow.map((item, i) => (
+                <li
+                  key={i}
+                  style={{
+                    display: "flex",
+                    gap: 10,
+                    fontSize: 13.5,
+                    lineHeight: 1.55,
+                    color: "var(--sf-text)",
+                  }}
+                >
+                  <span
+                    aria-hidden
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: 999,
+                      background: "var(--color-brand)",
+                      marginTop: 8,
+                      flexShrink: 0,
+                    }}
+                  />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* How to start */}
+        <div style={{ marginTop: 20 }}>
+          <h3
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              color: "var(--sf-text-muted)",
+              margin: "0 0 10px",
+            }}
+          >
+            How to start
+          </h3>
+          <ol
+            style={{
+              margin: 0,
+              padding: 0,
+              listStyle: "none",
+              display: "flex",
+              flexDirection: "column",
+              gap: 10,
+            }}
+          >
+            {steps.map((step, i) => (
+              <li
+                key={i}
+                style={{
+                  display: "flex",
+                  gap: 10,
+                  fontSize: 13.5,
+                  lineHeight: 1.55,
+                  color: "var(--sf-text)",
+                  alignItems: "flex-start",
+                }}
+              >
+                <Dot tone={stepTones[i % stepTones.length]} n={i + 1} />
+                <span style={{ paddingTop: 1 }}>{step}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        {/* Hosted by org card */}
+        {org && (
+          <div
+            style={{
+              marginTop: 22,
+              border: "1px solid var(--sf-border)",
+              borderRadius: 12,
+              padding: "12px 14px",
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              background: "var(--sf-surface)",
+            }}
+          >
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 38,
+                height: 38,
+                borderRadius: 999,
+                background: "var(--color-brand-soft)",
+                color: "var(--color-brand)",
+                fontSize: 13,
+                fontWeight: 700,
+                flexShrink: 0,
+              }}
+            >
+              {orgInitials(org)}
+            </span>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: "var(--sf-text)",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {org}
+              </div>
+              <div style={{ fontSize: 12, color: "var(--sf-text-muted)" }}>
+                {orgOppCount} active{" "}
+                {orgOppCount === 1 ? "opportunity" : "opportunities"}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Report a problem footer */}
+        <div
+          style={{
+            marginTop: 22,
+            paddingTop: 14,
+            borderTop: "1px solid var(--sf-border-soft)",
+            textAlign: "center",
+          }}
+        >
+          <a
+            href={
+              REPORT_PROBLEM_URL.startsWith("mailto:")
+                ? `${REPORT_PROBLEM_URL}?subject=${encodeURIComponent(
+                    `ServeFremont: problem with "${listing.title}" — ${org}`,
+                  )}`
+                : `${REPORT_PROBLEM_URL}?usp=pp_url&entry.listing=${encodeURIComponent(
+                    `${listing.title} — ${org}`,
+                  )}`
+            }
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              fontSize: 12,
+              color: "var(--sf-text-muted)",
+              textDecoration: "underline",
+            }}
+          >
+            Found incorrect info? Report a problem →
+          </a>
+        </div>
+      </div>
+
+      {/* Sticky CTA bar */}
+      <div
+        style={{
+          borderTop: "1px solid var(--sf-border)",
+          background: "var(--sf-bg)",
+          padding: "10px 16px",
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+        }}
+      >
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              color: listing.accepting
+                ? "var(--sf-green-text)"
+                : "var(--sf-warn-text)",
+            }}
+          >
+            {listing.accepting ? "Accepting volunteers" : "Waitlist open"}
+          </div>
+          <div style={{ fontSize: 11, color: "var(--sf-text-muted)" }}>
+            {listing.signsHourForms ? "Signs hour forms" : "Hours not signed"}
+          </div>
+        </div>
+        <button
+          onClick={() => setSaved((s) => !s)}
+          aria-label={saved ? "Remove from saved" : "Save for later"}
+          aria-pressed={saved}
+          style={{
+            width: 38,
+            height: 38,
+            borderRadius: 999,
+            border: "1px solid var(--sf-border)",
+            background: "var(--sf-surface)",
+            color: saved ? "var(--color-brand)" : "var(--sf-text-soft)",
+            fontSize: 16,
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          {saved ? "♥" : "♡"}
+        </button>
         {startUrl ? (
           <a
             href={link(startUrl)}
             target="_blank"
             rel="noopener noreferrer"
             style={{
-              display: "block",
-              textAlign: "center",
-              marginTop: 12,
-              background: "var(--sf-active-bg)",
-              color: "var(--sf-active-text)",
-              borderRadius: 9,
-              padding: "11px 0",
+              background: "var(--color-brand)",
+              color: "#ffffff",
+              borderRadius: 10,
+              padding: "10px 18px",
               fontSize: 14,
               fontWeight: 600,
               textDecoration: "none",
+              flexShrink: 0,
             }}
           >
-            {isMailto ? "Email to sign up →" : "Open sign-up page →"}
+            {ctaLabel}
           </a>
         ) : (
-          <p
+          <span
             style={{
-              marginTop: 12,
-              padding: "11px 14px",
               border: "1px dashed var(--sf-border)",
-              borderRadius: 9,
+              borderRadius: 10,
+              padding: "10px 18px",
               fontSize: 13,
               color: "var(--sf-text-muted)",
-              textAlign: "center",
+              flexShrink: 0,
             }}
           >
-            Contact the organization directly to begin.
-          </p>
+            Contact directly
+          </span>
         )}
-      </Section>
-
-      {/* Report a problem footer */}
-      <div
-        style={{
-          marginTop: 28,
-          paddingTop: 14,
-          borderTop: "1px solid var(--sf-border-soft)",
-          textAlign: "center",
-        }}
-      >
-        <a
-          href={
-            REPORT_PROBLEM_URL.startsWith("mailto:")
-              ? `${REPORT_PROBLEM_URL}?subject=${encodeURIComponent(
-                  `ServeFremont: problem with "${listing.title}" — ${org}`
-                )}`
-              : `${REPORT_PROBLEM_URL}?usp=pp_url&entry.listing=${encodeURIComponent(
-                  `${listing.title} — ${org}`
-                )}`
-          }
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            fontSize: 12,
-            color: "var(--sf-text-muted)",
-            textDecoration: "underline",
-          }}
-        >
-          Found incorrect info? Report a problem →
-        </a>
       </div>
     </div>
   );

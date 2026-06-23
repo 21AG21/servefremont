@@ -28,6 +28,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${inter.variable} ${fraunces.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <head>
         {/* Set the initial theme before paint so there's no flash. No storage —
