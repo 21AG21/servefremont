@@ -705,7 +705,6 @@ function ListingRow({
         padding: "12px 14px",
         marginBottom: 6,
         marginLeft: 14,
-        boxShadow: active ? "0 1px 4px var(--sf-shadow)" : "none",
       }}
     >
       {listing.priority && (
