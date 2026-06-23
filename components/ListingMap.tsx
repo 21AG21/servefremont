@@ -46,17 +46,25 @@ const modeButtonStyle: CSSProperties = {
 };
 
 function numberedIcon(n: number, active: boolean): L.DivIcon {
+  const bg = active ? "#5b21b6" : "#ffffff";
+  const fg = active ? "#ffffff" : "#5b21b6";
+  const border = active ? "#ffffff" : "#5b21b6";
+  const shadow = active
+    ? "0 2px 10px rgba(91,33,182,0.5),0 1px 3px rgba(0,0,0,0.25)"
+    : "0 2px 8px rgba(0,0,0,0.18),0 1px 3px rgba(0,0,0,0.12)";
+  const size = active ? 36 : 32;
+  const half = size / 2;
   return L.divIcon({
     className: "",
     html: `<div style="
-      width:36px;height:36px;border-radius:50%;
-      background:${active ? "#111" : "#555"};color:#fff;
-      border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);
+      width:${size}px;height:${size}px;border-radius:50%;
+      background:${bg};color:${fg};
+      border:2.5px solid ${border};box-shadow:${shadow};
       display:flex;align-items:center;justify-content:center;
-      font-size:13px;font-weight:700;">${n}</div>`,
-    iconSize: [36, 36],
-    iconAnchor: [18, 18],
-    popupAnchor: [0, -19],
+      font-size:${active ? 13 : 12}px;font-weight:700;">${n}</div>`,
+    iconSize: [size, size],
+    iconAnchor: [half, half],
+    popupAnchor: [0, -half - 2],
   });
 }
 
@@ -140,7 +148,7 @@ export default function ListingMap({
         url={
           theme === "dark"
             ? "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
-            : "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"
+            : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png"
         }
         subdomains="abcd"
       />
@@ -150,7 +158,7 @@ export default function ListingMap({
         url={
           theme === "dark"
             ? "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png"
-            : "https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png"
+            : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png"
         }
         subdomains="abcd"
       />

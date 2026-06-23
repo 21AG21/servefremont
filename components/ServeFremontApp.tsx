@@ -215,14 +215,16 @@ export default function ServeFremontApp() {
     <button
       onClick={onClick}
       style={{
-        border: `1.5px solid ${on ? "var(--sf-active-bg)" : "var(--sf-input-border)"}`,
-        borderRadius: 20,
-        padding: "6px 13px",
+        border: `1.5px solid ${on ? "var(--sf-pu)" : "var(--sf-border)"}`,
+        borderRadius: 999,
+        padding: "5px 12px",
         fontSize: 13,
-        background: on ? "var(--sf-active-bg)" : "var(--sf-surface)",
-        color: on ? "var(--sf-active-text)" : "var(--sf-text-soft)",
+        fontWeight: on ? 700 : 500,
+        background: on ? "var(--sf-pu)" : "var(--sf-surface)",
+        color: on ? "#ffffff" : "var(--sf-text-soft)",
         cursor: "pointer",
         whiteSpace: "nowrap",
+        transition: "background 0.15s, border-color 0.15s, color 0.15s",
       }}
     >
       {label}
@@ -534,15 +536,16 @@ function VerifiedBadge({ verified }: { verified?: string }) {
     <span
       style={{
         flexShrink: 0,
-        color: "var(--sf-green-text)",
-        background: "var(--sf-green-bg)",
-        border: "1px solid var(--sf-green-border)",
-        borderRadius: 6,
-        padding: "3px 8px",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 4,
+        color: "var(--sf-gr-d)",
+        background: "var(--sf-gr-l)",
+        borderRadius: 999,
+        padding: "3px 10px",
         fontSize: 11,
-        fontWeight: 600,
+        fontWeight: 700,
         whiteSpace: "nowrap",
-        marginTop: 2,
       }}
     >
       ✓ Verified {verified}
@@ -591,8 +594,8 @@ function OrgHeader({
           width: 28,
           height: 28,
           borderRadius: "50%",
-          background: active ? "var(--sf-active-bg)" : "var(--sf-text-soft)",
-          color: active ? "var(--sf-active-text)" : "var(--sf-bg)",
+          background: active ? "var(--sf-pu)" : "var(--sf-text-muted)",
+          color: "#ffffff",
           fontSize: 12,
           fontWeight: 700,
           display: "inline-flex",
@@ -655,13 +658,22 @@ function ListingRow({
   distance?: number;
   onClick: () => void;
 }) {
-  const tagStyle: React.CSSProperties = {
-    border: "1px solid var(--sf-border)",
-    borderRadius: 20,
-    padding: "4px 10px",
+  // Map category names to pill background/text for colored tagging.
+  const catStyle = (cat: string): React.CSSProperties => {
+    if (cat === "Food Security")
+      return { background: "var(--c-amber-bg)", color: "var(--c-amber-t)" };
+    if (cat === "Education" || cat === "Environment" || cat === "Events" || cat === "Immigrant Services")
+      return { background: "var(--c-teal-bg)", color: "var(--c-teal-t)" };
+    if (cat === "Animals" || cat === "Arts/History")
+      return { background: "var(--c-rose-bg)", color: "var(--c-rose-t)" };
+    return { background: "var(--sf-pill-track)", color: "var(--sf-text-soft)" };
+  };
+  const tagBase: React.CSSProperties = {
+    borderRadius: 999,
+    padding: "3px 9px",
     fontSize: 12,
-    color: "var(--sf-text-soft)",
-    background: "var(--sf-surface)",
+    fontWeight: 600,
+    whiteSpace: "nowrap" as const,
   };
 
   const notes: string[] = [];
@@ -681,12 +693,14 @@ function ListingRow({
         color: "var(--sf-text)",
         cursor: "pointer",
         background: listing.priority ? "var(--sf-priority-bg)" : "var(--sf-surface)",
-        borderTop: `1.5px solid ${active ? "var(--sf-active-bg)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border)"}`,
-        borderRight: `1.5px solid ${active ? "var(--sf-active-bg)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border)"}`,
-        borderBottom: `1.5px solid ${active ? "var(--sf-active-bg)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border)"}`,
+        borderTop: `1.5px solid ${active ? "var(--sf-pu)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border)"}`,
+        borderRight: `1.5px solid ${active ? "var(--sf-pu)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border)"}`,
+        borderBottom: `1.5px solid ${active ? "var(--sf-pu)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border)"}`,
         borderLeft: listing.priority
           ? "4px solid var(--sf-priority-accent)"
-          : `1.5px solid ${active ? "var(--sf-active-bg)" : "var(--sf-border)"}`,
+          : `1.5px solid ${active ? "var(--sf-pu)" : "var(--sf-border)"}`,
+        boxShadow: active ? "0 4px 18px var(--sf-shadow)" : "none",
+        transition: "box-shadow 0.18s, border-color 0.18s",
         borderRadius: 12,
         padding: "12px 14px",
         marginBottom: 6,
@@ -738,12 +752,12 @@ function ListingRow({
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 10 }}>
         {listing.category.map((t) => (
-          <span key={t} style={tagStyle}>
+          <span key={t} style={{ ...tagBase, ...catStyle(t) }}>
             {t}
           </span>
         ))}
         {(listing.ageMin != null || listing.ageMax != null) && (
-          <span style={tagStyle}>
+          <span style={{ ...tagBase, background: "var(--c-amber-bg)", color: "var(--c-amber-t)" }}>
             {listing.ageMin != null && listing.ageMax != null
               ? `${listing.ageMin}–${listing.ageMax}`
               : listing.ageMin != null
@@ -751,40 +765,23 @@ function ListingRow({
                 : `≤${listing.ageMax}`}
           </span>
         )}
-        {listing.schedule && <span style={tagStyle}>{listing.schedule}</span>}
+        {listing.schedule && (
+          <span style={{ ...tagBase, background: "var(--sf-pu-l)", color: "var(--sf-pu)" }}>
+            {listing.schedule}
+          </span>
+        )}
         {listing.nearTransit && (
-          <span
-            style={{
-              ...tagStyle,
-              border: "1px solid var(--sf-blue-border)",
-              background: "var(--sf-blue-bg)",
-              color: "var(--sf-blue-text)",
-            }}
-          >
+          <span style={{ ...tagBase, background: "var(--c-blue-bg)", color: "var(--c-blue-t)" }}>
             🚌 Near transit
           </span>
         )}
         {listing.signsHourForms && (
-          <span
-            style={{
-              ...tagStyle,
-              border: "1px solid var(--sf-green-border)",
-              background: "var(--sf-green-bg)",
-              color: "var(--sf-green-text)",
-            }}
-          >
+          <span style={{ ...tagBase, background: "var(--sf-gr-l)", color: "var(--sf-gr-d)" }}>
             Signs hours
           </span>
         )}
         {listing.groupsOK && (
-          <span
-            style={{
-              ...tagStyle,
-              border: "1px solid var(--sf-purple-border)",
-              background: "var(--sf-purple-bg)",
-              color: "var(--sf-purple-text)",
-            }}
-          >
+          <span style={{ ...tagBase, background: "var(--sf-pu-l)", color: "var(--sf-pu)" }}>
             Groups OK
           </span>
         )}
@@ -796,7 +793,7 @@ function ListingRow({
         </div>
       )}
       {active && (
-        <div style={{ color: "var(--sf-text-faint)", fontSize: 11, marginTop: 6 }}>
+        <div style={{ color: "var(--sf-pu)", fontSize: 12, fontWeight: 700, marginTop: 7 }}>
           Click again for full details →
         </div>
       )}
@@ -813,41 +810,25 @@ function formatShiftHours(h?: number): string | undefined {
   return `${lo}–${hi} hours`;
 }
 
-type Tone = "amber" | "teal" | "violet" | "green" | "plain";
+type Tone = "amber" | "teal" | "blue" | "rose" | "violet" | "green" | "plain";
 
 // Resolve a tone to (background, border, text) CSS vars.
 function toneColors(tone: Tone): { bg: string; border: string; text: string } {
   switch (tone) {
     case "amber":
-      return {
-        bg: "var(--sf-warn-bg)",
-        border: "var(--sf-warn-border)",
-        text: "var(--sf-warn-text)",
-      };
+      return { bg: "var(--c-amber-bg)", border: "var(--c-amber-bg)", text: "var(--c-amber-t)" };
     case "teal":
-      return {
-        bg: "var(--sf-blue-bg)",
-        border: "var(--sf-blue-border)",
-        text: "var(--sf-blue-text)",
-      };
+      return { bg: "var(--c-teal-bg)",  border: "var(--c-teal-bg)",  text: "var(--c-teal-t)" };
+    case "blue":
+      return { bg: "var(--c-blue-bg)",  border: "var(--c-blue-bg)",  text: "var(--c-blue-t)" };
+    case "rose":
+      return { bg: "var(--c-rose-bg)",  border: "var(--c-rose-bg)",  text: "var(--c-rose-t)" };
     case "violet":
-      return {
-        bg: "var(--sf-purple-bg)",
-        border: "var(--sf-purple-border)",
-        text: "var(--sf-purple-text)",
-      };
+      return { bg: "var(--sf-pu-l)",    border: "var(--sf-pu-l)",    text: "var(--sf-pu)" };
     case "green":
-      return {
-        bg: "var(--sf-green-bg)",
-        border: "var(--sf-green-border)",
-        text: "var(--sf-green-text)",
-      };
+      return { bg: "var(--sf-gr-l)",    border: "var(--sf-gr-l)",    text: "var(--sf-gr-d)" };
     default:
-      return {
-        bg: "var(--sf-surface)",
-        border: "var(--sf-border)",
-        text: "var(--sf-text-soft)",
-      };
+      return { bg: "var(--sf-pill-track)", border: "var(--sf-border)", text: "var(--sf-text-soft)" };
   }
 }
 
@@ -1037,11 +1018,14 @@ function DetailView({
               background: "none",
               color: "var(--sf-text-soft)",
               fontSize: 13,
+              fontWeight: 600,
               cursor: "pointer",
-              padding: 0,
+              padding: "5px 8px 5px 4px",
+              borderRadius: 8,
+              marginLeft: -4,
             }}
           >
-            ← Back to list
+            ← {org || "Back"} · {orgOppCount} opportunit{orgOppCount === 1 ? "y" : "ies"}
           </button>
           <VerifiedBadge verified={listing.verified} />
         </div>
@@ -1078,9 +1062,9 @@ function DetailView({
                 justifyContent: "center",
                 width: 22,
                 height: 22,
-                borderRadius: 999,
-                background: "var(--color-brand-soft)",
-                color: "var(--color-brand)",
+                borderRadius: 7,
+                background: "var(--sf-pu-l)",
+                color: "var(--sf-pu)",
                 fontSize: 10,
                 fontWeight: 700,
               }}
@@ -1104,23 +1088,11 @@ function DetailView({
             overflow: "hidden",
           }}
         >
-          <SumCell
-            label="Shifts"
-            value={listing.schedule ?? "Flexible"}
-            tone="teal"
-          />
-          <SumCell label="Min age" value={ageLabel} tone="violet" />
-          <SumCell
-            label="Distance"
-            value={distance != null ? formatMiles(distance) : "—"}
-            tone="amber"
-          />
+          <SumCell label="⏰ Shifts"   value={listing.schedule ?? "Flexible"}                 tone="teal"   />
+          <SumCell label="👤 Min age"  value={ageLabel}                                        tone="violet" />
+          <SumCell label="📍 Distance" value={distance != null ? formatMiles(distance) : "—"}  tone="amber"  />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <SumCell
-              label="Hours"
-              value={shiftLen ?? "Flexible"}
-              tone="green"
-            />
+            <SumCell label="📋 Hours" value={shiftLen ?? "Flexible"} tone="green" />
           </div>
         </div>
 
@@ -1200,31 +1172,43 @@ function DetailView({
                 gap: 8,
               }}
             >
-              {goodToKnow.map((item, i) => (
-                <li
-                  key={i}
-                  style={{
-                    display: "flex",
-                    gap: 10,
-                    fontSize: 13.5,
-                    lineHeight: 1.55,
-                    color: "var(--sf-text)",
-                  }}
-                >
-                  <span
-                    aria-hidden
+              {goodToKnow.map((item, i) => {
+                const dotTones: Tone[] = ["teal", "amber", "violet", "green", "blue", "rose"];
+                const c = toneColors(dotTones[i % dotTones.length]);
+                return (
+                  <li
+                    key={i}
                     style={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: 999,
-                      background: "var(--color-brand)",
-                      marginTop: 8,
-                      flexShrink: 0,
+                      display: "flex",
+                      gap: 9,
+                      fontSize: 13.5,
+                      lineHeight: 1.55,
+                      color: "var(--sf-text-soft)",
                     }}
-                  />
-                  <span>{item}</span>
-                </li>
-              ))}
+                  >
+                    <span
+                      aria-hidden
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: 20,
+                        height: 20,
+                        borderRadius: 999,
+                        background: c.bg,
+                        color: c.text,
+                        fontSize: 10,
+                        fontWeight: 700,
+                        flexShrink: 0,
+                        marginTop: 2,
+                      }}
+                    >
+                      i
+                    </span>
+                    <span>{item}</span>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         )}
@@ -1291,12 +1275,12 @@ function DetailView({
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                width: 38,
-                height: 38,
-                borderRadius: 999,
-                background: "var(--color-brand-soft)",
-                color: "var(--color-brand)",
-                fontSize: 13,
+                width: 42,
+                height: 42,
+                borderRadius: 11,
+                background: "var(--sf-pu-l)",
+                color: "var(--sf-pu)",
+                fontSize: 15,
                 fontWeight: 700,
                 flexShrink: 0,
               }}
@@ -1388,18 +1372,19 @@ function DetailView({
           aria-label={saved ? "Remove from saved" : "Save for later"}
           aria-pressed={saved}
           style={{
-            width: 38,
-            height: 38,
-            borderRadius: 999,
-            border: "1px solid var(--sf-border)",
+            width: 44,
+            height: 44,
+            borderRadius: 11,
+            border: `1.5px solid ${saved ? "var(--sf-pu)" : "var(--sf-border)"}`,
             background: "var(--sf-surface)",
-            color: saved ? "var(--color-brand)" : "var(--sf-text-soft)",
-            fontSize: 16,
+            color: saved ? "var(--sf-pu)" : "var(--sf-text-muted)",
+            fontSize: 18,
             cursor: "pointer",
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
             flexShrink: 0,
+            transition: "border-color 0.15s, color 0.15s",
           }}
         >
           {saved ? "♥" : "♡"}
@@ -1410,14 +1395,15 @@ function DetailView({
             target="_blank"
             rel="noopener noreferrer"
             style={{
-              background: "var(--color-brand)",
+              background: "var(--sf-pu)",
               color: "#ffffff",
-              borderRadius: 10,
-              padding: "10px 18px",
-              fontSize: 14,
-              fontWeight: 600,
+              borderRadius: 11,
+              padding: "10px 20px",
+              fontSize: 14.5,
+              fontWeight: 700,
               textDecoration: "none",
               flexShrink: 0,
+              transition: "filter 0.18s",
             }}
           >
             {ctaLabel}
@@ -1426,7 +1412,7 @@ function DetailView({
           <span
             style={{
               border: "1px dashed var(--sf-border)",
-              borderRadius: 10,
+              borderRadius: 11,
               padding: "10px 18px",
               fontSize: 13,
               color: "var(--sf-text-muted)",

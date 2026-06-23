@@ -29,6 +29,7 @@ export default function AddressBox({
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   const justPicked = useRef(false);
 
   useEffect(() => {
@@ -213,24 +214,48 @@ export default function AddressBox({
         </button>
       )}
 
-      <span
-        title={PRIVACY}
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: 18,
-          height: 18,
-          borderRadius: "50%",
-          border: "1px solid var(--sf-input-border)",
-          color: "var(--sf-text-muted)",
-          fontSize: 11,
-          cursor: "help",
-          flexShrink: 0,
-        }}
-      >
-        i
-      </span>
+      <div style={{ position: "relative", flexShrink: 0 }}>
+        <span
+          onMouseEnter={() => setShowInfo(true)}
+          onMouseLeave={() => setShowInfo(false)}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 18,
+            height: 18,
+            borderRadius: "50%",
+            border: "1px solid var(--sf-input-border)",
+            color: "var(--sf-text-muted)",
+            fontSize: 11,
+            cursor: "help",
+          }}
+        >
+          i
+        </span>
+        {showInfo && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: "calc(100% + 8px)",
+              right: 0,
+              width: 240,
+              background: "var(--sf-surface)",
+              border: "1px solid var(--sf-border)",
+              borderRadius: 10,
+              padding: "10px 12px",
+              fontSize: 12,
+              lineHeight: 1.55,
+              color: "var(--sf-text-soft)",
+              boxShadow: "0 4px 16px var(--sf-shadow-strong)",
+              zIndex: 4000,
+              pointerEvents: "none",
+            }}
+          >
+            {PRIVACY}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
