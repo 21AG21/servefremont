@@ -114,15 +114,18 @@ export default function AddressBox({
           aria-hidden
           style={{
             position: "absolute",
-            left: 14,
+            left: 12,
             top: "50%",
             transform: "translateY(-50%)",
             color: "var(--sf-text-muted)",
-            fontSize: 14,
             pointerEvents: "none",
+            display: "inline-flex",
           }}
         >
-          📍
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
         </span>
         <input
           value={q}
@@ -134,9 +137,9 @@ export default function AddressBox({
           }}
           placeholder="Enter your address to see distances…"
           style={{
-            border: "1.5px solid var(--sf-input-border)",
-            borderRadius: 22,
-            padding: "9px 16px 9px 38px",
+            border: "1px solid var(--sf-input-border)",
+            borderRadius: 10,
+            padding: "9px 14px 9px 34px",
             fontSize: 13,
             width: fullWidth ? "100%" : 280,
             outline: "none",
@@ -155,7 +158,7 @@ export default function AddressBox({
               maxWidth: "calc(100vw - 40px)",
               background: "var(--sf-surface)",
               border: "1px solid var(--sf-border)",
-              borderRadius: 12,
+              borderRadius: 10,
               boxShadow: "0 6px 24px var(--sf-shadow-strong)",
               overflow: "hidden",
               zIndex: 3000,
@@ -263,10 +266,12 @@ export default function AddressBox({
 const linkBtn: React.CSSProperties = {
   border: "none",
   background: "none",
-  color: "var(--sf-text-soft)",
+  color: "var(--sf-accent)",
   fontSize: 12,
+  fontWeight: 500,
   cursor: "pointer",
   textDecoration: "underline",
+  textUnderlineOffset: 3,
   whiteSpace: "nowrap",
   flexShrink: 0,
 };

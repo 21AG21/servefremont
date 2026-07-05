@@ -45,12 +45,14 @@ const modeButtonStyle: CSSProperties = {
   whiteSpace: "nowrap",
 };
 
-function numberedIcon(n: number, active: boolean): L.DivIcon {
-  const bg = active ? "#5b21b6" : "#ffffff";
-  const fg = active ? "#ffffff" : "#5b21b6";
-  const border = active ? "#ffffff" : "#5b21b6";
+function numberedIcon(n: number, active: boolean, dark: boolean): L.DivIcon {
+  const green = dark ? "#7fc39a" : "#18603f";
+  const paper = dark ? "#201f1b" : "#ffffff";
+  const bg = active ? green : paper;
+  const fg = active ? paper : green;
+  const border = active ? paper : green;
   const shadow = active
-    ? "0 2px 10px rgba(91,33,182,0.5),0 1px 3px rgba(0,0,0,0.25)"
+    ? "0 2px 10px rgba(24,96,63,0.45),0 1px 3px rgba(0,0,0,0.25)"
     : "0 2px 8px rgba(0,0,0,0.18),0 1px 3px rgba(0,0,0,0.12)";
   const size = active ? 36 : 32;
   const half = size / 2;
@@ -59,7 +61,7 @@ function numberedIcon(n: number, active: boolean): L.DivIcon {
     html: `<div style="
       width:${size}px;height:${size}px;border-radius:50%;
       background:${bg};color:${fg};
-      border:2.5px solid ${border};box-shadow:${shadow};
+      border:2px solid ${border};box-shadow:${shadow};
       display:flex;align-items:center;justify-content:center;
       font-size:${active ? 13 : 12}px;font-weight:700;">${n}</div>`,
     iconSize: [size, size],
@@ -178,7 +180,7 @@ export default function ListingMap({
           <Marker
             key={g.orgName}
             position={[g.lat!, g.lng!]}
-            icon={numberedIcon(orgIdx, isActive)}
+            icon={numberedIcon(orgIdx, isActive, theme === "dark")}
             ref={(m) => {
               if (m) markerRefs.current.set(g.orgName, m);
               else markerRefs.current.delete(g.orgName);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import type { Listing } from "@/lib/listing";
 import { haversineMiles, formatMiles } from "@/lib/distance";
@@ -15,6 +15,10 @@ const ListingMap = dynamic(() => import("@/components/ListingMap"), {
 // Where the "Report a problem" link in the detail view sends the user.
 const REPORT_PROBLEM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSekWo3JMmGrF6FujRdIr6UQ73W_7aqhus7r4XqJaDkgEv96uQ/viewform";
+
+// Display face for the wordmark, org names, detail titles, and the
+// verification stamp — the site's serif voice (see layout.tsx).
+const SERIF = "var(--font-fraunces), Georgia, serif";
 
 const AGES = [13, 14, 15, 16, 17, 18];
 const SCHEDULES = ["Shifts", "Drop-in", "Events", "Flexible/Remote"];
@@ -75,15 +79,19 @@ export default function ServeFremontApp() {
   const [userLoc, setUserLoc] = useState<{ lat: number; lng: number } | null>(null);
 
   // Theme: session-only (no storage). The layout's inline script sets the
-  // initial dataset attribute from the OS preference before paint; we mirror
-  // that here so React's view of theme matches the DOM from the first render.
-  const [theme, setTheme] = useState<"light" | "dark">(() => {
-    if (typeof document !== "undefined") {
-      return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
-    }
-    return "light";
-  });
+  // dataset attribute from the OS preference before paint. Server and first
+  // client render both use "light" so hydration matches; after mount we adopt
+  // the script's value, and only user toggles write back to the DOM.
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const themeSynced = useRef(false);
   useEffect(() => {
+    if (!themeSynced.current) {
+      themeSynced.current = true;
+      const fromDom =
+        document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+      if (fromDom !== theme) setTheme(fromDom);
+      return;
+    }
     document.documentElement.dataset.theme = theme;
   }, [theme]);
 
@@ -215,13 +223,13 @@ export default function ServeFremontApp() {
     <button
       onClick={onClick}
       style={{
-        border: `1.5px solid ${on ? "var(--sf-pu)" : "var(--sf-border)"}`,
-        borderRadius: 999,
+        border: `1px solid ${on ? "var(--sf-accent)" : "var(--sf-input-border)"}`,
+        borderRadius: 8,
         padding: "5px 12px",
         fontSize: 13,
-        fontWeight: on ? 700 : 500,
-        background: on ? "var(--sf-pu)" : "var(--sf-surface)",
-        color: on ? "#ffffff" : "var(--sf-text-soft)",
+        fontWeight: on ? 600 : 400,
+        background: on ? "var(--sf-accent)" : "transparent",
+        color: on ? "var(--sf-on-accent)" : "var(--sf-text-soft)",
         cursor: "pointer",
         whiteSpace: "nowrap",
         transition: "background 0.15s, border-color 0.15s, color 0.15s",
@@ -327,7 +335,7 @@ export default function ServeFremontApp() {
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
-        fontFamily: "system-ui, -apple-system, sans-serif",
+        fontFamily: "var(--font-inter), system-ui, sans-serif",
         color: "var(--sf-text)",
         background: "var(--sf-bg)",
       }}
@@ -352,12 +360,27 @@ export default function ServeFremontApp() {
             height={24}
             style={{ flexShrink: 0 }}
           />
-          <span style={{ fontSize: 19, fontWeight: 800, letterSpacing: "-0.02em" }}>
+          <span
+            style={{
+              fontFamily: SERIF,
+              fontSize: 21,
+              fontWeight: 600,
+              letterSpacing: "-0.01em",
+            }}
+          >
             ServeFremont
           </span>
           {!isMobile && (
-            <span style={{ fontSize: 12, color: "var(--sf-text-muted)" }}>
-              Volunteer spots in Fremont
+            <span
+              style={{
+                fontSize: 12,
+                color: "var(--sf-text-muted)",
+                borderLeft: "1px solid var(--sf-border)",
+                paddingLeft: 10,
+                marginLeft: 2,
+              }}
+            >
+              Volunteer spots in Fremont, verified in person
             </span>
           )}
         </div>
@@ -372,7 +395,7 @@ export default function ServeFremontApp() {
               border: "1px solid var(--sf-input-border)",
               borderRadius: 8,
               padding: "6px 10px",
-              background: "var(--sf-surface)",
+              background: "transparent",
               color: "var(--sf-text-soft)",
               cursor: "pointer",
             }}
@@ -383,10 +406,11 @@ export default function ServeFremontApp() {
             onClick={() => setShowMap((v) => !v)}
             style={{
               fontSize: 13,
+              fontWeight: 500,
               border: "1px solid var(--sf-input-border)",
               borderRadius: 8,
               padding: "6px 14px",
-              background: "var(--sf-surface)",
+              background: "transparent",
               color: "var(--sf-text-soft)",
               cursor: "pointer",
             }}
@@ -530,6 +554,8 @@ export default function ServeFremontApp() {
   );
 }
 
+// The verification stamp — set in the serif italic so it reads like an
+// actual stamp, not another pill. This is the site's trust mark.
 function VerifiedBadge({ verified }: { verified?: string }) {
   if (!verified) return null;
   return (
@@ -538,13 +564,15 @@ function VerifiedBadge({ verified }: { verified?: string }) {
         flexShrink: 0,
         display: "inline-flex",
         alignItems: "center",
-        gap: 4,
-        color: "var(--sf-gr-d)",
-        background: "var(--sf-gr-l)",
-        borderRadius: 999,
-        padding: "3px 10px",
-        fontSize: 11,
-        fontWeight: 700,
+        gap: 5,
+        fontFamily: SERIF,
+        fontStyle: "italic",
+        fontWeight: 500,
+        color: "var(--sf-accent-ink)",
+        border: "1px solid var(--sf-accent-border)",
+        borderRadius: 6,
+        padding: "2px 8px",
+        fontSize: 11.5,
         whiteSpace: "nowrap",
       }}
     >
@@ -591,18 +619,17 @@ function OrgHeader({
       <span
         style={{
           flexShrink: 0,
-          width: 28,
-          height: 28,
+          width: 26,
+          height: 26,
           borderRadius: "50%",
-          background: active ? "var(--sf-pu)" : "var(--sf-text-muted)",
-          color: "#ffffff",
+          background: active ? "var(--sf-accent)" : "var(--sf-surface)",
+          color: active ? "var(--sf-on-accent)" : "var(--sf-text-soft)",
           fontSize: 12,
-          fontWeight: 700,
+          fontWeight: 600,
           display: "inline-flex",
           alignItems: "center",
           justifyContent: "center",
-          border: "2px solid var(--sf-bg-list)",
-          boxShadow: "0 1px 3px var(--sf-shadow-strong)",
+          border: `1.5px solid ${active ? "var(--sf-accent)" : "var(--sf-input-border)"}`,
         }}
       >
         {index}
@@ -610,10 +637,10 @@ function OrgHeader({
       <div style={{ minWidth: 0, flex: 1 }}>
         <div
           style={{
-            fontSize: 14,
-            fontWeight: 700,
+            fontFamily: SERIF,
+            fontSize: 15.5,
+            fontWeight: 600,
             color: "var(--sf-text)",
-            letterSpacing: "-0.01em",
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
@@ -658,22 +685,24 @@ function ListingRow({
   distance?: number;
   onClick: () => void;
 }) {
-  // Map category names to pill background/text for colored tagging.
-  const catStyle = (cat: string): React.CSSProperties => {
-    if (cat === "Food Security")
-      return { background: "var(--c-amber-bg)", color: "var(--c-amber-t)" };
-    if (cat === "Education" || cat === "Environment" || cat === "Events" || cat === "Immigrant Services")
-      return { background: "var(--c-teal-bg)", color: "var(--c-teal-t)" };
-    if (cat === "Animals" || cat === "Arts/History")
-      return { background: "var(--c-rose-bg)", color: "var(--c-rose-t)" };
-    return { background: "var(--sf-pill-track)", color: "var(--sf-text-soft)" };
-  };
+  // Quiet outlined chips — color is reserved for information that changes
+  // a student's decision (hour forms), not decoration.
   const tagBase: React.CSSProperties = {
-    borderRadius: 999,
-    padding: "3px 9px",
+    borderRadius: 6,
+    padding: "2px 8px",
     fontSize: 12,
-    fontWeight: 600,
+    fontWeight: 450,
     whiteSpace: "nowrap" as const,
+    border: "1px solid var(--sf-border)",
+    background: "transparent",
+    color: "var(--sf-text-soft)",
+  };
+  const tagAccent: React.CSSProperties = {
+    ...tagBase,
+    border: "1px solid var(--sf-accent-border)",
+    background: "var(--sf-accent-soft)",
+    color: "var(--sf-accent-ink)",
+    fontWeight: 500,
   };
 
   const notes: string[] = [];
@@ -693,17 +722,17 @@ function ListingRow({
         color: "var(--sf-text)",
         cursor: "pointer",
         background: listing.priority ? "var(--sf-priority-bg)" : "var(--sf-surface)",
-        borderTop: `1.5px solid ${active ? "var(--sf-pu)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border)"}`,
-        borderRight: `1.5px solid ${active ? "var(--sf-pu)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border)"}`,
-        borderBottom: `1.5px solid ${active ? "var(--sf-pu)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border)"}`,
+        borderTop: `1px solid ${active ? "var(--sf-accent)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border)"}`,
+        borderRight: `1px solid ${active ? "var(--sf-accent)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border)"}`,
+        borderBottom: `1px solid ${active ? "var(--sf-accent)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border)"}`,
         borderLeft: listing.priority
-          ? "4px solid var(--sf-priority-accent)"
-          : `1.5px solid ${active ? "var(--sf-pu)" : "var(--sf-border)"}`,
-        boxShadow: active ? "0 4px 18px var(--sf-shadow)" : "none",
+          ? "3px solid var(--sf-priority-accent)"
+          : `1px solid ${active ? "var(--sf-accent)" : "var(--sf-border)"}`,
+        boxShadow: active ? "0 0 0 1px var(--sf-accent), 0 3px 14px var(--sf-shadow)" : "0 1px 2px var(--sf-shadow)",
         transition: "box-shadow 0.18s, border-color 0.18s",
-        borderRadius: 12,
+        borderRadius: 10,
         padding: "12px 14px",
-        marginBottom: 6,
+        marginBottom: 8,
         marginLeft: 14,
       }}
     >
@@ -713,18 +742,15 @@ function ListingRow({
             display: "inline-flex",
             alignItems: "center",
             gap: 5,
-            background: "var(--sf-priority-accent)",
-            color: "#ffffff",
-            borderRadius: 6,
-            padding: "2px 8px",
-            fontSize: 10,
-            fontWeight: 700,
-            letterSpacing: "0.06em",
+            color: "var(--sf-priority-text)",
+            fontSize: 10.5,
+            fontWeight: 600,
+            letterSpacing: "0.08em",
             textTransform: "uppercase",
-            marginBottom: 8,
+            marginBottom: 6,
           }}
         >
-          ★ Top priority
+          <span style={{ color: "var(--sf-priority-accent)" }}>★</span> Top priority
         </div>
       )}
       <div
@@ -737,10 +763,10 @@ function ListingRow({
       >
         <div
           style={{
-            fontWeight: 700,
-            fontSize: 16,
+            fontWeight: 600,
+            fontSize: 15,
             color: "var(--sf-text)",
-            lineHeight: 1.25,
+            lineHeight: 1.3,
             minWidth: 0,
           }}
         >
@@ -749,41 +775,27 @@ function ListingRow({
         <VerifiedBadge verified={listing.verified} />
       </div>
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 10 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 9 }}>
+        {listing.signsHourForms && (
+          <span style={tagAccent}>✓ Signs hours</span>
+        )}
         {listing.category.map((t) => (
-          <span key={t} style={{ ...tagBase, ...catStyle(t) }}>
+          <span key={t} style={tagBase}>
             {t}
           </span>
         ))}
         {(listing.ageMin != null || listing.ageMax != null) && (
-          <span style={{ ...tagBase, background: "var(--c-amber-bg)", color: "var(--c-amber-t)" }}>
+          <span style={tagBase}>
             {listing.ageMin != null && listing.ageMax != null
-              ? `${listing.ageMin}–${listing.ageMax}`
+              ? `Ages ${listing.ageMin}–${listing.ageMax}`
               : listing.ageMin != null
-                ? `${listing.ageMin}+`
-                : `≤${listing.ageMax}`}
+                ? `Ages ${listing.ageMin}+`
+                : `Ages ≤${listing.ageMax}`}
           </span>
         )}
-        {listing.schedule && (
-          <span style={{ ...tagBase, background: "var(--sf-pu-l)", color: "var(--sf-pu)" }}>
-            {listing.schedule}
-          </span>
-        )}
-        {listing.nearTransit && (
-          <span style={{ ...tagBase, background: "var(--c-blue-bg)", color: "var(--c-blue-t)" }}>
-            🚌 Near transit
-          </span>
-        )}
-        {listing.signsHourForms && (
-          <span style={{ ...tagBase, background: "var(--sf-gr-l)", color: "var(--sf-gr-d)" }}>
-            Signs hours
-          </span>
-        )}
-        {listing.groupsOK && (
-          <span style={{ ...tagBase, background: "var(--sf-pu-l)", color: "var(--sf-pu)" }}>
-            Groups OK
-          </span>
-        )}
+        {listing.schedule && <span style={tagBase}>{listing.schedule}</span>}
+        {listing.nearTransit && <span style={tagBase}>Near transit</span>}
+        {listing.groupsOK && <span style={tagBase}>Groups OK</span>}
       </div>
 
       {notes.length > 0 && (
@@ -792,8 +804,8 @@ function ListingRow({
         </div>
       )}
       {active && (
-        <div style={{ color: "var(--sf-pu)", fontSize: 12, fontWeight: 700, marginTop: 7 }}>
-          Click again for full details →
+        <div style={{ color: "var(--sf-accent)", fontSize: 12, fontWeight: 600, marginTop: 7 }}>
+          Open full details →
         </div>
       )}
     </button>
@@ -809,39 +821,8 @@ function formatShiftHours(h?: number): string | undefined {
   return `${lo}–${hi} hours`;
 }
 
-type Tone = "amber" | "teal" | "blue" | "rose" | "violet" | "green" | "plain";
-
-// Resolve a tone to (background, border, text) CSS vars.
-function toneColors(tone: Tone): { bg: string; border: string; text: string } {
-  switch (tone) {
-    case "amber":
-      return { bg: "var(--c-amber-bg)", border: "var(--c-amber-bg)", text: "var(--c-amber-t)" };
-    case "teal":
-      return { bg: "var(--c-teal-bg)",  border: "var(--c-teal-bg)",  text: "var(--c-teal-t)" };
-    case "blue":
-      return { bg: "var(--c-blue-bg)",  border: "var(--c-blue-bg)",  text: "var(--c-blue-t)" };
-    case "rose":
-      return { bg: "var(--c-rose-bg)",  border: "var(--c-rose-bg)",  text: "var(--c-rose-t)" };
-    case "violet":
-      return { bg: "var(--sf-pu-l)",    border: "var(--sf-pu-l)",    text: "var(--sf-pu)" };
-    case "green":
-      return { bg: "var(--sf-gr-l)",    border: "var(--sf-gr-l)",    text: "var(--sf-gr-d)" };
-    default:
-      return { bg: "var(--sf-pill-track)", border: "var(--sf-border)", text: "var(--sf-text-soft)" };
-  }
-}
-
 // Single cell in the 4-up summary bar at the top of the detail view.
-function SumCell({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone: Tone;
-}) {
-  const c = toneColors(tone);
+function SumCell({ label, value }: { label: string; value: string }) {
   return (
     <div
       style={{
@@ -855,18 +836,18 @@ function SumCell({
       <div
         style={{
           fontSize: 10,
-          fontWeight: 700,
+          fontWeight: 600,
           textTransform: "uppercase",
-          letterSpacing: "0.06em",
-          color: c.text,
-          marginBottom: 2,
+          letterSpacing: "0.07em",
+          color: "var(--sf-text-muted)",
+          marginBottom: 3,
         }}
       >
         {label}
       </div>
       <div
         style={{
-          fontSize: 13,
+          fontSize: 13.5,
           fontWeight: 600,
           color: "var(--sf-text)",
           overflow: "hidden",
@@ -880,19 +861,18 @@ function SumCell({
   );
 }
 
-// Colored category pill used in the tag row.
-function Pill({ label, tone = "plain" }: { label: string; tone?: Tone }) {
-  const c = toneColors(tone);
+// Chip used in the detail tag row. Accent is reserved for hour-form signing.
+function Pill({ label, accent = false }: { label: string; accent?: boolean }) {
   return (
     <span
       style={{
-        background: c.bg,
-        border: `1px solid ${c.border}`,
-        color: c.text,
-        borderRadius: 999,
-        padding: "4px 10px",
+        background: accent ? "var(--sf-accent-soft)" : "transparent",
+        border: `1px solid ${accent ? "var(--sf-accent-border)" : "var(--sf-border)"}`,
+        color: accent ? "var(--sf-accent-ink)" : "var(--sf-text-soft)",
+        borderRadius: 6,
+        padding: "3px 9px",
         fontSize: 12,
-        fontWeight: 500,
+        fontWeight: accent ? 500 : 450,
         whiteSpace: "nowrap",
       }}
     >
@@ -901,9 +881,8 @@ function Pill({ label, tone = "plain" }: { label: string; tone?: Tone }) {
   );
 }
 
-// Numbered colored dot used in the "How to start" steps.
-function Dot({ tone, n }: { tone: Tone; n: number }) {
-  const c = toneColors(tone);
+// Numbered dot used in the "How to start" steps.
+function Dot({ n }: { n: number }) {
   return (
     <span
       aria-hidden
@@ -914,11 +893,11 @@ function Dot({ tone, n }: { tone: Tone; n: number }) {
         width: 22,
         height: 22,
         borderRadius: 999,
-        background: c.bg,
-        border: `1px solid ${c.border}`,
-        color: c.text,
+        background: "var(--sf-accent-soft)",
+        border: "1px solid var(--sf-accent-border)",
+        color: "var(--sf-accent-ink)",
         fontSize: 11,
-        fontWeight: 700,
+        fontWeight: 600,
         flexShrink: 0,
       }}
     >
@@ -982,7 +961,6 @@ function DetailView({
             ? "They're accepting volunteers now — go ahead and sign up."
             : "They're currently waitlisting — ask to be added.",
         ];
-  const stepTones: Tone[] = ["green", "teal", "violet", "amber"];
 
   const ctaLabel = isMailto
     ? "Email to sign up"
@@ -1032,10 +1010,12 @@ function DetailView({
         {/* Title */}
         <h2
           style={{
-            fontSize: 24,
-            fontWeight: 800,
+            fontFamily: SERIF,
+            fontSize: 26,
+            fontWeight: 600,
             margin: 0,
-            lineHeight: 1.2,
+            lineHeight: 1.18,
+            letterSpacing: "-0.01em",
             color: "var(--sf-text)",
           }}
         >
@@ -1061,11 +1041,11 @@ function DetailView({
                 justifyContent: "center",
                 width: 22,
                 height: 22,
-                borderRadius: 7,
-                background: "var(--sf-pu-l)",
-                color: "var(--sf-pu)",
+                borderRadius: 6,
+                background: "var(--sf-accent-soft)",
+                color: "var(--sf-accent-ink)",
                 fontSize: 10,
-                fontWeight: 700,
+                fontWeight: 600,
               }}
             >
               {orgInitials(org)}
@@ -1087,11 +1067,11 @@ function DetailView({
             overflow: "hidden",
           }}
         >
-          <SumCell label="⏰ Shifts"   value={listing.schedule ?? "Flexible"}                 tone="teal"   />
-          <SumCell label="👤 Min age"  value={ageLabel}                                        tone="violet" />
-          <SumCell label="📍 Distance" value={distance != null ? formatMiles(distance) : "—"}  tone="amber"  />
+          <SumCell label="Schedule" value={listing.schedule ?? "Flexible"} />
+          <SumCell label="Min age" value={ageLabel} />
+          <SumCell label="Distance" value={distance != null ? formatMiles(distance) : "—"} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <SumCell label="📋 Hours" value={shiftLen ?? "Flexible"} tone="green" />
+            <SumCell label="Shift" value={shiftLen ?? "Flexible"} />
           </div>
         </div>
 
@@ -1104,12 +1084,12 @@ function DetailView({
             marginTop: 12,
           }}
         >
+          {listing.signsHourForms && <Pill label="✓ Signs hour forms" accent />}
           {listing.category.map((t) => (
-            <Pill key={t} label={t} tone="plain" />
+            <Pill key={t} label={t} />
           ))}
-          {listing.signsHourForms && <Pill label="Signs hours" tone="green" />}
-          {listing.nearTransit && <Pill label="Near transit" tone="teal" />}
-          {listing.groupsOK && <Pill label="Groups OK" tone="violet" />}
+          {listing.nearTransit && <Pill label="Near transit" />}
+          {listing.groupsOK && <Pill label="Groups OK" />}
         </div>
 
         {/* Next-session callout */}
@@ -1171,43 +1151,31 @@ function DetailView({
                 gap: 8,
               }}
             >
-              {goodToKnow.map((item, i) => {
-                const dotTones: Tone[] = ["teal", "amber", "violet", "green", "blue", "rose"];
-                const c = toneColors(dotTones[i % dotTones.length]);
-                return (
-                  <li
-                    key={i}
+              {goodToKnow.map((item, i) => (
+                <li
+                  key={i}
+                  style={{
+                    display: "flex",
+                    gap: 10,
+                    fontSize: 13.5,
+                    lineHeight: 1.6,
+                    color: "var(--sf-text-soft)",
+                  }}
+                >
+                  <span
+                    aria-hidden
                     style={{
-                      display: "flex",
-                      gap: 9,
-                      fontSize: 13.5,
-                      lineHeight: 1.55,
-                      color: "var(--sf-text-soft)",
+                      width: 5,
+                      height: 5,
+                      borderRadius: 999,
+                      background: "var(--sf-gold)",
+                      marginTop: 8,
+                      flexShrink: 0,
                     }}
-                  >
-                    <span
-                      aria-hidden
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: 20,
-                        height: 20,
-                        borderRadius: 999,
-                        background: c.bg,
-                        color: c.text,
-                        fontSize: 10,
-                        fontWeight: 700,
-                        flexShrink: 0,
-                        marginTop: 2,
-                      }}
-                    >
-                      i
-                    </span>
-                    <span>{item}</span>
-                  </li>
-                );
-              })}
+                  />
+                  <span>{item}</span>
+                </li>
+              ))}
             </ul>
           </div>
         )}
@@ -1248,8 +1216,8 @@ function DetailView({
                   alignItems: "flex-start",
                 }}
               >
-                <Dot tone={stepTones[i % stepTones.length]} n={i + 1} />
-                <span style={{ paddingTop: 1 }}>{step}</span>
+                <Dot n={i + 1} />
+                <span style={{ paddingTop: 2 }}>{step}</span>
               </li>
             ))}
           </ol>
@@ -1276,11 +1244,12 @@ function DetailView({
                 justifyContent: "center",
                 width: 42,
                 height: 42,
-                borderRadius: 11,
-                background: "var(--sf-pu-l)",
-                color: "var(--sf-pu)",
+                borderRadius: 10,
+                background: "var(--sf-accent-soft)",
+                color: "var(--sf-accent-ink)",
+                fontFamily: SERIF,
                 fontSize: 15,
-                fontWeight: 700,
+                fontWeight: 600,
                 flexShrink: 0,
               }}
             >
@@ -1343,7 +1312,7 @@ function DetailView({
       <div
         style={{
           borderTop: "1px solid var(--sf-border)",
-          background: "var(--sf-bg)",
+          background: "var(--sf-surface)",
           padding: "10px 16px",
           display: "flex",
           alignItems: "center",
@@ -1356,8 +1325,8 @@ function DetailView({
               fontSize: 12,
               fontWeight: 600,
               color: listing.accepting
-                ? "var(--sf-green-text)"
-                : "var(--sf-warn-text)",
+                ? "var(--sf-accent-ink)"
+                : "var(--sf-gold-ink)",
             }}
           >
             {listing.accepting ? "Accepting volunteers" : "Waitlist open"}
@@ -1371,19 +1340,19 @@ function DetailView({
           aria-label={saved ? "Remove from saved" : "Save for later"}
           aria-pressed={saved}
           style={{
-            width: 44,
-            height: 44,
-            borderRadius: 11,
-            border: `1.5px solid ${saved ? "var(--sf-pu)" : "var(--sf-border)"}`,
-            background: "var(--sf-surface)",
-            color: saved ? "var(--sf-pu)" : "var(--sf-text-muted)",
-            fontSize: 18,
+            width: 42,
+            height: 42,
+            borderRadius: 10,
+            border: `1px solid ${saved ? "var(--sf-accent)" : "var(--sf-input-border)"}`,
+            background: saved ? "var(--sf-accent-soft)" : "transparent",
+            color: saved ? "var(--sf-accent-ink)" : "var(--sf-text-muted)",
+            fontSize: 17,
             cursor: "pointer",
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
             flexShrink: 0,
-            transition: "border-color 0.15s, color 0.15s",
+            transition: "border-color 0.15s, color 0.15s, background 0.15s",
           }}
         >
           {saved ? "♥" : "♡"}
@@ -1394,12 +1363,12 @@ function DetailView({
             target="_blank"
             rel="noopener noreferrer"
             style={{
-              background: "var(--sf-pu)",
-              color: "#ffffff",
-              borderRadius: 11,
-              padding: "10px 20px",
-              fontSize: 14.5,
-              fontWeight: 700,
+              background: "var(--sf-accent)",
+              color: "var(--sf-on-accent)",
+              borderRadius: 10,
+              padding: "11px 20px",
+              fontSize: 14,
+              fontWeight: 600,
               textDecoration: "none",
               flexShrink: 0,
               transition: "filter 0.18s",
@@ -1410,8 +1379,8 @@ function DetailView({
         ) : (
           <span
             style={{
-              border: "1px dashed var(--sf-border)",
-              borderRadius: 11,
+              border: "1px dashed var(--sf-input-border)",
+              borderRadius: 10,
               padding: "10px 18px",
               fontSize: 13,
               color: "var(--sf-text-muted)",
