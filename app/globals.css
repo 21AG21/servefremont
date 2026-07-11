@@ -56,8 +56,6 @@
   --sf-priority-accent: #6b3fa0;
   --sf-divider: #e2e2e2;
   --sf-pill-track: #eeeeee;
-  --sf-popup-bg: #ffffff;
-  --sf-popup-text: #141414;
   /* Primary accent — deep green */
   --sf-accent: #1f6b48;
   --sf-accent-soft: #e7f2ec;
@@ -67,9 +65,6 @@
   /* Purple — reserved exclusively for "top priority" listings */
   --sf-accent2: #6b3fa0;
   --sf-accent2-soft: #f4eefb;
-  /* Map grid tint */
-  --sf-map-bg: #eef2ef;
-  --sf-map-line: #d4e0da;
   /* Warning highlight (stale/unconfirmed verification) */
   --sf-gold: #8a5a1d;
   --sf-gold-soft: #faf3e0;
@@ -113,8 +108,6 @@ html[data-theme="dark"] {
   --sf-priority-accent: #b98fe8;
   --sf-divider: #2a2a2a;
   --sf-pill-track: #1c1c1c;
-  --sf-popup-bg: #121212;
-  --sf-popup-text: #f2f2f2;
   /* Primary accent — sage on black */
   --sf-accent: #5fbf90;
   --sf-accent-soft: #132a20;
@@ -124,9 +117,6 @@ html[data-theme="dark"] {
   /* Purple — reserved exclusively for "top priority" listings */
   --sf-accent2: #b98fe8;
   --sf-accent2-soft: #241c30;
-  /* Map grid tint */
-  --sf-map-bg: #0d0d0d;
-  --sf-map-line: #232323;
   /* Warning highlight (stale/unconfirmed verification) */
   --sf-gold: #d9b27a;
   --sf-gold-soft: #2a2113;
@@ -145,19 +135,33 @@ body {
   display: none !important;
 }
 
-/* Dark-mode Leaflet popups + zoom control. */
-html[data-theme="dark"] .leaflet-popup-content-wrapper,
-html[data-theme="dark"] .leaflet-popup-tip {
-  background: var(--sf-popup-bg);
-  color: var(--sf-popup-text);
-}
-html[data-theme="dark"] .leaflet-popup-close-button {
-  color: var(--sf-text-muted) !important;
-}
-html[data-theme="dark"] .leaflet-control-zoom a {
+/* Leaflet chrome — restyled to match the site's card-shell aesthetic
+   instead of Leaflet's default white/square look, in both themes. */
+.leaflet-popup-content-wrapper {
   background: var(--sf-surface);
   color: var(--sf-text);
-  border-color: var(--sf-border);
+  border-radius: 10px;
+  box-shadow: 0 1px 2px var(--sf-shadow), 0 12px 28px -14px var(--sf-shadow-strong);
+}
+.leaflet-popup-tip {
+  background: var(--sf-surface);
+}
+.leaflet-popup-close-button {
+  color: var(--sf-text-muted) !important;
+}
+.leaflet-control-zoom {
+  border: none !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  box-shadow: 0 1px 2px var(--sf-shadow), 0 4px 10px var(--sf-shadow-strong);
+}
+.leaflet-control-zoom a {
+  background: var(--sf-surface) !important;
+  color: var(--sf-text) !important;
+  border-color: var(--sf-border) !important;
+}
+.leaflet-control-zoom a:hover {
+  background: var(--sf-surface-hover) !important;
 }
 
 /* Mobile: filter pills scroll horizontally without wrapping. */

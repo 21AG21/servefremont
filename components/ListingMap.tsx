@@ -15,6 +15,9 @@ import type { Listing } from "@/lib/listing";
 
 const CENTER: [number, number] = [37.553, -121.982];
 
+const UI =
+  '-apple-system, BlinkMacSystemFont, var(--font-inter), "Segoe UI", system-ui, sans-serif';
+
 type OrgGroup = {
   orgName: string;
   listings: Listing[];
@@ -45,28 +48,23 @@ const modeButtonStyle: CSSProperties = {
   whiteSpace: "nowrap",
 };
 
-function numberedIcon(n: number, active: boolean, dark: boolean): L.DivIcon {
-  const green = dark ? "#7fc39a" : "#18603f";
-  const paper = dark ? "#201f1b" : "#ffffff";
-  const bg = active ? green : paper;
-  const fg = active ? paper : green;
-  const border = active ? paper : green;
-  const shadow = active
-    ? "0 2px 10px rgba(24,96,63,0.45),0 1px 3px rgba(0,0,0,0.25)"
-    : "0 2px 8px rgba(0,0,0,0.18),0 1px 3px rgba(0,0,0,0.12)";
-  const size = active ? 36 : 32;
+function numberedIcon(n: number, active: boolean, priority: boolean): L.DivIcon {
+  const accent = priority ? "var(--sf-priority-accent)" : "var(--sf-accent)";
+  const size = active ? 30 : 26;
   const half = size / 2;
   return L.divIcon({
     className: "",
     html: `<div style="
-      width:${size}px;height:${size}px;border-radius:50%;
-      background:${bg};color:${fg};
-      border:2px solid ${border};box-shadow:${shadow};
+      width:${size}px;height:${size}px;border-radius:8px;
+      background:${active ? accent : "var(--sf-surface)"};
+      color:${active ? "var(--sf-on-accent)" : accent};
+      border:1.5px solid ${accent};
+      box-shadow:0 1px 2px var(--sf-shadow), 0 4px 10px var(--sf-shadow-strong);
       display:flex;align-items:center;justify-content:center;
-      font-size:${active ? 13 : 12}px;font-weight:700;">${n}</div>`,
+      font-family:${UI};font-size:${active ? 13 : 12}px;font-weight:700;">${n}</div>`,
     iconSize: [size, size],
     iconAnchor: [half, half],
-    popupAnchor: [0, -half - 2],
+    popupAnchor: [0, -half - 4],
   });
 }
 
@@ -74,11 +72,11 @@ function userIcon(): L.DivIcon {
   return L.divIcon({
     className: "",
     html: `<div style="
-      width:18px;height:18px;border-radius:50%;
-      background:#e23b3b;border:3px solid #fff;
-      box-shadow:0 1px 5px rgba(0,0,0,0.4);"></div>`,
-    iconSize: [18, 18],
-    iconAnchor: [9, 9],
+      width:16px;height:16px;border-radius:50%;
+      background:#2f6fed;border:3px solid #fff;
+      box-shadow:0 0 0 6px rgba(47,111,237,0.22),0 1px 4px rgba(0,0,0,0.35);"></div>`,
+    iconSize: [16, 16],
+    iconAnchor: [8, 8],
   });
 }
 
@@ -158,7 +156,7 @@ export default function ListingMap({
         url={
           theme === "dark"
             ? "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
-            : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png"
+            : "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"
         }
         subdomains="abcd"
       />
@@ -168,7 +166,7 @@ export default function ListingMap({
         url={
           theme === "dark"
             ? "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png"
-            : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png"
+            : "https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png"
         }
         subdomains="abcd"
       />
@@ -177,6 +175,7 @@ export default function ListingMap({
       {groupsWithCoords.map((g) => {
         const orgIdx = orgGroups.indexOf(g) + 1;
         const isActive = g.listings.some((l) => l.id === activeId);
+        const isPriority = g.listings.some((l) => l.priority);
         const isShowingDirections = directionsOrg === g.orgName;
         const count = g.listings.length;
         const address = g.listings.find((l) => l.address)?.address;
@@ -188,7 +187,7 @@ export default function ListingMap({
           <Marker
             key={g.orgName}
             position={[g.lat!, g.lng!]}
-            icon={numberedIcon(orgIdx, isActive, theme === "dark")}
+            icon={numberedIcon(orgIdx, isActive, isPriority)}
             ref={(m) => {
               if (m) markerRefs.current.set(g.orgName, m);
               else markerRefs.current.delete(g.orgName);
