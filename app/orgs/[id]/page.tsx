@@ -6,6 +6,9 @@ import OpportunityCard from "@/components/OpportunityCard";
 
 type Params = { params: Promise<{ id: string }> };
 
+const UI =
+  '-apple-system, BlinkMacSystemFont, var(--font-inter), "Segoe UI", system-ui, sans-serif';
+
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { id } = await params;
   const org = await getOrganization(id);
@@ -28,52 +31,79 @@ export default async function OrganizationPage({ params }: Params) {
   const opps = allOpps.filter((o) => o.orgId === org.id);
 
   return (
-    <main className="mx-auto w-full max-w-xl px-4 py-6">
-      <Link href="/" className="text-sm text-brand">
-        ← All opportunities
-      </Link>
+    <main
+      style={{
+        minHeight: "100dvh",
+        background: "var(--sf-bg)",
+        display: "flex",
+        justifyContent: "center",
+        padding: "40px 20px",
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 560,
+          background: "var(--sf-surface)",
+          border: "1px solid var(--sf-border)",
+          borderRadius: 14,
+          padding: 24,
+          boxShadow:
+            "0 1px 2px var(--sf-shadow), 0 20px 44px -22px var(--sf-shadow-strong)",
+          fontFamily: UI,
+          boxSizing: "border-box",
+        }}
+      >
+        <Link href="/" style={{ fontSize: 12.5, fontWeight: 500, color: "var(--sf-accent)" }}>
+          ← All opportunities
+        </Link>
 
-      <h1 className="mt-3 font-display text-2xl font-medium text-ink">
-        {org.name}
-      </h1>
-      {org.address && (
-        <p className="mt-0.5 text-sm text-ink-soft">{org.address}</p>
-      )}
-      {org.mission && (
-        <p className="mt-3 text-sm leading-relaxed text-ink">{org.mission}</p>
-      )}
+        <h1 style={{ fontFamily: UI, fontSize: 20, fontWeight: 700, marginTop: 12, marginBottom: 0, color: "var(--sf-text)" }}>
+          {org.name}
+        </h1>
+        {org.address && (
+          <p style={{ marginTop: 4, marginBottom: 0, fontSize: 13, color: "var(--sf-text-soft)" }}>
+            {org.address}
+          </p>
+        )}
+        {org.mission && (
+          <p style={{ marginTop: 12, fontSize: 13, lineHeight: 1.6, color: "var(--sf-text-soft)" }}>
+            {org.mission}
+          </p>
+        )}
 
-      <div className="mt-3 flex flex-wrap gap-3 text-sm">
         {org.website && (
-          <a
-            href={
-              org.website.startsWith("http")
-                ? org.website
-                : `https://${org.website}`
-            }
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-brand underline"
-          >
-            Visit website →
-          </a>
+          <div style={{ marginTop: 12 }}>
+            <a
+              href={
+                org.website.startsWith("http")
+                  ? org.website
+                  : `https://${org.website}`
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ fontSize: 13, fontWeight: 500, color: "var(--sf-accent)", textDecoration: "underline" }}
+            >
+              Visit website →
+            </a>
+          </div>
+        )}
+
+        <h2 style={{ fontFamily: UI, fontSize: 13, fontWeight: 700, marginTop: 20, marginBottom: 0, color: "var(--sf-text)" }}>
+          Volunteer opportunities
+        </h2>
+        {opps.length === 0 ? (
+          <p style={{ marginTop: 8, fontSize: 12.5, color: "var(--sf-text-muted)" }}>
+            No active opportunities listed right now.
+          </p>
+        ) : (
+          <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 10 }}>
+            {opps.map((opp) => (
+              <OpportunityCard key={opp.id} opp={opp} />
+            ))}
+          </div>
         )}
       </div>
-
-      <h2 className="mt-6 font-display text-lg font-medium text-ink">
-        Volunteer opportunities
-      </h2>
-      {opps.length === 0 ? (
-        <p className="mt-2 text-sm text-ink-soft">
-          No active opportunities listed right now.
-        </p>
-      ) : (
-        <div className="mt-3 flex flex-col gap-3">
-          {opps.map((opp) => (
-            <OpportunityCard key={opp.id} opp={opp} />
-          ))}
-        </div>
-      )}
     </main>
   );
 }

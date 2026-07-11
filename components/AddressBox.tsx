@@ -138,12 +138,12 @@ export default function AddressBox({
           placeholder="Enter your address to see distances…"
           style={{
             border: "1px solid var(--sf-input-border)",
-            borderRadius: 0,
+            borderRadius: 7,
             padding: "9px 14px 9px 34px",
             fontSize: 13,
             width: fullWidth ? "100%" : 280,
             outline: "none",
-            background: "var(--sf-surface)",
+            background: "var(--sf-bg)",
             color: "var(--sf-text)",
           }}
         />
@@ -158,7 +158,7 @@ export default function AddressBox({
               maxWidth: "calc(100vw - 40px)",
               background: "var(--sf-surface)",
               border: "1px solid var(--sf-border)",
-              borderRadius: 0,
+              borderRadius: 7,
               boxShadow: "0 6px 24px var(--sf-shadow-strong)",
               overflow: "hidden",
               zIndex: 3000,
@@ -245,7 +245,7 @@ export default function AddressBox({
               width: 240,
               background: "var(--sf-surface)",
               border: "1px solid var(--sf-border)",
-              borderRadius: 0,
+              borderRadius: 7,
               padding: "10px 12px",
               fontSize: 12,
               lineHeight: 1.55,

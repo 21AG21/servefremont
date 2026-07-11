@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Fraunces, Space_Grotesk } from "next/font/google";
+import { Inter, Fraunces } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -7,19 +7,12 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-// Characterful display face for headings + the verification stamp, used sparingly.
+// Kept for a few legacy Tailwind pages (for-organizations, org detail,
+// not-found) that still use the serif `font-display` utility class.
 const fraunces = Fraunces({
   variable: "--font-fraunces",
   subsets: ["latin"],
   style: ["normal", "italic"],
-});
-
-// Structural UI face for the home screen (Civic Block v2 / 3a): wordmark,
-// org names, and listing titles. Squarer and more mechanical than the serif.
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -36,7 +29,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${fraunces.variable} ${spaceGrotesk.variable} h-full antialiased`}
+      className={`${inter.variable} ${fraunces.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>

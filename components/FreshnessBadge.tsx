@@ -1,7 +1,10 @@
 import { getFreshness } from "@/lib/freshness";
 
-// The verification stamp is the product's one design flourish (§3.4). Fresh
-// listings get the marigold rubber-stamp; older ones decay to honest text.
+const UI =
+  '-apple-system, BlinkMacSystemFont, var(--font-inter), "Segoe UI", system-ui, sans-serif';
+
+// Quiet plain-text verification mark — no stamp, no chip. Fresh listings
+// get the accent color; older ones decay to progressively quieter text.
 export default function FreshnessBadge({
   verifiedAt,
   size = "sm",
@@ -10,31 +13,39 @@ export default function FreshnessBadge({
   size?: "sm" | "md";
 }) {
   const { level, monthYear } = getFreshness(verifiedAt);
-  const text = size === "md" ? "text-sm" : "text-xs";
+  const base: React.CSSProperties = {
+    fontFamily: UI,
+    fontSize: size === "md" ? 13 : 11.5,
+    fontWeight: 500,
+  };
 
   if (level === "fresh") {
     return (
-      <span
-        className={`inline-flex -rotate-2 items-center gap-1 rounded-md border border-marigold/50 bg-marigold-soft px-2 py-1 font-display font-medium text-marigold-ink ${text}`}
-      >
-        ✓ Verified by a visit · {monthYear}
+      <span style={{ ...base, color: "var(--sf-accent-ink)" }}>
+        Verified {monthYear}
       </span>
     );
   }
 
   if (level === "aging") {
     return (
-      <span className={`text-ink-soft ${text}`}>Last verified {monthYear}</span>
+      <span style={{ ...base, color: "var(--sf-text-soft)" }}>
+        Last verified {monthYear}
+      </span>
     );
   }
 
   if (level === "stale") {
     return (
-      <span className={`text-amber-700 ${text}`}>
+      <span style={{ ...base, color: "var(--sf-gold-ink)" }}>
         Unconfirmed — contact the organization before visiting
       </span>
     );
   }
 
-  return <span className={`text-ink-soft ${text}`}>Not yet verified</span>;
+  return (
+    <span style={{ ...base, color: "var(--sf-text-muted)" }}>
+      Not yet verified
+    </span>
+  );
 }

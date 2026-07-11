@@ -4,6 +4,30 @@ import { useState } from "react";
 
 type Status = "idle" | "sending" | "ok" | "error";
 
+const UI =
+  '-apple-system, BlinkMacSystemFont, var(--font-inter), "Segoe UI", system-ui, sans-serif';
+
+const fieldStyle: React.CSSProperties = {
+  width: "100%",
+  boxSizing: "border-box",
+  borderRadius: 7,
+  border: "1px solid var(--sf-input-border)",
+  background: "var(--sf-bg)",
+  color: "var(--sf-text)",
+  padding: "8px 12px",
+  fontSize: 13,
+  fontFamily: UI,
+};
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: 12.5,
+  fontWeight: 600,
+  fontFamily: UI,
+  color: "var(--sf-text)",
+  marginBottom: 5,
+};
+
 export default function SubmitForm() {
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
@@ -38,19 +62,25 @@ export default function SubmitForm() {
 
   if (status === "ok") {
     return (
-      <div className="rounded-xl border border-brand/30 bg-brand-soft p-4 text-sm text-brand-dark">
+      <div
+        style={{
+          borderRadius: 10,
+          border: "1px solid var(--sf-accent-border)",
+          background: "var(--sf-accent-soft)",
+          padding: 16,
+          fontFamily: UI,
+          fontSize: 13,
+          color: "var(--sf-accent-ink)",
+        }}
+      >
         Thank you! Your organization was submitted for review. Nothing goes live
         until we verify it — we&apos;ll be in touch.
       </div>
     );
   }
 
-  const field =
-    "w-full rounded-lg border border-ink/15 bg-white px-3 py-2 text-sm";
-  const label = "block text-sm font-medium text-ink";
-
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       {/* Honeypot — visually hidden, ignored by humans. */}
       <input
         type="text"
@@ -58,63 +88,76 @@ export default function SubmitForm() {
         tabIndex={-1}
         autoComplete="off"
         aria-hidden="true"
-        className="hidden"
+        style={{ display: "none" }}
       />
 
       <div>
-        <label className={label} htmlFor="orgName">
+        <label style={labelStyle} htmlFor="orgName">
           Organization name *
         </label>
-        <input id="orgName" name="orgName" required className={field} />
+        <input id="orgName" name="orgName" required style={fieldStyle} />
       </div>
       <div>
-        <label className={label} htmlFor="email">
+        <label style={labelStyle} htmlFor="email">
           Contact email *
         </label>
-        <input id="email" name="email" type="email" required className={field} />
+        <input id="email" name="email" type="email" required style={fieldStyle} />
       </div>
       <div>
-        <label className={label} htmlFor="contactName">
+        <label style={labelStyle} htmlFor="contactName">
           Your name
         </label>
-        <input id="contactName" name="contactName" className={field} />
+        <input id="contactName" name="contactName" style={fieldStyle} />
       </div>
       <div>
-        <label className={label} htmlFor="role">
+        <label style={labelStyle} htmlFor="role">
           Volunteer role(s)
         </label>
         <input
           id="role"
           name="role"
           placeholder="e.g. front-desk help (14+), food sorting"
-          className={field}
+          style={fieldStyle}
         />
       </div>
       <div>
-        <label className={label} htmlFor="website">
+        <label style={labelStyle} htmlFor="website">
           Website
         </label>
-        <input id="website" name="website" className={field} />
+        <input id="website" name="website" style={fieldStyle} />
       </div>
       <div>
-        <label className={label} htmlFor="notes">
+        <label style={labelStyle} htmlFor="notes">
           Anything else?
         </label>
-        <textarea id="notes" name="notes" rows={4} className={field} />
+        <textarea id="notes" name="notes" rows={4} style={fieldStyle} />
       </div>
 
       {status === "error" && (
-        <p className="text-sm text-red-700">{message}</p>
+        <p style={{ fontFamily: UI, fontSize: 13, color: "var(--sf-gold-ink)", margin: 0 }}>
+          {message}
+        </p>
       )}
 
       <button
         type="submit"
         disabled={status === "sending"}
-        className="rounded-lg bg-brand px-4 py-3 font-medium text-white transition hover:bg-brand-dark disabled:opacity-60"
+        style={{
+          borderRadius: 10,
+          border: "none",
+          background: "var(--sf-accent)",
+          color: "var(--sf-on-accent)",
+          padding: "12px 16px",
+          fontFamily: UI,
+          fontSize: 13.5,
+          fontWeight: 600,
+          cursor: status === "sending" ? "default" : "pointer",
+          opacity: status === "sending" ? 0.6 : 1,
+        }}
       >
         {status === "sending" ? "Sending…" : "Submit for review"}
       </button>
-      <p className="text-xs text-ink-soft">
+      <p style={{ fontFamily: UI, fontSize: 11.5, color: "var(--sf-text-muted)", margin: 0 }}>
         Nothing publishes automatically. We verify every organization before it
         appears on the map.
       </p>

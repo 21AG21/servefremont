@@ -90,11 +90,19 @@ function FlyTo({ lat, lng }: { lat: number; lng: number }) {
   return null;
 }
 
+// Keeps Leaflet's internal size in sync with its container — needed now
+// that the container can shrink to a 210px rail (hide-map state) or grow
+// back, without the MapContainer itself remounting.
 function InvalidateOnLayout() {
   const map = useMap();
   useEffect(() => {
     const t = setTimeout(() => map.invalidateSize(), 0);
-    return () => clearTimeout(t);
+    const ro = new ResizeObserver(() => map.invalidateSize());
+    ro.observe(map.getContainer());
+    return () => {
+      clearTimeout(t);
+      ro.disconnect();
+    };
   }, [map]);
   return null;
 }

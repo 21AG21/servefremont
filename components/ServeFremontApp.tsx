@@ -16,14 +16,12 @@ const ListingMap = dynamic(() => import("@/components/ListingMap"), {
 const REPORT_PROBLEM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSekWo3JMmGrF6FujRdIr6UQ73W_7aqhus7r4XqJaDkgEv96uQ/viewform";
 
-// Display face for the wordmark, org names, detail titles, and the
-// verification stamp — the site's serif voice (see layout.tsx).
-const SERIF = "var(--font-fraunces), Georgia, serif";
-
-// Civic Block v2 (3a): Space Grotesk carries the wordmark, org names, and
-// listing titles; Inter handles the smaller UI/meta text.
-const SG = "var(--font-space-grotesk), system-ui, sans-serif";
-const UI = "var(--font-inter), system-ui, sans-serif";
+// The one face used throughout this screen — renders as real San Francisco
+// on Apple devices, Inter (licensed, next/font-loaded) everywhere else.
+// No serif, no second display face: wordmark, titles, and "Verified" are
+// all plain UI type now.
+const UI =
+  '-apple-system, BlinkMacSystemFont, var(--font-inter), "Segoe UI", system-ui, sans-serif';
 
 const AGES = [13, 14, 15, 16, 17, 18];
 const SCHEDULES = ["Shifts", "Drop-in", "Events", "Flexible/Remote"];
@@ -241,12 +239,14 @@ export default function ServeFremontApp() {
     setOpenFacet(null);
   };
 
-  // Squared dropdown-facet button — green when the facet has a selection.
+  // Dropdown-facet button, moderate rounding — green when the facet has a
+  // selection.
   const ddStyle = (on: boolean): React.CSSProperties => ({
     fontFamily: UI,
     fontSize: 12.5,
     fontWeight: on ? 600 : 500,
     padding: "6px 11px",
+    borderRadius: 7,
     border: `1px solid ${on ? "var(--sf-accent)" : "var(--sf-border)"}`,
     color: on ? "var(--sf-accent-ink)" : "var(--sf-text-soft)",
     background: on ? "var(--sf-accent-soft)" : "var(--sf-surface)",
@@ -255,19 +255,18 @@ export default function ServeFremontApp() {
     alignItems: "center",
     gap: 6,
     cursor: "pointer",
-    borderRadius: 0,
   });
 
   const menuStyle: React.CSSProperties = {
     position: "absolute",
-    top: "calc(100% + 4px)",
+    top: "calc(100% + 3px)",
     left: 0,
-    minWidth: 210,
+    width: 200,
     background: "var(--sf-surface)",
-    border: "1.5px solid var(--sf-border)",
-    borderRadius: 0,
-    boxShadow: "0 8px 28px var(--sf-shadow-strong)",
-    padding: "4px 0",
+    border: "1px solid var(--sf-border)",
+    borderRadius: 7,
+    boxShadow: "0 10px 28px var(--sf-shadow-strong)",
+    padding: 5,
     zIndex: 50,
   };
 
@@ -284,14 +283,15 @@ export default function ServeFremontApp() {
         display: "flex",
         alignItems: "center",
         gap: 9,
-        padding: "8px 12px",
+        padding: "7px 8px",
         width: "100%",
         border: "none",
-        background: "none",
+        borderRadius: 6,
+        background: on ? "var(--sf-accent-soft)" : "none",
         textAlign: "left",
         cursor: "pointer",
         fontFamily: UI,
-        fontSize: 13,
+        fontSize: 12.5,
         fontWeight: on ? 600 : 400,
         color: on ? "var(--sf-accent-ink)" : "var(--sf-text-soft)",
       }}
@@ -299,16 +299,17 @@ export default function ServeFremontApp() {
       <span
         aria-hidden
         style={{
-          width: 15,
-          height: 15,
+          width: 14,
+          height: 14,
+          borderRadius: 4,
           flexShrink: 0,
-          border: `1.5px solid ${on ? "var(--sf-accent)" : "var(--sf-input-border)"}`,
+          border: `1.5px solid ${on ? "var(--sf-accent)" : "var(--sf-border)"}`,
           background: on ? "var(--sf-accent)" : "transparent",
           color: "var(--sf-on-accent)",
           display: "inline-flex",
           alignItems: "center",
           justifyContent: "center",
-          fontSize: 10,
+          fontSize: 9,
         }}
       >
         {on ? "✓" : ""}
@@ -364,9 +365,9 @@ export default function ServeFremontApp() {
         ) : (
           <div
             style={{
-              padding: "8px 12px",
+              padding: "7px 8px",
               fontFamily: UI,
-              fontSize: 13,
+              fontSize: 12.5,
               color: "var(--sf-text-muted)",
             }}
           >
@@ -466,24 +467,25 @@ export default function ServeFremontApp() {
           alignItems: "center",
           justifyContent: "space-between",
           gap: 12,
-          padding: "12px 20px",
-          borderBottom: "1px solid var(--sf-border-soft)",
+          padding: isMobile ? "10px 16px" : "15px 22px",
+          borderBottom: "1px solid var(--sf-border)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <img
             src="/logo.svg"
             alt=""
-            width={24}
-            height={24}
+            width={isMobile ? 19 : 22}
+            height={isMobile ? 19 : 22}
             style={{ flexShrink: 0 }}
           />
           <span
             style={{
-              fontFamily: SG,
-              fontSize: 20,
+              fontFamily: UI,
+              fontSize: 16,
               fontWeight: 600,
               letterSpacing: "-0.01em",
+              color: "var(--sf-text)",
             }}
           >
             ServeFremont
@@ -492,7 +494,7 @@ export default function ServeFremontApp() {
             <span
               style={{
                 fontFamily: UI,
-                fontSize: 11,
+                fontSize: 12,
                 color: "var(--sf-text-muted)",
                 borderLeft: "1px solid var(--sf-border)",
                 paddingLeft: 11,
@@ -510,13 +512,18 @@ export default function ServeFremontApp() {
             title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
             style={{
               fontFamily: UI,
-              fontSize: isMobile ? 15 : 11.5,
+              fontSize: isMobile ? 14 : 12,
               fontWeight: 500,
               lineHeight: 1,
               border: "1px solid var(--sf-border)",
-              borderRadius: 0,
-              padding: isMobile ? "6px 9px" : "6px 11px",
-              background: "transparent",
+              borderRadius: isMobile ? 8 : 7,
+              padding: isMobile ? "7px" : "6px 12px",
+              width: isMobile ? 32 : undefined,
+              height: isMobile ? 32 : undefined,
+              display: isMobile ? "inline-flex" : undefined,
+              alignItems: isMobile ? "center" : undefined,
+              justifyContent: isMobile ? "center" : undefined,
+              background: "var(--sf-surface)",
               color: "var(--sf-text-soft)",
               cursor: "pointer",
             }}
@@ -533,13 +540,14 @@ export default function ServeFremontApp() {
             onClick={() => setShowMap((v) => !v)}
             style={{
               fontFamily: UI,
-              fontSize: 11.5,
-              fontWeight: 500,
-              border: "1px solid var(--sf-border)",
-              borderRadius: 0,
-              padding: "6px 12px",
-              background: "transparent",
-              color: "var(--sf-text-soft)",
+              fontSize: isMobile ? 12.5 : 12,
+              fontWeight: isMobile ? 600 : 500,
+              border: `1px solid ${isMobile && showMap === false ? "var(--sf-accent)" : "var(--sf-border)"}`,
+              borderRadius: isMobile ? 8 : 7,
+              padding: isMobile ? "7px 13px" : "6px 12px",
+              background:
+                !isMobile && !showMap ? "var(--sf-accent-soft)" : "var(--sf-surface)",
+              color: !isMobile && !showMap ? "var(--sf-accent-ink)" : "var(--sf-text-soft)",
               cursor: "pointer",
             }}
           >
@@ -552,7 +560,7 @@ export default function ServeFremontApp() {
       <div
         style={{
           flexShrink: 0,
-          padding: "10px 20px 8px",
+          padding: isMobile ? "9px 16px" : "11px 22px",
           borderBottom: "1px solid var(--sf-border-soft)",
         }}
       >
@@ -564,13 +572,13 @@ export default function ServeFremontApp() {
         />
       </div>
 
-      {/* Filter bar — squared dropdown facets */}
+      {/* Filter bar — one-line dropdown facets */}
       <div
         style={{
           flexShrink: 0,
           position: "relative",
           zIndex: 45,
-          padding: "9px 22px 10px",
+          padding: isMobile ? "9px 16px" : "9px 22px",
           borderBottom: "1px solid var(--sf-border)",
         }}
       >
@@ -600,12 +608,18 @@ export default function ServeFremontApp() {
         {/* Left column: list OR detail — hidden on mobile when map is showing */}
         <div
           style={{
-            flex: showMap && !isMobile ? "1.6" : "1",
+            flex: 1,
             display: isMobile && showMap ? "none" : undefined,
             minWidth: 0,
             overflowY: detail ? "hidden" : "auto",
             background: detail ? "var(--sf-bg)" : "var(--sf-bg-list)",
-            padding: detail ? 0 : !showMap && !isMobile ? "14px 24px" : 14,
+            padding: detail
+              ? 0
+              : isMobile
+                ? "13px 16px"
+                : !showMap
+                  ? "20px 28px"
+                  : "15px 20px",
           }}
         >
           {detail ? (
@@ -667,7 +681,7 @@ export default function ServeFremontApp() {
                       listing={l}
                       active={l.id === activeId}
                       distance={distances.get(l.id)}
-                      gridMode={useGrid}
+                      flushLeft={useGrid || isMobile}
                       onClick={() => {
                         if (activeId === l.id) setDetailId(l.id);
                         else setActiveId(l.id);
@@ -685,8 +699,8 @@ export default function ServeFremontApp() {
                     ? {
                         display: "grid",
                         gridTemplateColumns: "1fr 1fr",
-                        gap: "12px 16px",
-                        maxWidth: 720,
+                        gap: "16px 20px",
+                        maxWidth: 980,
                         margin: "0 auto",
                       }
                     : undefined
@@ -698,9 +712,22 @@ export default function ServeFremontApp() {
           })()}
         </div>
 
-        {/* Map — full width on mobile, 62% on desktop */}
-        {showMap && (
-          <div style={{ flex: isMobile ? "1" : "1", minWidth: 0, position: "relative" }}>
+        {/* Map — full-bleed on mobile; on desktop it never fully disappears:
+            flex:1.3 alongside the list, or a slim 210px rail when "hidden"
+            so the list can reflow into a 2-column grid without losing
+            spatial orientation. */}
+        {(showMap || !isMobile) && (
+          <div
+            style={{
+              flex: isMobile ? 1 : showMap ? 1.3 : undefined,
+              width: !isMobile && !showMap ? 210 : undefined,
+              flexShrink: !isMobile && !showMap ? 0 : undefined,
+              minWidth: 0,
+              position: "relative",
+              borderLeft:
+                !isMobile && !showMap ? "1px solid var(--sf-border)" : undefined,
+            }}
+          >
             <ListingMap
               orgGroups={orgGroups}
               activeId={activeId}
@@ -715,29 +742,22 @@ export default function ServeFremontApp() {
   );
 }
 
-// The verification stamp — set in the serif italic so it reads like an
-// actual stamp, not another pill. This is the site's trust mark.
+// Quiet plain-text verification mark — no chip, no stamp. Trust comes from
+// legibility and consistency, not decoration.
 function VerifiedBadge({ verified }: { verified?: string }) {
   if (!verified) return null;
   return (
     <span
       style={{
         flexShrink: 0,
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 5,
-        fontFamily: SERIF,
-        fontStyle: "italic",
+        fontFamily: UI,
         fontWeight: 500,
         color: "var(--sf-accent-ink)",
-        border: "1px solid var(--sf-accent-border)",
-        borderRadius: 0,
-        padding: "2px 8px",
         fontSize: 11.5,
         whiteSpace: "nowrap",
       }}
     >
-      ✓ Verified {verified}
+      Verified {verified}
     </span>
   );
 }
@@ -780,18 +800,18 @@ function OrgHeader({
       <span
         style={{
           flexShrink: 0,
-          width: 26,
-          height: 26,
-          borderRadius: 0,
-          background: active ? "var(--sf-accent)" : "transparent",
-          color: active ? "var(--sf-on-accent)" : "var(--sf-accent-ink)",
-          fontSize: 12,
-          fontFamily: SG,
-          fontWeight: 600,
+          width: 24,
+          height: 24,
+          borderRadius: 5,
+          background: active ? "var(--sf-accent)" : "var(--sf-surface)",
+          color: active ? "var(--sf-on-accent)" : "var(--sf-text-soft)",
+          fontSize: 11.5,
+          fontFamily: UI,
+          fontWeight: 700,
           display: "inline-flex",
           alignItems: "center",
           justifyContent: "center",
-          border: `1.5px solid var(--sf-accent)`,
+          border: `1.5px solid ${active ? "var(--sf-accent)" : "var(--sf-border-strong)"}`,
         }}
       >
         {index}
@@ -799,8 +819,8 @@ function OrgHeader({
       <div style={{ minWidth: 0, flex: 1 }}>
         <div
           style={{
-            fontFamily: SG,
-            fontSize: 15.5,
+            fontFamily: UI,
+            fontSize: 14,
             fontWeight: 600,
             color: "var(--sf-text)",
             overflow: "hidden",
@@ -810,7 +830,7 @@ function OrgHeader({
         >
           {name}
         </div>
-        <div style={{ fontSize: 11, color: "var(--sf-text-muted)", marginTop: 1 }}>
+        <div style={{ fontSize: 11.5, color: "var(--sf-text-muted)", marginTop: 1 }}>
           {count} opportunit{count === 1 ? "y" : "ies"}
           {distance != null ? ` · ${formatMiles(distance)}` : ""}
         </div>
@@ -840,22 +860,24 @@ function ListingRow({
   listing,
   active,
   distance,
-  gridMode,
+  flushLeft,
   onClick,
 }: {
   listing: Listing;
   active: boolean;
   distance?: number;
-  gridMode?: boolean;
+  // True in the 2-col grid (map hidden) and on mobile — both drop the
+  // org-relative 36px indent since there's no room/reason to keep it.
+  flushLeft?: boolean;
   onClick: () => void;
 }) {
   // Quiet outlined chips — color is reserved for information that changes
   // a student's decision (hour forms), not decoration.
   const tagBase: React.CSSProperties = {
-    borderRadius: 0,
-    padding: "2px 8px",
-    fontSize: 12,
-    fontWeight: 450,
+    borderRadius: 5,
+    padding: "3px 8px",
+    fontSize: 11,
+    fontWeight: 500,
     whiteSpace: "nowrap" as const,
     border: "1px solid var(--sf-border)",
     background: "transparent",
@@ -866,7 +888,6 @@ function ListingRow({
     border: "1px solid var(--sf-accent-border)",
     background: "var(--sf-accent-soft)",
     color: "var(--sf-accent-ink)",
-    fontWeight: 500,
   };
 
   const notes: string[] = [];
@@ -874,30 +895,40 @@ function ListingRow({
   else if (listing.distance) notes.push(listing.distance);
   if (!listing.accepting) notes.push("waitlist");
 
+  const borderColor = active
+    ? "var(--sf-accent)"
+    : listing.priority
+      ? "var(--sf-priority-border)"
+      : "var(--sf-outline)";
+
   return (
     <button
       id={`row-${listing.id}`}
       onClick={onClick}
       style={{
         display: "block",
-        width: gridMode ? "100%" : "calc(100% - 14px)",
+        width: flushLeft ? "100%" : "calc(100% - 36px)",
         textAlign: "left",
         font: "inherit",
         color: "var(--sf-text)",
         cursor: "pointer",
         background: listing.priority ? "var(--sf-priority-bg)" : "var(--sf-surface)",
-        borderTop: `2px solid ${active ? "var(--sf-accent)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border-strong)"}`,
-        borderRight: `2px solid ${active ? "var(--sf-accent)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border-strong)"}`,
-        borderBottom: `2px solid ${active ? "var(--sf-accent)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border-strong)"}`,
-        borderLeft: listing.priority
-          ? "3px solid var(--sf-priority-accent)"
-          : `2px solid ${active ? "var(--sf-accent)" : "var(--sf-border-strong)"}`,
-        boxShadow: active ? "0 3px 14px var(--sf-shadow)" : "none",
+        borderTop: `1.5px solid ${borderColor}`,
+        borderRight: `1.5px solid ${borderColor}`,
+        borderBottom: `1.5px solid ${borderColor}`,
+        borderLeft: active
+          ? "3px solid var(--sf-accent)"
+          : listing.priority
+            ? "3px solid var(--sf-priority-accent)"
+            : `1.5px solid ${borderColor}`,
+        boxShadow: active
+          ? "0 4px 16px var(--sf-shadow)"
+          : "0 1px 3px var(--sf-shadow)",
         transition: "box-shadow 0.18s, border-color 0.18s",
-        borderRadius: 0,
-        padding: "12px 14px",
-        marginBottom: gridMode ? 0 : 8,
-        marginLeft: gridMode ? 0 : 14,
+        borderRadius: 10,
+        padding: "13px 15px",
+        marginBottom: 9,
+        marginLeft: flushLeft ? 0 : 36,
       }}
     >
       {listing.priority && (
@@ -908,10 +939,10 @@ function ListingRow({
             gap: 5,
             color: "var(--sf-priority-text)",
             fontSize: 10.5,
-            fontWeight: 600,
-            letterSpacing: "0.08em",
+            fontWeight: 700,
+            letterSpacing: "0.06em",
             textTransform: "uppercase",
-            marginBottom: 6,
+            marginBottom: 7,
           }}
         >
           <span style={{ color: "var(--sf-priority-accent)" }}>★</span> Top priority
@@ -927,9 +958,9 @@ function ListingRow({
       >
         <div
           style={{
-            fontFamily: SG,
-            fontWeight: 700,
-            fontSize: 17.5,
+            fontFamily: UI,
+            fontWeight: 600,
+            fontSize: 14.5,
             color: "var(--sf-text)",
             lineHeight: 1.3,
             minWidth: 0,
@@ -940,9 +971,9 @@ function ListingRow({
         <VerifiedBadge verified={listing.verified} />
       </div>
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 9 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 9 }}>
         {listing.signsHourForms && (
-          <span style={tagAccent}>✓ Signs hours</span>
+          <span style={tagAccent}>Signs hours</span>
         )}
         {listing.category.map((t) => (
           <span key={t} style={tagBase}>
@@ -968,22 +999,16 @@ function ListingRow({
           {notes.join(" · ")}
         </div>
       )}
-      <div style={{ marginTop: 10, display: "flex", justifyContent: "flex-end" }}>
-        <span
-          style={{
-            fontFamily: SG,
-            fontSize: 12.5,
-            fontWeight: 600,
-            padding: "5px 14px",
-            background: active ? "var(--sf-accent)" : "transparent",
-            color: active ? "var(--sf-on-accent)" : "var(--sf-accent-ink)",
-            border: `1.5px solid var(--sf-accent)`,
-            borderRadius: 0,
-            cursor: "pointer",
-          }}
-        >
-          More info →
-        </span>
+      <div
+        style={{
+          marginTop: 9,
+          fontFamily: UI,
+          fontSize: 12,
+          fontWeight: 600,
+          color: "var(--sf-accent)",
+        }}
+      >
+        More info →
       </div>
     </button>
   );
@@ -1187,11 +1212,11 @@ function DetailView({
         {/* Title */}
         <h2
           style={{
-            fontFamily: SERIF,
-            fontSize: 26,
-            fontWeight: 600,
+            fontFamily: UI,
+            fontSize: 22,
+            fontWeight: 700,
             margin: 0,
-            lineHeight: 1.18,
+            lineHeight: 1.2,
             letterSpacing: "-0.01em",
             color: "var(--sf-text)",
           }}
@@ -1239,7 +1264,7 @@ function DetailView({
             display: "flex",
             marginTop: 14,
             border: "1px solid var(--sf-border)",
-            borderRadius: 12,
+            borderRadius: 10,
             background: "var(--sf-surface)",
             overflow: "hidden",
           }}
@@ -1406,7 +1431,7 @@ function DetailView({
             style={{
               marginTop: 22,
               border: "1px solid var(--sf-border)",
-              borderRadius: 12,
+              borderRadius: 10,
               padding: "12px 14px",
               display: "flex",
               alignItems: "center",
@@ -1424,9 +1449,9 @@ function DetailView({
                 borderRadius: 10,
                 background: "var(--sf-accent-soft)",
                 color: "var(--sf-accent-ink)",
-                fontFamily: SERIF,
-                fontSize: 15,
-                fontWeight: 600,
+                fontFamily: UI,
+                fontSize: 14,
+                fontWeight: 700,
                 flexShrink: 0,
               }}
             >
