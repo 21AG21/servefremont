@@ -712,20 +712,15 @@ export default function ServeFremontApp() {
           })()}
         </div>
 
-        {/* Map — full-bleed on mobile; on desktop it never fully disappears:
-            flex:1.3 alongside the list, or a slim 210px rail when "hidden"
-            so the list can reflow into a 2-column grid without losing
-            spatial orientation. */}
-        {(showMap || !isMobile) && (
+        {/* Map — full-bleed on mobile; on desktop it sits alongside the list
+            at flex:1.3. Hiding the map removes it entirely and the list
+            reflows into a 2-column grid to use the freed space. */}
+        {showMap && (
           <div
             style={{
-              flex: isMobile ? 1 : showMap ? 1.3 : undefined,
-              width: !isMobile && !showMap ? 210 : undefined,
-              flexShrink: !isMobile && !showMap ? 0 : undefined,
+              flex: isMobile ? 1 : 1.3,
               minWidth: 0,
               position: "relative",
-              borderLeft:
-                !isMobile && !showMap ? "1px solid var(--sf-border)" : undefined,
             }}
           >
             <ListingMap
