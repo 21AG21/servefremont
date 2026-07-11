@@ -41,6 +41,7 @@ export default function OpportunityCard({ opp }: { opp: Opportunity }) {
   return (
     <Link
       href={`/opportunities/${opp.id}`}
+      className="sf-card"
       style={{
         display: "block",
         borderRadius: 10,

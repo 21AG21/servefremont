@@ -54,7 +54,7 @@ export default async function OrganizationPage({ params }: Params) {
           boxSizing: "border-box",
         }}
       >
-        <Link href="/" style={{ fontSize: 12.5, fontWeight: 500, color: "var(--sf-accent)" }}>
+        <Link href="/" className="sf-link" style={{ fontSize: 12.5, fontWeight: 500, color: "var(--sf-accent)" }}>
           ← All opportunities
         </Link>
 
@@ -82,6 +82,7 @@ export default async function OrganizationPage({ params }: Params) {
               }
               target="_blank"
               rel="noopener noreferrer"
+              className="sf-link"
               style={{ fontSize: 13, fontWeight: 500, color: "var(--sf-accent)", textDecoration: "underline" }}
             >
               Visit website →

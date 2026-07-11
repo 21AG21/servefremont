@@ -54,13 +54,14 @@ function numberedIcon(n: number, active: boolean, priority: boolean): L.DivIcon 
   const half = size / 2;
   return L.divIcon({
     className: "",
-    html: `<div style="
+    html: `<div class="sf-map-pin" style="
       width:${size}px;height:${size}px;border-radius:8px;
       background:${active ? accent : "var(--sf-surface)"};
       color:${active ? "var(--sf-on-accent)" : accent};
       border:1.5px solid ${accent};
       box-shadow:0 1px 2px var(--sf-shadow), 0 4px 10px var(--sf-shadow-strong);
       display:flex;align-items:center;justify-content:center;
+      cursor:pointer;
       font-family:${UI};font-size:${active ? 13 : 12}px;font-weight:700;">${n}</div>`,
     iconSize: [size, size],
     iconAnchor: [half, half],
@@ -271,6 +272,7 @@ export default function ListingMap({
                       href={directionsUrl(destination, "transit")}
                       target="_blank"
                       rel="noopener noreferrer"
+                      className="sf-btn"
                       style={modeButtonStyle}
                     >
                       🚍 Transit
@@ -279,6 +281,7 @@ export default function ListingMap({
                       href={directionsUrl(destination, "walking")}
                       target="_blank"
                       rel="noopener noreferrer"
+                      className="sf-btn"
                       style={modeButtonStyle}
                     >
                       🚶 Walk
@@ -287,6 +290,7 @@ export default function ListingMap({
                       href={directionsUrl(destination, "bicycling")}
                       target="_blank"
                       rel="noopener noreferrer"
+                      className="sf-btn"
                       style={modeButtonStyle}
                     >
                       🚲 Bike
@@ -295,6 +299,7 @@ export default function ListingMap({
                       href={directionsUrl(destination, "driving")}
                       target="_blank"
                       rel="noopener noreferrer"
+                      className="sf-btn"
                       style={modeButtonStyle}
                     >
                       🚗 Drive

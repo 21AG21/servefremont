@@ -279,6 +279,7 @@ export default function ServeFremontApp() {
     <button
       key={key}
       onClick={onClick}
+      className="sf-menu-item"
       style={{
         display: "flex",
         alignItems: "center",
@@ -327,6 +328,7 @@ export default function ServeFremontApp() {
     <span style={{ position: "relative", flexShrink: 0 }}>
       <button
         onClick={() => setOpenFacet((f) => (f === id ? null : id))}
+        className="sf-btn"
         style={ddStyle(on)}
       >
         {label}
@@ -419,6 +421,7 @@ export default function ServeFremontApp() {
       {anyFilter && (
         <button
           onClick={clearAll}
+          className="sf-link"
           style={{
             fontFamily: UI,
             fontSize: 12.5,
@@ -510,6 +513,7 @@ export default function ServeFremontApp() {
             onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
             aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
             title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            className="sf-btn"
             style={{
               fontFamily: UI,
               fontSize: isMobile ? 14 : 12,
@@ -538,6 +542,7 @@ export default function ServeFremontApp() {
           </button>
           <button
             onClick={() => setShowMap((v) => !v)}
+            className="sf-btn"
             style={{
               fontFamily: UI,
               fontSize: isMobile ? 12.5 : 12,
@@ -778,6 +783,7 @@ function OrgHeader({
     <button
       onClick={onToggle}
       aria-expanded={!collapsed}
+      className="sf-btn"
       style={{
         display: "flex",
         alignItems: "center",
@@ -900,6 +906,7 @@ function ListingRow({
     <button
       id={`row-${listing.id}`}
       onClick={onClick}
+      className="sf-card"
       style={{
         display: "block",
         width: flushLeft ? "100%" : "calc(100% - 36px)",
@@ -1187,6 +1194,7 @@ function DetailView({
         >
           <button
             onClick={onBack}
+            className="sf-link"
             style={{
               border: "none",
               background: "none",
@@ -1494,6 +1502,7 @@ function DetailView({
             }
             target="_blank"
             rel="noopener noreferrer"
+            className="sf-link"
             style={{
               fontSize: 12,
               color: "var(--sf-text-muted)",
@@ -1536,6 +1545,7 @@ function DetailView({
           onClick={() => setSaved((s) => !s)}
           aria-label={saved ? "Remove from saved" : "Save for later"}
           aria-pressed={saved}
+          className="sf-btn"
           style={{
             width: 42,
             height: 42,
@@ -1559,6 +1569,7 @@ function DetailView({
             href={link(startUrl)}
             target="_blank"
             rel="noopener noreferrer"
+            className="sf-btn"
             style={{
               background: "var(--sf-accent)",
               color: "var(--sf-on-accent)",

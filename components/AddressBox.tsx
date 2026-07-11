@@ -179,6 +179,7 @@ export default function AddressBox({
                 <button
                   key={`${s.lat}-${s.lng}-${i}`}
                   onClick={() => pick(s)}
+                  className="sf-menu-item"
                   style={{
                     display: "block",
                     width: "100%",
@@ -207,12 +208,13 @@ export default function AddressBox({
             setQ("");
             onClear();
           }}
+          className="sf-link"
           style={linkBtn}
         >
           Clear
         </button>
       ) : (
-        <button onClick={useMyLocation} style={linkBtn}>
+        <button onClick={useMyLocation} className="sf-link" style={linkBtn}>
           Use my location
         </button>
       )}

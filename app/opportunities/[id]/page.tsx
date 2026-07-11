@@ -116,6 +116,7 @@ export default async function OpportunityPage({ params }: Params) {
       >
         <Link
           href="/"
+          className="sf-link"
           style={{ fontSize: 12.5, fontWeight: 500, color: "var(--sf-accent)" }}
         >
           ← All opportunities
@@ -130,6 +131,7 @@ export default async function OpportunityPage({ params }: Params) {
               (opp.orgId ? (
                 <Link
                   href={`/orgs/${opp.orgId}`}
+                  className="sf-link"
                   style={{ display: "inline-block", marginTop: 4, fontSize: 13, fontWeight: 500, color: "var(--sf-accent)" }}
                 >
                   {opp.orgName}
@@ -175,6 +177,7 @@ export default async function OpportunityPage({ params }: Params) {
               href={opp.howToStartUrl}
               target="_blank"
               rel="noopener noreferrer"
+              className="sf-btn"
               style={{
                 display: "block",
                 textAlign: "center",
@@ -210,6 +213,7 @@ export default async function OpportunityPage({ params }: Params) {
           {/* TODO: replace with a real project email / report form (Sprint 3). */}
           <a
             href={`mailto:hello@servefremont.example?subject=${reportSubject}`}
+            className="sf-link"
             style={{ color: "var(--sf-text-muted)", textDecoration: "underline" }}
           >
             Report outdated info

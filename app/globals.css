@@ -159,9 +159,78 @@ body {
   background: var(--sf-surface) !important;
   color: var(--sf-text) !important;
   border-color: var(--sf-border) !important;
+  transition: background-color 0.15s ease, transform 0.1s ease;
 }
 .leaflet-control-zoom a:hover {
   background: var(--sf-surface-hover) !important;
+  transform: scale(1.08);
+}
+.leaflet-control-zoom a:active {
+  transform: scale(0.92);
+}
+
+/* Map pins — the inner div (not the Leaflet wrapper, which carries
+   Leaflet's own positioning transform and can't be touched). */
+.sf-map-pin {
+  transition: transform 0.15s ease;
+}
+.sf-map-pin:hover {
+  transform: scale(1.12);
+}
+.sf-map-pin:active {
+  transform: scale(0.95);
+}
+
+/* Motion — subtle hover/press feedback so controls feel responsive.
+   Kept to transform/opacity so it never fights the dynamic
+   background/border colors components already set inline per state. */
+.sf-btn,
+.sf-card {
+  transition: transform 0.15s ease;
+}
+.sf-btn:hover,
+.sf-card:hover {
+  transform: translateY(-1px);
+}
+.sf-btn:active {
+  transform: translateY(0) scale(0.96);
+  transition-duration: 0.05s;
+}
+.sf-card:active {
+  transform: scale(0.99);
+  transition-duration: 0.05s;
+}
+.sf-link,
+.sf-menu-item {
+  transition: opacity 0.15s ease;
+}
+.sf-link:hover,
+.sf-menu-item:hover {
+  opacity: 0.65;
+}
+.sf-menu-item:active {
+  opacity: 0.45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sf-btn,
+  .sf-card,
+  .sf-link,
+  .sf-menu-item,
+  .sf-map-pin,
+  .leaflet-control-zoom a {
+    transition: none !important;
+  }
+  .sf-btn:hover,
+  .sf-btn:active,
+  .sf-card:hover,
+  .sf-card:active,
+  .sf-map-pin:hover,
+  .sf-map-pin:active,
+  .leaflet-control-zoom a:hover,
+  .leaflet-control-zoom a:active {
+    transform: none !important;
+  }
 }
 
 /* Mobile: filter pills scroll horizontally without wrapping. */

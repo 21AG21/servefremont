@@ -25,6 +25,7 @@ export default function NotFound() {
         </p>
         <Link
           href="/"
+          className="sf-btn"
           style={{
             marginTop: 20,
             display: "inline-block",

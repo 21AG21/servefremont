@@ -142,6 +142,7 @@ export default function SubmitForm() {
       <button
         type="submit"
         disabled={status === "sending"}
+        className="sf-btn"
         style={{
           borderRadius: 10,
           border: "none",
