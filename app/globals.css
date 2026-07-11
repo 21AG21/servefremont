@@ -20,17 +20,18 @@
    matches the site brand (--color-brand / --color-marigold above).
    Light by default; html[data-theme="dark"] overrides below. */
 :root {
-  --sf-bg: #faf9f5;
-  --sf-bg-list: #f2f0e9;
+  --sf-bg: #f0ede6;
+  --sf-bg-list: #f0ede6;
   --sf-surface: #ffffff;
-  --sf-surface-hover: #f7f5ee;
-  --sf-text: #26251f;
-  --sf-text-soft: #52504a;
-  --sf-text-muted: #8b877c;
-  --sf-text-faint: #c9c5b8;
-  --sf-border: #e5e2d8;
-  --sf-border-soft: #edeae0;
-  --sf-input-border: #d9d5c8;
+  --sf-surface-hover: #e8e4da;
+  --sf-text: #181f1a;
+  --sf-text-soft: #454b46;
+  --sf-text-muted: #82877e;
+  --sf-text-faint: #b7b3a6;
+  --sf-border: #d8d3c8;
+  --sf-border-soft: #e4e0d6;
+  --sf-border-strong: #181f1a;
+  --sf-input-border: #d8d3c8;
   --sf-shadow: rgba(38, 37, 31, 0.06);
   --sf-shadow-strong: rgba(38, 37, 31, 0.16);
   --sf-active-bg: #26251f;
@@ -52,16 +53,22 @@
   --sf-priority-border: #e9d49c;
   --sf-priority-text: #7a4f08;
   --sf-priority-accent: #c97f0a;
-  --sf-divider: #e5e2d8;
+  --sf-divider: #d8d3c8;
   --sf-pill-track: #eae7dc;
   --sf-popup-bg: #ffffff;
-  --sf-popup-text: #26251f;
-  /* Brand accent — deep green */
-  --sf-accent: #18603f;
-  --sf-accent-soft: #e4efe7;
-  --sf-accent-ink: #124a31;
-  --sf-accent-border: #bcd6c6;
-  --sf-on-accent: #ffffff;
+  --sf-popup-text: #181f1a;
+  /* Brand accent — deep green (Civic Block v2 / 3a) */
+  --sf-accent: #1f5c42;
+  --sf-accent-soft: #e3ece6;
+  --sf-accent-ink: #1f5c42;
+  --sf-accent-border: #1f5c42;
+  --sf-on-accent: #f0f5f1;
+  /* Secondary accent — purple, used sparingly */
+  --sf-accent2: #6b3fa0;
+  --sf-accent2-soft: #efe8f7;
+  /* Map grid tint */
+  --sf-map-bg: #dfe9e2;
+  --sf-map-line: #bcd0c2;
   /* Marigold highlight */
   --sf-gold: #c97f0a;
   --sf-gold-soft: #f9efd6;
@@ -69,17 +76,18 @@
 }
 
 html[data-theme="dark"] {
-  --sf-bg: #171613;
-  --sf-bg-list: #131210;
-  --sf-surface: #201f1b;
-  --sf-surface-hover: #262521;
-  --sf-text: #ebe8df;
-  --sf-text-soft: #c3bfb2;
-  --sf-text-muted: #928e81;
-  --sf-text-faint: #57544b;
-  --sf-border: #34322b;
-  --sf-border-soft: #292722;
-  --sf-input-border: #3d3a31;
+  --sf-bg: #10140f;
+  --sf-bg-list: #10140f;
+  --sf-surface: #191f18;
+  --sf-surface-hover: #222820;
+  --sf-text: #eef2ec;
+  --sf-text-soft: #bcc4b8;
+  --sf-text-muted: #83897e;
+  --sf-text-faint: #5a5f56;
+  --sf-border: #2b322c;
+  --sf-border-soft: #232a24;
+  --sf-border-strong: #454e47;
+  --sf-input-border: #2b322c;
   --sf-shadow: rgba(0, 0, 0, 0.4);
   --sf-shadow-strong: rgba(0, 0, 0, 0.6);
   --sf-active-bg: #ebe8df;
@@ -101,16 +109,22 @@ html[data-theme="dark"] {
   --sf-priority-border: #5c4a1e;
   --sf-priority-text: #eac97e;
   --sf-priority-accent: #e3a52c;
-  --sf-divider: #34322b;
+  --sf-divider: #2b322c;
   --sf-pill-track: #2a2822;
-  --sf-popup-bg: #201f1b;
-  --sf-popup-text: #ebe8df;
-  /* Brand accent — sage on ink */
-  --sf-accent: #7fc39a;
-  --sf-accent-soft: #20362a;
-  --sf-accent-ink: #a8d9bd;
-  --sf-accent-border: #345843;
-  --sf-on-accent: #10281a;
+  --sf-popup-bg: #191f18;
+  --sf-popup-text: #eef2ec;
+  /* Brand accent — sage on ink (Civic Block v2 / 3a) */
+  --sf-accent: #6fbf94;
+  --sf-accent-soft: #1a2a20;
+  --sf-accent-ink: #6fbf94;
+  --sf-accent-border: #6fbf94;
+  --sf-on-accent: #0e1a13;
+  /* Secondary accent — purple, used sparingly */
+  --sf-accent2: #b393e0;
+  --sf-accent2-soft: #241c30;
+  /* Map grid tint */
+  --sf-map-bg: #182018;
+  --sf-map-line: #2e3a30;
   /* Marigold highlight */
   --sf-gold: #e3a52c;
   --sf-gold-soft: #2e2512;

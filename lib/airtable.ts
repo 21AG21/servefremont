@@ -145,9 +145,8 @@ function toOpportunity(
     scheduleNotes: str(f.Schedule_Notes),
     description: str(f.Description),
     transitNotes: str(f.Transit_Notes),
-    nearSchool: isYes(f.Near_School),
-    walkableFrom: Array.isArray(f.Walkable_From)
-      ? (f.Walkable_From as string[])
+    walkableFrom: Array.isArray(f.Near_School)
+      ? (f.Near_School as string[])
       : [],
     groupFriendly: isYes(f.Group_Friendly),
     onboarding: (Array.isArray(f.Onboarding)

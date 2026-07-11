@@ -20,6 +20,11 @@ const REPORT_PROBLEM_URL =
 // verification stamp — the site's serif voice (see layout.tsx).
 const SERIF = "var(--font-fraunces), Georgia, serif";
 
+// Civic Block v2 (3a): Space Grotesk carries the wordmark, org names, and
+// listing titles; Inter handles the smaller UI/meta text.
+const SG = "var(--font-space-grotesk), system-ui, sans-serif";
+const UI = "var(--font-inter), system-ui, sans-serif";
+
 const AGES = [13, 14, 15, 16, 17, 18];
 const SCHEDULES = ["Shifts", "Drop-in", "Events", "Flexible/Remote"];
 const REQUIREMENTS: { key: string; label: string }[] = [
@@ -68,6 +73,10 @@ export default function ServeFremontApp() {
 
   const [activeAge, setActiveAge] = useState<number | null>(null);
   const [filters, setFilters] = useState<Filters>(EMPTY);
+  // Which dropdown-facet menu is open (Civic Block v2 filter bar). One at a time.
+  const [openFacet, setOpenFacet] = useState<
+    "age" | "cause" | "schedule" | "req" | "status" | null
+  >(null);
   const [showMap, setShowMap] = useState(() =>
     typeof window === "undefined" ? true : window.innerWidth > 640
   );
@@ -219,112 +228,213 @@ export default function ServeFremontApp() {
 
   const detail = detailId ? listings.find((l) => l.id === detailId) : null;
 
-  const pill = (label: string, on: boolean, onClick: () => void) => (
+  const anyFilter =
+    activeAge != null ||
+    filters.categories.length > 0 ||
+    filters.schedules.length > 0 ||
+    filters.requirements.length > 0 ||
+    filters.statuses.length > 0;
+
+  const clearAll = () => {
+    setActiveAge(null);
+    setFilters(EMPTY);
+    setOpenFacet(null);
+  };
+
+  // Squared dropdown-facet button — green when the facet has a selection.
+  const ddStyle = (on: boolean): React.CSSProperties => ({
+    fontFamily: UI,
+    fontSize: 12.5,
+    fontWeight: on ? 600 : 500,
+    padding: "6px 11px",
+    border: `1px solid ${on ? "var(--sf-accent)" : "var(--sf-border)"}`,
+    color: on ? "var(--sf-accent-ink)" : "var(--sf-text-soft)",
+    background: on ? "var(--sf-accent-soft)" : "var(--sf-surface)",
+    whiteSpace: "nowrap",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    cursor: "pointer",
+    borderRadius: 0,
+  });
+
+  const menuStyle: React.CSSProperties = {
+    position: "absolute",
+    top: "calc(100% + 4px)",
+    left: 0,
+    minWidth: 210,
+    background: "var(--sf-surface)",
+    border: "1.5px solid var(--sf-border)",
+    borderRadius: 0,
+    boxShadow: "0 8px 28px var(--sf-shadow-strong)",
+    padding: "4px 0",
+    zIndex: 50,
+  };
+
+  const menuRow = (
+    key: string,
+    label: string,
+    on: boolean,
+    onClick: () => void
+  ) => (
     <button
+      key={key}
       onClick={onClick}
       style={{
-        border: `1px solid ${on ? "var(--sf-accent)" : "var(--sf-input-border)"}`,
-        borderRadius: 8,
-        padding: "5px 12px",
+        display: "flex",
+        alignItems: "center",
+        gap: 9,
+        padding: "8px 12px",
+        width: "100%",
+        border: "none",
+        background: "none",
+        textAlign: "left",
+        cursor: "pointer",
+        fontFamily: UI,
         fontSize: 13,
         fontWeight: on ? 600 : 400,
-        background: on ? "var(--sf-accent)" : "transparent",
-        color: on ? "var(--sf-on-accent)" : "var(--sf-text-soft)",
-        cursor: "pointer",
-        whiteSpace: "nowrap",
-        transition: "background 0.15s, border-color 0.15s, color 0.15s",
+        color: on ? "var(--sf-accent-ink)" : "var(--sf-text-soft)",
       }}
     >
+      <span
+        aria-hidden
+        style={{
+          width: 15,
+          height: 15,
+          flexShrink: 0,
+          border: `1.5px solid ${on ? "var(--sf-accent)" : "var(--sf-input-border)"}`,
+          background: on ? "var(--sf-accent)" : "transparent",
+          color: "var(--sf-on-accent)",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 10,
+        }}
+      >
+        {on ? "✓" : ""}
+      </span>
       {label}
     </button>
   );
 
-  const divider = (
-    <span
-      style={{
-        width: 1,
-        height: 22,
-        background: "var(--sf-divider)",
-        margin: "0 4px",
-        flexShrink: 0,
-      }}
-    />
+  const facet = (
+    id: NonNullable<typeof openFacet>,
+    label: string,
+    on: boolean,
+    rows: React.ReactNode
+  ) => (
+    <span style={{ position: "relative", flexShrink: 0 }}>
+      <button
+        onClick={() => setOpenFacet((f) => (f === id ? null : id))}
+        style={ddStyle(on)}
+      >
+        {label}
+        <span aria-hidden style={{ fontSize: 9, opacity: 0.7 }}>
+          ▾
+        </span>
+      </button>
+      {openFacet === id && <div style={menuStyle}>{rows}</div>}
+    </span>
   );
 
-  const filterPills = (
+  const filterFacets = (
     <>
-      <div
-        style={{
-          display: "flex",
-          background: "var(--sf-pill-track)",
-          borderRadius: 9,
-          padding: 3,
-          gap: 2,
-          flexShrink: 0,
-        }}
-      >
-        {AGES.map((a) => {
-          const on = activeAge === a;
-          return (
-            <button
-              key={a}
-              onClick={() => setActiveAge(on ? null : a)}
-              style={{
-                border: "none",
-                borderRadius: 7,
-                padding: "5px 11px",
-                fontSize: 13,
-                fontWeight: on ? 600 : 400,
-                color: on ? "var(--sf-text)" : "var(--sf-text-muted)",
-                background: on ? "var(--sf-surface)" : "transparent",
-                boxShadow: on ? "0 1px 3px var(--sf-shadow)" : "none",
-                cursor: "pointer",
-              }}
-            >
-              {a}
-            </button>
-          );
-        })}
-      </div>
-
-      {categories.length > 0 && divider}
-      {categories.map((c) => (
-        <span key={`cat-${c}`}>
-          {pill(c, filters.categories.includes(c), () =>
-            setFilters((f) => ({ ...f, categories: toggle(f.categories, c) }))
-          )}
-        </span>
-      ))}
-
-      {divider}
-      {SCHEDULES.map((s) => (
-        <span key={`sch-${s}`}>
-          {pill(s, filters.schedules.includes(s), () =>
+      {facet(
+        "age",
+        activeAge != null ? `Age: ${activeAge}` : "Age",
+        activeAge != null,
+        AGES.map((a) =>
+          menuRow(`age-${a}`, `${a}${a === 18 ? "+" : ""}`, activeAge === a, () =>
+            setActiveAge(activeAge === a ? null : a)
+          )
+        )
+      )}
+      {facet(
+        "cause",
+        filters.categories.length
+          ? `Cause: ${filters.categories.length}`
+          : "Cause",
+        filters.categories.length > 0,
+        categories.length ? (
+          categories.map((c) =>
+            menuRow(`cat-${c}`, c, filters.categories.includes(c), () =>
+              setFilters((f) => ({ ...f, categories: toggle(f.categories, c) }))
+            )
+          )
+        ) : (
+          <div
+            style={{
+              padding: "8px 12px",
+              fontFamily: UI,
+              fontSize: 13,
+              color: "var(--sf-text-muted)",
+            }}
+          >
+            No categories yet
+          </div>
+        )
+      )}
+      {facet(
+        "schedule",
+        filters.schedules.length
+          ? `Schedule: ${filters.schedules.length}`
+          : "Schedule",
+        filters.schedules.length > 0,
+        SCHEDULES.map((s) =>
+          menuRow(`sch-${s}`, s, filters.schedules.includes(s), () =>
             setFilters((f) => ({ ...f, schedules: toggle(f.schedules, s) }))
-          )}
-        </span>
-      ))}
-
-      {divider}
-      {REQUIREMENTS.map((r) => (
-        <span key={`req-${r.key}`}>
-          {pill(r.label, filters.requirements.includes(r.key), () =>
-            setFilters((f) => ({
-              ...f,
-              requirements: toggle(f.requirements, r.key),
-            }))
-          )}
-        </span>
-      ))}
-
-      {divider}
-      {STATUSES.map((s) => (
-        <span key={`st-${s.key}`}>
-          {pill(s.label, filters.statuses.includes(s.key), () =>
+          )
+        )
+      )}
+      {facet(
+        "req",
+        filters.requirements.length
+          ? `Requirements: ${filters.requirements.length}`
+          : "Requirements",
+        filters.requirements.length > 0,
+        REQUIREMENTS.map((r) =>
+          menuRow(
+            `req-${r.key}`,
+            r.label,
+            filters.requirements.includes(r.key),
+            () =>
+              setFilters((f) => ({
+                ...f,
+                requirements: toggle(f.requirements, r.key),
+              }))
+          )
+        )
+      )}
+      {facet(
+        "status",
+        filters.statuses.length ? `Status: ${filters.statuses.length}` : "Status",
+        filters.statuses.length > 0,
+        STATUSES.map((s) =>
+          menuRow(`st-${s.key}`, s.label, filters.statuses.includes(s.key), () =>
             setFilters((f) => ({ ...f, statuses: toggle(f.statuses, s.key) }))
-          )}
-        </span>
-      ))}
+          )
+        )
+      )}
+      {anyFilter && (
+        <button
+          onClick={clearAll}
+          style={{
+            fontFamily: UI,
+            fontSize: 12.5,
+            fontWeight: 600,
+            color: "var(--sf-accent)",
+            background: "none",
+            border: "none",
+            textDecoration: "underline",
+            textUnderlineOffset: 3,
+            cursor: "pointer",
+            marginLeft: 2,
+            flexShrink: 0,
+          }}
+        >
+          Clear all
+        </button>
+      )}
     </>
   );
 
@@ -340,6 +450,14 @@ export default function ServeFremontApp() {
         background: "var(--sf-bg)",
       }}
     >
+      {/* Click-away layer for open facet menus */}
+      {openFacet && (
+        <div
+          onClick={() => setOpenFacet(null)}
+          style={{ position: "fixed", inset: 0, zIndex: 40 }}
+        />
+      )}
+
       {/* Top bar */}
       <div
         style={{
@@ -362,8 +480,8 @@ export default function ServeFremontApp() {
           />
           <span
             style={{
-              fontFamily: SERIF,
-              fontSize: 21,
+              fontFamily: SG,
+              fontSize: 20,
               fontWeight: 600,
               letterSpacing: "-0.01em",
             }}
@@ -373,14 +491,15 @@ export default function ServeFremontApp() {
           {!isMobile && (
             <span
               style={{
-                fontSize: 12,
+                fontFamily: UI,
+                fontSize: 11,
                 color: "var(--sf-text-muted)",
                 borderLeft: "1px solid var(--sf-border)",
-                paddingLeft: 10,
+                paddingLeft: 11,
                 marginLeft: 2,
               }}
             >
-              Volunteer spots in Fremont, verified in person
+              Volunteer spots in Fremont
             </span>
           )}
         </div>
@@ -390,26 +509,35 @@ export default function ServeFremontApp() {
             aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
             title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
             style={{
-              fontSize: 15,
+              fontFamily: UI,
+              fontSize: isMobile ? 15 : 11.5,
+              fontWeight: 500,
               lineHeight: 1,
-              border: "1px solid var(--sf-input-border)",
-              borderRadius: 8,
-              padding: "6px 10px",
+              border: "1px solid var(--sf-border)",
+              borderRadius: 0,
+              padding: isMobile ? "6px 9px" : "6px 11px",
               background: "transparent",
               color: "var(--sf-text-soft)",
               cursor: "pointer",
             }}
           >
-            {theme === "dark" ? "☀" : "☾"}
+            {isMobile
+              ? theme === "dark"
+                ? "☀"
+                : "☾"
+              : theme === "dark"
+                ? "Light mode"
+                : "Dark mode"}
           </button>
           <button
             onClick={() => setShowMap((v) => !v)}
             style={{
-              fontSize: 13,
+              fontFamily: UI,
+              fontSize: 11.5,
               fontWeight: 500,
-              border: "1px solid var(--sf-input-border)",
-              borderRadius: 8,
-              padding: "6px 14px",
+              border: "1px solid var(--sf-border)",
+              borderRadius: 0,
+              padding: "6px 12px",
               background: "transparent",
               color: "var(--sf-text-soft)",
               cursor: "pointer",
@@ -436,31 +564,33 @@ export default function ServeFremontApp() {
         />
       </div>
 
-      {/* Filter bar */}
+      {/* Filter bar — squared dropdown facets */}
       <div
         style={{
           flexShrink: 0,
-          padding: "10px 20px 14px",
-          borderBottom: "1px solid var(--sf-border-soft)",
+          position: "relative",
+          zIndex: 45,
+          padding: "9px 22px 10px",
+          borderBottom: "1px solid var(--sf-border)",
         }}
       >
         {isMobile ? (
           <div
             className="filter-scroll"
-            style={{ display: "flex", alignItems: "center", gap: 8 }}
+            style={{ display: "flex", alignItems: "center", gap: 6 }}
           >
-            {filterPills}
+            {filterFacets}
           </div>
         ) : (
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 8,
+              gap: 6,
               flexWrap: "wrap",
             }}
           >
-            {filterPills}
+            {filterFacets}
           </div>
         )}
       </div>
@@ -470,12 +600,12 @@ export default function ServeFremontApp() {
         {/* Left column: list OR detail — hidden on mobile when map is showing */}
         <div
           style={{
-            flex: showMap && !isMobile ? "38" : "1",
+            flex: showMap && !isMobile ? "1.6" : "1",
             display: isMobile && showMap ? "none" : undefined,
             minWidth: 0,
             overflowY: detail ? "hidden" : "auto",
             background: detail ? "var(--sf-bg)" : "var(--sf-bg-list)",
-            padding: detail ? 0 : 14,
+            padding: detail ? 0 : !showMap && !isMobile ? "14px 24px" : 14,
           }}
         >
           {detail ? (
@@ -499,16 +629,25 @@ export default function ServeFremontApp() {
             <p style={{ padding: 6, color: "var(--sf-text-muted)", fontSize: 13 }}>
               No opportunities match these filters.
             </p>
-          ) : (
-            orgGroups.map((group, gi) => {
+          ) : (() => {
+            const useGrid = !showMap && !isMobile;
+            const items = orgGroups.flatMap((group, gi) => {
               const orgActive = group.listings.some((l) => l.id === activeId);
               const orgDistance =
                 group.lat != null && group.lng != null && userLoc
                   ? distances.get(group.listings[0].id)
                   : undefined;
               const isCollapsed = collapsed.has(group.orgName);
-              return (
-                <div key={group.orgName} style={{ marginBottom: 18 }}>
+              const nodes: React.ReactNode[] = [];
+              nodes.push(
+                <div
+                  key={`org-${group.orgName}`}
+                  style={{
+                    gridColumn: useGrid ? "1 / -1" : undefined,
+                    marginTop: gi > 0 && !useGrid ? 0 : undefined,
+                    marginBottom: useGrid ? -4 : 0,
+                  }}
+                >
                   <OrgHeader
                     index={gi + 1}
                     name={group.orgName}
@@ -518,28 +657,50 @@ export default function ServeFremontApp() {
                     collapsed={isCollapsed}
                     onToggle={() => toggleOrg(group.orgName)}
                   />
-                  {!isCollapsed &&
-                    group.listings.map((l) => (
-                      <ListingRow
-                        key={l.id}
-                        listing={l}
-                        active={l.id === activeId}
-                        distance={distances.get(l.id)}
-                        onClick={() => {
-                          if (activeId === l.id) setDetailId(l.id);
-                          else setActiveId(l.id);
-                        }}
-                      />
-                    ))}
                 </div>
               );
-            })
-          )}
+              if (!isCollapsed) {
+                for (const l of group.listings) {
+                  nodes.push(
+                    <ListingRow
+                      key={l.id}
+                      listing={l}
+                      active={l.id === activeId}
+                      distance={distances.get(l.id)}
+                      gridMode={useGrid}
+                      onClick={() => {
+                        if (activeId === l.id) setDetailId(l.id);
+                        else setActiveId(l.id);
+                      }}
+                    />
+                  );
+                }
+              }
+              return nodes;
+            });
+            return (
+              <div
+                style={
+                  useGrid
+                    ? {
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr",
+                        gap: "12px 16px",
+                        maxWidth: 720,
+                        margin: "0 auto",
+                      }
+                    : undefined
+                }
+              >
+                {items}
+              </div>
+            );
+          })()}
         </div>
 
         {/* Map — full width on mobile, 62% on desktop */}
         {showMap && (
-          <div style={{ flex: isMobile ? "1" : "62", minWidth: 0, position: "relative" }}>
+          <div style={{ flex: isMobile ? "1" : "1", minWidth: 0, position: "relative" }}>
             <ListingMap
               orgGroups={orgGroups}
               activeId={activeId}
@@ -570,7 +731,7 @@ function VerifiedBadge({ verified }: { verified?: string }) {
         fontWeight: 500,
         color: "var(--sf-accent-ink)",
         border: "1px solid var(--sf-accent-border)",
-        borderRadius: 6,
+        borderRadius: 0,
         padding: "2px 8px",
         fontSize: 11.5,
         whiteSpace: "nowrap",
@@ -621,15 +782,16 @@ function OrgHeader({
           flexShrink: 0,
           width: 26,
           height: 26,
-          borderRadius: "50%",
-          background: active ? "var(--sf-accent)" : "var(--sf-surface)",
-          color: active ? "var(--sf-on-accent)" : "var(--sf-text-soft)",
+          borderRadius: 0,
+          background: active ? "var(--sf-accent)" : "transparent",
+          color: active ? "var(--sf-on-accent)" : "var(--sf-accent-ink)",
           fontSize: 12,
+          fontFamily: SG,
           fontWeight: 600,
           display: "inline-flex",
           alignItems: "center",
           justifyContent: "center",
-          border: `1.5px solid ${active ? "var(--sf-accent)" : "var(--sf-input-border)"}`,
+          border: `1.5px solid var(--sf-accent)`,
         }}
       >
         {index}
@@ -637,7 +799,7 @@ function OrgHeader({
       <div style={{ minWidth: 0, flex: 1 }}>
         <div
           style={{
-            fontFamily: SERIF,
+            fontFamily: SG,
             fontSize: 15.5,
             fontWeight: 600,
             color: "var(--sf-text)",
@@ -678,17 +840,19 @@ function ListingRow({
   listing,
   active,
   distance,
+  gridMode,
   onClick,
 }: {
   listing: Listing;
   active: boolean;
   distance?: number;
+  gridMode?: boolean;
   onClick: () => void;
 }) {
   // Quiet outlined chips — color is reserved for information that changes
   // a student's decision (hour forms), not decoration.
   const tagBase: React.CSSProperties = {
-    borderRadius: 6,
+    borderRadius: 0,
     padding: "2px 8px",
     fontSize: 12,
     fontWeight: 450,
@@ -716,24 +880,24 @@ function ListingRow({
       onClick={onClick}
       style={{
         display: "block",
-        width: "calc(100% - 14px)",
+        width: gridMode ? "100%" : "calc(100% - 14px)",
         textAlign: "left",
         font: "inherit",
         color: "var(--sf-text)",
         cursor: "pointer",
         background: listing.priority ? "var(--sf-priority-bg)" : "var(--sf-surface)",
-        borderTop: `1px solid ${active ? "var(--sf-accent)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border)"}`,
-        borderRight: `1px solid ${active ? "var(--sf-accent)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border)"}`,
-        borderBottom: `1px solid ${active ? "var(--sf-accent)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border)"}`,
+        borderTop: `2px solid ${active ? "var(--sf-accent)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border-strong)"}`,
+        borderRight: `2px solid ${active ? "var(--sf-accent)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border-strong)"}`,
+        borderBottom: `2px solid ${active ? "var(--sf-accent)" : listing.priority ? "var(--sf-priority-border)" : "var(--sf-border-strong)"}`,
         borderLeft: listing.priority
           ? "3px solid var(--sf-priority-accent)"
-          : `1px solid ${active ? "var(--sf-accent)" : "var(--sf-border)"}`,
-        boxShadow: active ? "0 0 0 1px var(--sf-accent), 0 3px 14px var(--sf-shadow)" : "0 1px 2px var(--sf-shadow)",
+          : `2px solid ${active ? "var(--sf-accent)" : "var(--sf-border-strong)"}`,
+        boxShadow: active ? "0 3px 14px var(--sf-shadow)" : "none",
         transition: "box-shadow 0.18s, border-color 0.18s",
-        borderRadius: 10,
+        borderRadius: 0,
         padding: "12px 14px",
-        marginBottom: 8,
-        marginLeft: 14,
+        marginBottom: gridMode ? 0 : 8,
+        marginLeft: gridMode ? 0 : 14,
       }}
     >
       {listing.priority && (
@@ -763,8 +927,9 @@ function ListingRow({
       >
         <div
           style={{
-            fontWeight: 600,
-            fontSize: 15,
+            fontFamily: SG,
+            fontWeight: 700,
+            fontSize: 17.5,
             color: "var(--sf-text)",
             lineHeight: 1.3,
             minWidth: 0,
@@ -803,11 +968,23 @@ function ListingRow({
           {notes.join(" · ")}
         </div>
       )}
-      {active && (
-        <div style={{ color: "var(--sf-accent)", fontSize: 12, fontWeight: 600, marginTop: 7 }}>
-          Open full details →
-        </div>
-      )}
+      <div style={{ marginTop: 10, display: "flex", justifyContent: "flex-end" }}>
+        <span
+          style={{
+            fontFamily: SG,
+            fontSize: 12.5,
+            fontWeight: 600,
+            padding: "5px 14px",
+            background: active ? "var(--sf-accent)" : "transparent",
+            color: active ? "var(--sf-on-accent)" : "var(--sf-accent-ink)",
+            border: `1.5px solid var(--sf-accent)`,
+            borderRadius: 0,
+            cursor: "pointer",
+          }}
+        >
+          More info →
+        </span>
+      </div>
     </button>
   );
 }

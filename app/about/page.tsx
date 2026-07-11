@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "About — ServeFremont",
   description:
-    "How ServeFremont verifies every volunteer listing in person, our inclusion policy, and the trust promise behind the map.",
+    "How ServeFremont verifies every volunteer listing with a real person at the organization, our inclusion policy, and the trust promise behind the map.",
 };
 
 export default function AboutPage() {
@@ -24,10 +24,11 @@ export default function AboutPage() {
         The verification promise
       </h2>
       <p className="mt-2 text-sm leading-relaxed text-ink">
-        Every listing is verified in person. We visit each organization, confirm
-        the details with a real person, and re-confirm each quarter. Every card
-        shows when it was last verified, so you can trust what you read. If a
-        listing hasn&apos;t been confirmed in a while, we say so plainly.
+        Every listing is verified directly with a real person at the
+        organization — by visit, phone, or email — and re-confirmed each
+        quarter. Every card shows when it was last verified, so you can trust
+        what you read. If a listing hasn&apos;t been confirmed in a while, we
+        say so plainly.
       </p>
 
       <h2 className="mt-6 font-display text-lg font-medium text-ink">

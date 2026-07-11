@@ -33,7 +33,6 @@ export type Opportunity = {
   scheduleNotes?: string;
   description?: string;
   transitNotes?: string;
-  nearSchool?: boolean;
   walkableFrom: string[]; // high schools this is walkable from
   groupFriendly: boolean;
   onboarding?: string;
