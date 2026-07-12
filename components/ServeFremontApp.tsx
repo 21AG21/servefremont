@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import type { Listing } from "@/lib/listing";
 import { haversineMiles, formatMiles } from "@/lib/distance";
-import AddressBox from "@/components/AddressBox";
+import LocateButton from "@/components/LocateButton";
 import { useIsMobile } from "@/lib/useIsMobile";
 
 const ListingMap = dynamic(() => import("@/components/ListingMap"), {
@@ -589,7 +589,7 @@ export default function ServeFremontApp({
         </div>
       </div>
 
-      {/* Address bar — its own row, prominent. */}
+      {/* Location bar — its own row, prominent. */}
       <div
         style={{
           flexShrink: 0,
@@ -597,11 +597,10 @@ export default function ServeFremontApp({
           borderBottom: "1px solid var(--sf-border-soft)",
         }}
       >
-        <AddressBox
+        <LocateButton
           active={!!userLoc}
-          onPick={(loc) => setUserLoc(loc)}
+          onLocate={(loc) => setUserLoc(loc)}
           onClear={() => setUserLoc(null)}
-          fullWidth
         />
       </div>
 
