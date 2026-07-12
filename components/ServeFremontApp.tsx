@@ -5,7 +5,9 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import type { Listing } from "@/lib/listing";
 import { haversineMiles, formatMiles } from "@/lib/distance";
+import { getFreshness } from "@/lib/freshness";
 import LocateButton from "@/components/LocateButton";
+import ReportOutdated from "@/components/ReportOutdated";
 import { useIsMobile } from "@/lib/useIsMobile";
 import { useSavedIds } from "@/lib/useSavedIds";
 
@@ -13,10 +15,6 @@ const ListingMap = dynamic(() => import("@/components/ListingMap"), {
   ssr: false,
   loading: () => <div style={center("var(--sf-text-muted)")}>Loading map…</div>,
 });
-
-// Where the "Report a problem" link in the detail view sends the user.
-const REPORT_PROBLEM_URL =
-  "https://docs.google.com/forms/d/e/1FAIpQLSekWo3JMmGrF6FujRdIr6UQ73W_7aqhus7r4XqJaDkgEv96uQ/viewform";
 
 // The one face used throughout this screen — renders as real San Francisco
 // on Apple devices, Inter (licensed, next/font-loaded) everywhere else.
@@ -86,6 +84,8 @@ export default function ServeFremontApp({
 }) {
   const [activeAge, setActiveAge] = useState<number | null>(null);
   const [filters, setFilters] = useState<Filters>(EMPTY);
+  // Free-text search across title / org / category (spec §3.3 #8).
+  const [query, setQuery] = useState("");
   // Which dropdown-facet menu is open (Civic Block v2 filter bar). One at a time.
   const [openFacet, setOpenFacet] = useState<
     "age" | "cause" | "schedule" | "school" | "req" | "status" | null
@@ -104,6 +104,18 @@ export default function ServeFremontApp({
   }, []);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
+
+  // Escape closes whichever layer is on top: an open facet menu first,
+  // otherwise the detail panel. Keyboard parity with the click-away layer.
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key !== "Escape") return;
+      if (openFacet !== null) setOpenFacet(null);
+      else if (detailId !== null) setDetailId(null);
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [openFacet, detailId]);
 
   const isMobile = useIsMobile();
 
@@ -149,7 +161,12 @@ export default function ServeFremontApp({
     new Set(listings.flatMap((l) => l.category))
   ).sort();
 
+  const q = query.trim().toLowerCase();
   const filtered = listings.filter((l) => {
+    if (q) {
+      const hay = `${l.title} ${l.org} ${l.category.join(" ")}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
     if (activeAge != null) {
       if (l.ageMin != null && l.ageMin > activeAge) return false;
       if (l.ageMax != null && l.ageMax < activeAge) return false;
@@ -198,8 +215,15 @@ export default function ServeFremontApp({
 
   const sorted = useMemo(() => {
     if (!userLoc) {
+      // Stale/unconfirmed listings sink to the bottom of the default sort
+      // (spec §3.7) — trust decays visibly instead of silently.
+      const staleRank = (l: Listing) => {
+        const level = getFreshness(l.verifiedAt).level;
+        return level === "stale" || level === "unverified" ? 1 : 0;
+      };
       return [...filtered].sort(
         (a, b) =>
+          staleRank(a) - staleRank(b) ||
           (a.org || "").localeCompare(b.org || "") ||
           a.title.localeCompare(b.title)
       );
@@ -243,6 +267,7 @@ export default function ServeFremontApp({
   const detail = detailId ? listings.find((l) => l.id === detailId) : null;
 
   const anyFilter =
+    q !== "" ||
     activeAge != null ||
     filters.categories.length > 0 ||
     filters.schedules.length > 0 ||
@@ -254,6 +279,7 @@ export default function ServeFremontApp({
   const clearAll = () => {
     setActiveAge(null);
     setFilters(EMPTY);
+    setQuery("");
     setOpenFacet(null);
   };
 
@@ -395,6 +421,25 @@ export default function ServeFremontApp({
 
   const filterFacets = (
     <>
+      <input
+        type="search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search"
+        aria-label="Search opportunities by name, organization, or cause"
+        style={{
+          fontFamily: UI,
+          fontSize: 12.5,
+          padding: "6px 11px",
+          borderRadius: 7,
+          border: `1px solid ${q ? "var(--sf-accent)" : "var(--sf-border)"}`,
+          background: q ? "var(--sf-accent-soft)" : "var(--sf-surface)",
+          color: "var(--sf-text)",
+          width: isMobile ? 110 : 150,
+          flexShrink: 0,
+          boxSizing: "border-box",
+        }}
+      />
       <LocateButton
         active={!!userLoc}
         onLocate={(loc) => setUserLoc(loc)}
@@ -904,20 +949,40 @@ export default function ServeFremontApp({
 
 // Quiet plain-text verification mark — no chip, no stamp. Trust comes from
 // legibility and consistency, not decoration.
-function VerifiedBadge({ verified }: { verified?: string }) {
+// Freshness decay (spec §3.7): green while recently confirmed, neutral as it
+// ages, an explicit warning once it's stale — never silently confident.
+function VerifiedBadge({
+  verified,
+  verifiedAt,
+}: {
+  verified?: string;
+  verifiedAt?: string;
+}) {
   if (!verified) return null;
+  const level = getFreshness(verifiedAt).level;
+  const label =
+    level === "fresh"
+      ? `Verified ${verified}`
+      : level === "aging"
+        ? `Last verified ${verified}`
+        : "Unconfirmed — check with the org";
   return (
     <span
       style={{
         flexShrink: 0,
         fontFamily: UI,
         fontWeight: 500,
-        color: "var(--sf-accent-ink)",
+        color:
+          level === "fresh"
+            ? "var(--sf-accent-ink)"
+            : level === "aging"
+              ? "var(--sf-text-muted)"
+              : "var(--sf-warn-text)",
         fontSize: 11.5,
         whiteSpace: "nowrap",
       }}
     >
-      Verified {verified}
+      {label}
     </span>
   );
 }
@@ -1136,7 +1201,7 @@ function ListingRow({
         >
           {listing.title}
         </div>
-        <VerifiedBadge verified={listing.verified} />
+        <VerifiedBadge verified={listing.verified} verifiedAt={listing.verifiedAt} />
       </div>
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 9 }}>
@@ -1391,7 +1456,7 @@ function DetailView({
           >
             ← {org || "Back"} · {orgOppCount} opportunit{orgOppCount === 1 ? "y" : "ies"}
           </button>
-          <VerifiedBadge verified={listing.verified} />
+          <VerifiedBadge verified={listing.verified} verifiedAt={listing.verifiedAt} />
         </div>
 
         {/* Title */}
@@ -1675,27 +1740,10 @@ function DetailView({
             textAlign: "center",
           }}
         >
-          <a
-            href={
-              REPORT_PROBLEM_URL.startsWith("mailto:")
-                ? `${REPORT_PROBLEM_URL}?subject=${encodeURIComponent(
-                    `ServeFremont: problem with "${listing.title}" — ${org}`,
-                  )}`
-                : `${REPORT_PROBLEM_URL}?usp=pp_url&entry.listing=${encodeURIComponent(
-                    `${listing.title} — ${org}`,
-                  )}`
-            }
-            target="_blank"
-            rel="noopener noreferrer"
-            className="sf-link"
-            style={{
-              fontSize: 12,
-              color: "var(--sf-text-muted)",
-              textDecoration: "underline",
-            }}
-          >
-            Found incorrect info? Report a problem →
-          </a>
+          <ReportOutdated
+            oppId={listing.id}
+            oppTitle={`${listing.title} — ${org}`}
+          />
         </div>
       </div>
 

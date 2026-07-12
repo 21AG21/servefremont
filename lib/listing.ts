@@ -12,6 +12,7 @@ export type Listing = {
   lat?: number;
   lng?: number;
   verified?: string; // formatted, e.g. "Jun 2026"
+  verifiedAt?: string; // raw ISO date — drives freshness decay (spec §3.7)
   distance?: string;
   accepting: boolean;
   schedule?: string; // Recurring / One-time / Drop-in

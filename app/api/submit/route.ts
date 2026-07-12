@@ -14,6 +14,11 @@ type SubmitBody = {
   company?: string; // honeypot — real users never fill this
 };
 
+// Length caps: a legit submission never needs more, and it stops one bad
+// actor from stuffing megabytes into the moderation queue.
+const cap = (v: unknown, max: number) =>
+  typeof v === "string" ? v.trim().slice(0, max) : "";
+
 export async function POST(request: Request) {
   let body: SubmitBody;
   try {
@@ -27,8 +32,8 @@ export async function POST(request: Request) {
     return Response.json({ ok: true });
   }
 
-  const orgName = (body.orgName ?? "").trim();
-  const email = (body.email ?? "").trim();
+  const orgName = cap(body.orgName, 200);
+  const email = cap(body.email, 200);
   if (!orgName || !email) {
     return Response.json(
       { error: "Organization name and email are required." },
@@ -54,11 +59,11 @@ export async function POST(request: Request) {
     body: JSON.stringify({
       fields: {
         Org_Name: orgName,
-        Contact_Name: (body.contactName ?? "").trim(),
+        Contact_Name: cap(body.contactName, 200),
         Email: email,
-        Role: (body.role ?? "").trim(),
-        Website: (body.website ?? "").trim(),
-        Notes: (body.notes ?? "").trim(),
+        Role: cap(body.role, 200),
+        Website: cap(body.website, 500),
+        Notes: cap(body.notes, 2000),
         Status: "pending",
         Submitted_At: new Date().toISOString().slice(0, 10),
       },

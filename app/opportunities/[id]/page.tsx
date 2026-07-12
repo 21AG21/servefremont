@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getOpportunity } from "@/lib/airtable";
 import type { Opportunity } from "@/lib/types";
 import FreshnessBadge from "@/components/FreshnessBadge";
+import ReportOutdated from "@/components/ReportOutdated";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -94,10 +95,6 @@ export default async function OpportunityPage({ params }: Params) {
   const { id } = await params;
   const opp = await getOpportunity(id);
   if (!opp) notFound();
-
-  const reportSubject = encodeURIComponent(
-    `Outdated listing: ${opp.title}${opp.orgName ? ` (${opp.orgName})` : ""}`
-  );
 
   return (
     <main
@@ -222,14 +219,10 @@ export default async function OpportunityPage({ params }: Params) {
         </div>
 
         <div style={{ marginTop: 20, borderTop: "1px solid var(--sf-border)", paddingTop: 14, fontSize: 12, color: "var(--sf-text-muted)" }}>
-          {/* TODO: replace with a real project email / report form (Sprint 3). */}
-          <a
-            href={`mailto:hello@servefremont.example?subject=${reportSubject}`}
-            className="sf-link"
-            style={{ color: "var(--sf-text-muted)", textDecoration: "underline" }}
-          >
-            Report outdated info
-          </a>
+          <ReportOutdated
+            oppId={opp.id}
+            oppTitle={`${opp.title}${opp.orgName ? ` — ${opp.orgName}` : ""}`}
+          />
         </div>
       </div>
     </main>

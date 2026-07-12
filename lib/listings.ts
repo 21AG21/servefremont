@@ -106,6 +106,7 @@ export async function getListings(): Promise<Listing[]> {
         verified:
           formatMonthYear(str(f.VerifiedDate)) ??
           formatMonthYear(str(f.Verified_At)),
+        verifiedAt: str(f.VerifiedDate) ?? str(f.Verified_At),
         distance: str(f.Distance),
         accepting: isYes(f.Accepting),
         schedule: str(f.Schedule) ?? str(f.Schedule_Type),
