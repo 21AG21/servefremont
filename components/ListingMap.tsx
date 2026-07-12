@@ -259,7 +259,6 @@ export default function ListingMap({
 
             {isShowingDirections && (
               <Popup
-                offset={[0, -46]}
                 closeButton
                 closeOnClick={false}
                 autoClose={false}

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "About — ServeFremont",
@@ -63,6 +64,22 @@ export default function AboutPage() {
           boxSizing: "border-box",
         }}
       >
+        <Link
+          href="/"
+          className="sf-link"
+          style={{
+            fontFamily: UI,
+            fontSize: 12.5,
+            fontWeight: 600,
+            color: "var(--sf-accent)",
+            textDecoration: "none",
+            display: "inline-block",
+            marginBottom: 16,
+          }}
+        >
+          ← Back to ServeFremont
+        </Link>
+
         <h1 style={{ fontFamily: UI, fontSize: 20, fontWeight: 700, margin: 0, color: "var(--sf-text)" }}>
           About ServeFremont
         </h1>

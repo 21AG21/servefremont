@@ -90,6 +90,12 @@ export default function ServeFremontApp({
   const [openFacet, setOpenFacet] = useState<
     "age" | "cause" | "schedule" | "school" | "req" | "status" | null
   >(null);
+  // Trigger button's measured on-screen position for the currently-open
+  // facet menu — see the facet()/floating-menu comment below for why this
+  // can't just be position:absolute under the button.
+  const [menuPos, setMenuPos] = useState<{ left: number; top: number } | null>(
+    null
+  );
   // Starts true so the client's first render matches the server HTML (no
   // hydration mismatch); corrected for small screens before first paint.
   const [showMap, setShowMap] = useState(true);
@@ -334,39 +340,58 @@ export default function ServeFremontApp({
     </button>
   );
 
+  // Rows for whichever facet is open, collected as each facet() call below
+  // runs during this render — read after filterFacets is built, once
+  // openFacet settles which key to use. Plain object, not state: it only
+  // needs to be fresh within this one render pass.
+  const menuRowsById: Record<string, React.ReactNode> = {};
+
   const facet = (
     id: NonNullable<typeof openFacet>,
     label: string,
     on: boolean,
     rows: React.ReactNode
-  ) => (
-    <span style={{ position: "relative", flexShrink: 0 }}>
-      <button
-        onClick={() => setOpenFacet((f) => (f === id ? null : id))}
-        className="sf-btn"
-        style={ddStyle(on)}
-      >
-        {label}
-        <span
-          aria-hidden
-          style={{
-            fontSize: 9,
-            opacity: 0.7,
-            display: "inline-block",
-            transition: "transform 0.15s ease",
-            transform: openFacet === id ? "rotate(180deg)" : "none",
+  ) => {
+    menuRowsById[id] = rows;
+    return (
+      <span style={{ position: "relative", flexShrink: 0 }}>
+        <button
+          onClick={(e) => {
+            if (openFacet === id) {
+              setOpenFacet(null);
+              return;
+            }
+            const rect = e.currentTarget.getBoundingClientRect();
+            const menuWidth = 210;
+            setMenuPos({
+              left: Math.min(
+                Math.max(8, rect.left),
+                window.innerWidth - menuWidth - 8
+              ),
+              top: rect.bottom + 6,
+            });
+            setOpenFacet(id);
           }}
+          className="sf-btn"
+          style={ddStyle(on)}
         >
-          ▾
-        </span>
-      </button>
-      {openFacet === id && (
-        <div key={id} style={menuStyle} className="sf-dropdown-enter">
-          {rows}
-        </div>
-      )}
-    </span>
-  );
+          {label}
+          <span
+            aria-hidden
+            style={{
+              fontSize: 9,
+              opacity: 0.7,
+              display: "inline-block",
+              transition: "transform 0.15s ease",
+              transform: openFacet === id ? "rotate(180deg)" : "none",
+            }}
+          >
+            ▾
+          </span>
+        </button>
+      </span>
+    );
+  };
 
   const filterFacets = (
     <>
@@ -509,6 +534,28 @@ export default function ServeFremontApp({
           onClick={() => setOpenFacet(null)}
           style={{ position: "fixed", inset: 0, zIndex: 40 }}
         />
+      )}
+
+      {/* Facet dropdown menu — rendered at the root, positioned from the
+          trigger button's measured rect (menuPos), instead of living
+          position:absolute inside the mobile filter row. That row scrolls
+          horizontally (.filter-scroll, overflow-x:auto), and a scroll
+          container can't have visible overflow on only one axis — the
+          browser forces overflow-y:auto too, which silently clipped this
+          menu on mobile even though the click and state update worked. */}
+      {openFacet && menuPos && (
+        <div
+          key={openFacet}
+          className="sf-dropdown-enter"
+          style={{
+            ...menuStyle,
+            position: "fixed",
+            left: menuPos.left,
+            top: menuPos.top,
+          }}
+        >
+          {menuRowsById[openFacet]}
+        </div>
       )}
 
       {/* Top bar */}
