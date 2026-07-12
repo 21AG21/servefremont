@@ -68,7 +68,7 @@ export default function AddressBox({
       } finally {
         setLoading(false);
       }
-    }, 350);
+    }, 180);
     return () => clearTimeout(handle);
   }, [q]);
 
@@ -242,7 +242,7 @@ export default function AddressBox({
           <div
             style={{
               position: "absolute",
-              bottom: "calc(100% + 8px)",
+              top: "calc(100% + 8px)",
               right: 0,
               width: 240,
               background: "var(--sf-surface)",

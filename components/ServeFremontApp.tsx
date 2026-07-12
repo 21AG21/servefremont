@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import type { Listing } from "@/lib/listing";
 import { haversineMiles, formatMiles } from "@/lib/distance";
 import AddressBox from "@/components/AddressBox";
@@ -248,14 +249,17 @@ export default function ServeFremontApp({
 
   const menuStyle: React.CSSProperties = {
     position: "absolute",
-    top: "calc(100% + 3px)",
+    top: "calc(100% + 6px)",
     left: 0,
-    width: 200,
+    width: 210,
     background: "var(--sf-surface)",
     border: "1px solid var(--sf-border)",
-    borderRadius: 7,
+    borderRadius: 10,
     boxShadow: "0 10px 28px var(--sf-shadow-strong)",
-    padding: 5,
+    padding: 6,
+    display: "flex",
+    flexDirection: "column",
+    gap: 1,
     zIndex: 50,
   };
 
@@ -273,11 +277,11 @@ export default function ServeFremontApp({
         display: "flex",
         alignItems: "center",
         gap: 9,
-        padding: "7px 8px",
+        padding: "8px 9px",
         width: "100%",
         border: "none",
         borderRadius: 6,
-        background: on ? "var(--sf-accent-soft)" : "none",
+        background: on ? "var(--sf-accent-soft)" : "transparent",
         textAlign: "left",
         cursor: "pointer",
         fontFamily: UI,
@@ -289,11 +293,11 @@ export default function ServeFremontApp({
       <span
         aria-hidden
         style={{
-          width: 14,
-          height: 14,
-          borderRadius: 4,
+          width: 15,
+          height: 15,
+          borderRadius: 5,
           flexShrink: 0,
-          border: `1.5px solid ${on ? "var(--sf-accent)" : "var(--sf-border)"}`,
+          border: `1.5px solid ${on ? "var(--sf-accent)" : "var(--sf-outline)"}`,
           background: on ? "var(--sf-accent)" : "transparent",
           color: "var(--sf-on-accent)",
           display: "inline-flex",
@@ -321,11 +325,24 @@ export default function ServeFremontApp({
         style={ddStyle(on)}
       >
         {label}
-        <span aria-hidden style={{ fontSize: 9, opacity: 0.7 }}>
+        <span
+          aria-hidden
+          style={{
+            fontSize: 9,
+            opacity: 0.7,
+            display: "inline-block",
+            transition: "transform 0.15s ease",
+            transform: openFacet === id ? "rotate(180deg)" : "none",
+          }}
+        >
           ▾
         </span>
       </button>
-      {openFacet === id && <div style={menuStyle}>{rows}</div>}
+      {openFacet === id && (
+        <div key={id} style={menuStyle} className="sf-dropdown-enter">
+          {rows}
+        </div>
+      )}
     </span>
   );
 
@@ -498,6 +515,26 @@ export default function ServeFremontApp({
           )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+          <Link
+            href="/about"
+            className="sf-btn"
+            style={{
+              fontFamily: UI,
+              fontSize: isMobile ? 12.5 : 12,
+              fontWeight: isMobile ? 600 : 500,
+              border: "1px solid var(--sf-border)",
+              borderRadius: isMobile ? 8 : 7,
+              padding: isMobile ? "7px 13px" : "6px 12px",
+              background: "var(--sf-surface)",
+              color: "var(--sf-text-soft)",
+              cursor: "pointer",
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+            }}
+          >
+            About
+          </Link>
           <button
             onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
             aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
@@ -506,9 +543,9 @@ export default function ServeFremontApp({
             style={{
               fontFamily: UI,
               fontSize: isMobile ? 14 : 12,
-              fontWeight: 500,
+              fontWeight: isMobile ? 600 : 500,
               lineHeight: 1,
-              border: "1px solid var(--sf-border)",
+              border: `1px solid ${isMobile && theme === "dark" ? "var(--sf-accent)" : "var(--sf-border)"}`,
               borderRadius: isMobile ? 8 : 7,
               padding: isMobile ? "7px" : "6px 12px",
               width: isMobile ? 32 : undefined,
@@ -516,8 +553,10 @@ export default function ServeFremontApp({
               display: isMobile ? "inline-flex" : undefined,
               alignItems: isMobile ? "center" : undefined,
               justifyContent: isMobile ? "center" : undefined,
-              background: "var(--sf-surface)",
-              color: "var(--sf-text-soft)",
+              background:
+                !isMobile && theme === "dark" ? "var(--sf-accent-soft)" : "var(--sf-surface)",
+              color:
+                !isMobile && theme === "dark" ? "var(--sf-accent-ink)" : "var(--sf-text-soft)",
               cursor: "pointer",
             }}
           >

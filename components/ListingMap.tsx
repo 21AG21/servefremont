@@ -55,8 +55,17 @@ function numberedIcon(
   enterDelayMs?: number
 ): L.DivIcon {
   const accent = priority ? "var(--sf-priority-accent)" : "var(--sf-accent)";
+  const tint = priority ? "var(--sf-priority-bg)" : "var(--sf-green-bg)";
   const size = active ? 30 : 26;
   const half = size / 2;
+  // Teardrop pin: a square rotated -45deg (border-radius rounds three
+  // corners, leaving one sharp corner to form the point). The rotation
+  // lives on an inner div so the outer div's hover/active scale (see
+  // .sf-map-pin in globals.css) and the pop-in animation aren't clobbered
+  // by a competing inline `transform`. The number sits in its own
+  // unrotated layer so it reads upright instead of on a diagonal.
+  const tipOffset = Math.round(size * 0.707);
+  const anchorY = half + tipOffset;
   // Only the marker's first-ever icon gets the pop-in — every later call
   // (active/priority toggling) omits it, since Leaflet's setIcon() rebuilds
   // this element on every change and an unconditional animation would
@@ -67,18 +76,22 @@ function numberedIcon(
       : "";
   return L.divIcon({
     className: "",
-    html: `<div class="sf-map-pin" style="
-      width:${size}px;height:${size}px;border-radius:8px;
-      background:${active ? accent : "var(--sf-surface)"};
-      color:${active ? "var(--sf-on-accent)" : accent};
-      border:1.5px solid ${accent};
-      box-shadow:0 1px 2px var(--sf-shadow), 0 4px 10px var(--sf-shadow-strong);
-      display:flex;align-items:center;justify-content:center;
-      cursor:pointer;${enterStyle}
-      font-family:${UI};font-size:${active ? 13 : 12}px;font-weight:700;">${n}</div>`,
+    html: `<div class="sf-map-pin" style="position:relative;width:${size}px;height:${size}px;cursor:pointer;${enterStyle}">
+      <div style="
+        position:absolute;inset:0;border-radius:50% 50% 50% 0;
+        background:${active ? accent : tint};
+        border:1.5px solid ${accent};
+        box-shadow:0 1px 2px var(--sf-shadow), 0 4px 10px var(--sf-shadow-strong);
+        transform:rotate(-45deg);"></div>
+      <div style="
+        position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+        color:${active ? "var(--sf-on-accent)" : accent};
+        font-family:${UI};font-size:${active ? 13 : 12}px;font-weight:700;
+        pointer-events:none;">${n}</div>
+    </div>`,
     iconSize: [size, size],
-    iconAnchor: [half, half],
-    popupAnchor: [0, -half - 4],
+    iconAnchor: [half, anchorY],
+    popupAnchor: [0, -2 * tipOffset - 8],
   });
 }
 
@@ -237,7 +250,7 @@ export default function ListingMap({
             }}
           >
             {!isShowingDirections && (
-              <Tooltip direction="top" offset={[0, -18]}>
+              <Tooltip direction="top" offset={[0, -46]}>
                 {g.orgName}
                 {count > 1 ? ` · ${count} opportunities` : ""}
                 {isActive ? " · click for directions" : ""}
@@ -246,7 +259,7 @@ export default function ListingMap({
 
             {isShowingDirections && (
               <Popup
-                offset={[0, -18]}
+                offset={[0, -46]}
                 closeButton
                 closeOnClick={false}
                 autoClose={false}

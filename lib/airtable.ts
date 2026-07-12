@@ -147,7 +147,7 @@ function toOpportunity(
     lng: org?.lng,
     categories: org?.categories ?? [],
     minAge: num(f.Min_Age),
-    guardianRequiredUnder: num(f.Guardian_Required_Under),
+    guardianRequiredUnder: num(f.Guardian_Required_Number),
     adultsOnly: isYes(f.Adults_Only),
     signsHourForms: yesNoUnknown(f.Signs_Hour_Forms),
     accepting: parseAccepting(f.Accepting),
