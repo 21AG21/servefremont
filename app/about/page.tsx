@@ -21,15 +21,24 @@ function Section({
 }) {
   return (
     <>
-      <h2 style={{ fontFamily: UI, fontSize: 13, fontWeight: 700, marginTop: 16, marginBottom: 0, color: "var(--sf-text)" }}>
+      <h2
+        style={{
+          fontFamily: UI,
+          fontSize: 18,
+          fontWeight: 700,
+          marginTop: 40,
+          marginBottom: 0,
+          color: "var(--sf-text)",
+        }}
+      >
         {heading}
       </h2>
       <p
         style={{
           fontFamily: UI,
-          fontSize: 12.5,
-          lineHeight: 1.65,
-          marginTop: 6,
+          fontSize: 16.5,
+          lineHeight: 1.7,
+          marginTop: 10,
           marginBottom: 0,
           color: soft ? "var(--sf-text-muted)" : "var(--sf-text-soft)",
         }}
@@ -46,24 +55,11 @@ export default function AboutPage() {
       style={{
         minHeight: "100dvh",
         background: "var(--sf-bg)",
-        display: "flex",
-        justifyContent: "center",
-        padding: "40px 20px",
+        padding: "clamp(28px, 8vw, 88px) 24px",
+        boxSizing: "border-box",
       }}
     >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: 560,
-          background: "var(--sf-surface)",
-          border: "1px solid var(--sf-border)",
-          borderRadius: 14,
-          padding: 24,
-          boxShadow:
-            "0 1px 2px var(--sf-shadow), 0 20px 44px -22px var(--sf-shadow-strong)",
-          boxSizing: "border-box",
-        }}
-      >
+      <div style={{ maxWidth: 640, margin: "0 auto" }}>
         <Link
           href="/"
           className="sf-link"
@@ -71,20 +67,38 @@ export default function AboutPage() {
             fontFamily: UI,
             fontSize: 12.5,
             fontWeight: 600,
-            color: "var(--sf-accent)",
+            color: "var(--sf-text-muted)",
             textDecoration: "none",
             display: "inline-block",
-            marginBottom: 16,
           }}
         >
-          ← Back to ServeFremont
+          ← ServeFremont
         </Link>
 
-        <h1 style={{ fontFamily: UI, fontSize: 20, fontWeight: 700, margin: 0, color: "var(--sf-text)" }}>
+        <h1
+          style={{
+            fontFamily: UI,
+            fontSize: "clamp(28px, 5vw, 38px)",
+            fontWeight: 800,
+            letterSpacing: "-0.02em",
+            lineHeight: 1.15,
+            margin: "22px 0 0",
+            color: "var(--sf-text)",
+          }}
+        >
           About ServeFremont
         </h1>
 
-        <p style={{ fontFamily: UI, fontSize: 12.5, lineHeight: 1.65, marginTop: 12, marginBottom: 0, color: "var(--sf-text-soft)" }}>
+        <p
+          style={{
+            fontFamily: UI,
+            fontSize: 18,
+            lineHeight: 1.7,
+            marginTop: 20,
+            marginBottom: 0,
+            color: "var(--sf-text-soft)",
+          }}
+        >
           ServeFremont is a free, student-built map of volunteer opportunities in
           Fremont, California. The goal is simple: any student should be able to
           find a legitimate, age-eligible, currently-active opportunity they can

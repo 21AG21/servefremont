@@ -74,6 +74,10 @@ function numberedIcon(
     enterDelayMs != null
       ? `animation:sf-pin-pop 0.3s cubic-bezier(0.34,1.56,0.64,1) ${enterDelayMs}ms both;`
       : "";
+  // Two-digit numerals read as mathematically centered but optically
+  // right-heavy inside a circular badge — nudge them left a hair to
+  // compensate, matching how single digits already look centered.
+  const numberNudge = n >= 10 ? "transform:translateX(-1px);" : "";
   return L.divIcon({
     className: "",
     html: `<div class="sf-map-pin" style="position:relative;width:${size}px;height:${size}px;cursor:pointer;${enterStyle}">
@@ -83,11 +87,11 @@ function numberedIcon(
         border:1.5px solid ${accent};
         box-shadow:0 1px 2px var(--sf-shadow), 0 4px 10px var(--sf-shadow-strong);
         transform:rotate(-45deg);"></div>
-      <div style="
+      <div style='
         position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
         color:${active ? "var(--sf-on-accent)" : accent};
         font-family:${UI};font-size:${active ? 13 : 12}px;font-weight:700;
-        pointer-events:none;">${n}</div>
+        pointer-events:none;${numberNudge}'>${n}</div>
     </div>`,
     iconSize: [size, size],
     iconAnchor: [half, anchorY],

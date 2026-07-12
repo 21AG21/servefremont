@@ -395,6 +395,11 @@ export default function ServeFremontApp({
 
   const filterFacets = (
     <>
+      <LocateButton
+        active={!!userLoc}
+        onLocate={(loc) => setUserLoc(loc)}
+        onClear={() => setUserLoc(null)}
+      />
       {facet(
         "age",
         activeAge != null ? `Age: ${activeAge}` : "Age",
@@ -635,7 +640,7 @@ export default function ServeFremontApp({
               fontFamily: UI,
               fontSize: isMobile ? 14 : 12,
               fontWeight: isMobile ? 600 : 500,
-              lineHeight: 1,
+              lineHeight: isMobile ? 1 : undefined,
               border: `1px solid ${isMobile && theme === "dark" ? "var(--sf-accent)" : "var(--sf-border)"}`,
               borderRadius: isMobile ? 8 : 7,
               padding: isMobile ? "7px" : "6px 12px",
@@ -678,21 +683,6 @@ export default function ServeFremontApp({
             {isMobile ? (showMap ? "List" : "Map") : showMap ? "Hide map" : "Show map"}
           </button>
         </div>
-      </div>
-
-      {/* Location bar — its own row, prominent. */}
-      <div
-        style={{
-          flexShrink: 0,
-          padding: isMobile ? "9px 16px" : "11px 22px",
-          borderBottom: "1px solid var(--sf-border-soft)",
-        }}
-      >
-        <LocateButton
-          active={!!userLoc}
-          onLocate={(loc) => setUserLoc(loc)}
-          onClear={() => setUserLoc(null)}
-        />
       </div>
 
       {/* Filter bar — one-line dropdown facets */}
