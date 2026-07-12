@@ -1,17 +1,69 @@
-// Shown while the homepage fetches from Airtable.
+// Shown while the homepage fetches from Airtable on the server.
+// Mirrors the app shell (header bar + list column) so the swap is seamless.
+
+const UI =
+  '-apple-system, BlinkMacSystemFont, var(--font-inter), "Segoe UI", system-ui, sans-serif';
+
+function Bar({ w, h = 12 }: { w: number | string; h?: number }) {
+  return (
+    <div
+      style={{
+        width: w,
+        height: h,
+        borderRadius: 6,
+        background: "var(--sf-pill-track)",
+      }}
+    />
+  );
+}
+
 export default function Loading() {
   return (
-    <main className="mx-auto w-full max-w-xl px-4 py-6">
-      <div className="h-7 w-64 animate-pulse rounded bg-ink/10" />
-      <div className="mt-2 h-4 w-80 animate-pulse rounded bg-ink/10" />
-      <div className="mt-6 flex flex-col gap-3">
-        {[0, 1, 2].map((i) => (
+    <div
+      style={{
+        height: "100dvh",
+        display: "flex",
+        flexDirection: "column",
+        background: "var(--sf-bg)",
+        fontFamily: UI,
+      }}
+    >
+      <div
+        style={{
+          borderBottom: "1px solid var(--sf-border)",
+          padding: "12px 20px",
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+        }}
+      >
+        <Bar w={120} h={16} />
+        <Bar w={160} />
+      </div>
+      <div style={{ flex: 1, padding: "15px 20px", maxWidth: 560 }}>
+        {[0, 1, 2, 3].map((i) => (
           <div
             key={i}
-            className="h-28 animate-pulse rounded-xl border border-ink/10 bg-white"
-          />
+            style={{
+              border: "1.5px solid var(--sf-outline)",
+              borderRadius: 10,
+              background: "var(--sf-surface)",
+              padding: 14,
+              marginBottom: 10,
+            }}
+          >
+            <Bar w="60%" h={14} />
+            <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
+              <Bar w={70} />
+              <Bar w={90} />
+              <Bar w={60} />
+            </div>
+          </div>
         ))}
+        <p style={{ fontSize: 12.5, color: "var(--sf-text-muted)" }}>
+          Loading opportunities…
+        </p>
       </div>
-    </main>
+    </div>
   );
 }

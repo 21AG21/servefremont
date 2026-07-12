@@ -66,6 +66,16 @@ function isYes(value: unknown): boolean {
   return false;
 }
 
+// Distinguishes an explicit "No" from a genuinely unconfirmed (blank) field —
+// unlike isYes(), which collapses both to false.
+function yesNoUnknown(value: unknown): boolean | null {
+  if (typeof value !== "string") return null;
+  const v = value.toLowerCase();
+  if (v === "yes") return true;
+  if (v === "no") return false;
+  return null;
+}
+
 function parseAccepting(value: unknown): Opportunity["accepting"] {
   if (value === true) return "yes";
   if (typeof value === "string") {
@@ -139,7 +149,7 @@ function toOpportunity(
     minAge: num(f.Min_Age),
     guardianRequiredUnder: num(f.Guardian_Required_Under),
     adultsOnly: isYes(f.Adults_Only),
-    signsHourForms: isYes(f.Signs_Hour_Forms),
+    signsHourForms: yesNoUnknown(f.Signs_Hour_Forms),
     accepting: parseAccepting(f.Accepting),
     scheduleType: str(f.Schedule_Type),
     scheduleNotes: str(f.Schedule_Notes),

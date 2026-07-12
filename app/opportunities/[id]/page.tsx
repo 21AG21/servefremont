@@ -159,9 +159,11 @@ export default async function OpportunityPage({ params }: Params) {
           <Answer question="Can I get there?">{getThereAnswer(opp)}</Answer>
           <Answer question="Can I just start?">{startAnswer(opp)}</Answer>
           <Answer question="Will they sign my hour form?">
-            {opp.signsHourForms
+            {opp.signsHourForms === true
               ? "Yes — they sign school service-hour forms."
-              : "Not for school hour forms. Confirm with your CSF/NHS adviser, whose rules may differ."}
+              : opp.signsHourForms === false
+                ? "No — they don't sign school hour forms. Confirm with your CSF/NHS adviser, whose rules may differ."
+                : "Not confirmed yet — ask them directly when you reach out, and check with your CSF/NHS adviser."}
           </Answer>
         </div>
 

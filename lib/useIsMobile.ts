@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 
 export function useIsMobile(): boolean {
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window === "undefined" ? false : window.innerWidth <= 640
-  );
-  useEffect(() => {
+  // false on the server and on the first client render (hydration-safe);
+  // corrected before first paint, then tracked live.
+  const [isMobile, setIsMobile] = useState(false);
+  useLayoutEffect(() => {
     const mq = window.matchMedia("(max-width: 640px)");
     setIsMobile(mq.matches);
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);

@@ -1,18 +1,62 @@
-@import "tailwindcss";
-
-@theme {
-  --color-paper: #faf8f3;
-  --color-ink: #2b2b28;
-  --color-ink-soft: #6b6a63;
-  --color-brand: #18603f;
-  --color-brand-dark: #0f4a30;
-  --color-brand-soft: #e6efe9;
-  --color-marigold: #c97f0a;
-  --color-marigold-soft: #fbecc9;
-  --color-marigold-ink: #7a4f08;
-
-  --font-sans: var(--font-inter);
-  --font-display: var(--font-fraunces);
+/* Minimal reset — replaces Tailwind's preflight, keeping only the behaviors
+   this codebase actually leans on: border-box sizing, zeroed default margins,
+   1.5 line-height, inherited type on controls, quiet anchors, plain lists. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  height: 100%;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+body {
+  min-height: 100%;
+  margin: 0;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+figure,
+blockquote {
+  margin: 0;
+}
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+  margin: 0;
+}
+button {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  text-align: inherit;
+  cursor: pointer;
+}
+img,
+svg {
+  display: block;
+  max-width: 100%;
 }
 
 /* App-wide tokens used by the inline-styled components.
@@ -212,6 +256,64 @@ body {
   opacity: 0.45;
 }
 
+/* Entrance animations — cards, map pins, and the detail view animate in
+   once when they're first inserted into the DOM. Re-rendering an
+   already-mounted element (a filter change, an active-state toggle) never
+   replays these: CSS animations only run on actual DOM insertion, not on
+   React prop updates to an existing node. */
+@keyframes sf-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.sf-enter {
+  animation: sf-rise 0.35s ease-out both;
+}
+
+@keyframes sf-pin-pop {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes sf-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.sf-detail-enter {
+  animation: sf-slide-in 0.2s ease-out both;
+}
+
+@keyframes sf-slide-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+}
+.sf-detail-exit {
+  animation: sf-slide-out 0.14s ease-in both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sf-btn,
   .sf-card,
@@ -229,6 +331,14 @@ body {
   .sf-map-pin:active,
   .leaflet-control-zoom a:hover,
   .leaflet-control-zoom a:active {
+    transform: none !important;
+  }
+  .sf-enter,
+  .sf-map-pin,
+  .sf-detail-enter,
+  .sf-detail-exit {
+    animation: none !important;
+    opacity: 1 !important;
     transform: none !important;
   }
 }

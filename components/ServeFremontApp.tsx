@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import type { Listing } from "@/lib/listing";
 import { haversineMiles, formatMiles } from "@/lib/distance";
@@ -64,20 +64,25 @@ function toggle(arr: string[], v: string): string[] {
   return arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
 }
 
-export default function ServeFremontApp() {
-  const [listings, setListings] = useState<Listing[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
+export default function ServeFremontApp({
+  listings,
+  error,
+}: {
+  listings: Listing[];
+  error?: string;
+}) {
   const [activeAge, setActiveAge] = useState<number | null>(null);
   const [filters, setFilters] = useState<Filters>(EMPTY);
   // Which dropdown-facet menu is open (Civic Block v2 filter bar). One at a time.
   const [openFacet, setOpenFacet] = useState<
     "age" | "cause" | "schedule" | "req" | "status" | null
   >(null);
-  const [showMap, setShowMap] = useState(() =>
-    typeof window === "undefined" ? true : window.innerWidth > 640
-  );
+  // Starts true so the client's first render matches the server HTML (no
+  // hydration mismatch); corrected for small screens before first paint.
+  const [showMap, setShowMap] = useState(true);
+  useLayoutEffect(() => {
+    if (window.innerWidth <= 640) setShowMap(false);
+  }, []);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
 
@@ -111,22 +116,6 @@ export default function ServeFremontApp() {
       else next.add(name);
       return next;
     });
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/listings")
-      .then((r) => r.json())
-      .then((data) => {
-        if (cancelled) return;
-        if (data.error) setError(data.error);
-        else setListings(data.listings ?? []);
-      })
-      .catch(() => !cancelled && setError("Could not load listings."))
-      .finally(() => !cancelled && setLoading(false));
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   useEffect(() => {
     if (!activeId || detailId) return;
@@ -638,10 +627,6 @@ export default function ServeFremontApp() {
               }
               onBack={() => setDetailId(null)}
             />
-          ) : loading ? (
-            <p style={{ padding: 6, color: "var(--sf-text-muted)", fontSize: 13 }}>
-              Loading opportunities…
-            </p>
           ) : error ? (
             <p style={{ padding: 6, color: "var(--sf-text-muted)", fontSize: 13 }}>{error}</p>
           ) : sorted.length === 0 ? (
@@ -650,6 +635,14 @@ export default function ServeFremontApp() {
             </p>
           ) : (() => {
             const useGrid = !showMap && !isMobile;
+            // Staggers each row/header's entrance by its reading-order
+            // position, capped so a long list doesn't drag the reveal out.
+            // Recomputed every render, but harmless: a CSS animation only
+            // plays when its element is newly inserted into the DOM, so
+            // already-mounted rows (the common case — filtering/sorting)
+            // never replay it, only genuinely new ones do.
+            let enterIndex = 0;
+            const enterDelay = () => `${Math.min(enterIndex++, 14) * 25}ms`;
             const items = orgGroups.flatMap((group, gi) => {
               const orgActive = group.listings.some((l) => l.id === activeId);
               const orgDistance =
@@ -661,10 +654,12 @@ export default function ServeFremontApp() {
               nodes.push(
                 <div
                   key={`org-${group.orgName}`}
+                  className="sf-enter"
                   style={{
                     gridColumn: useGrid ? "1 / -1" : undefined,
                     marginTop: gi > 0 && !useGrid ? 0 : undefined,
                     marginBottom: useGrid ? -4 : 0,
+                    animationDelay: enterDelay(),
                   }}
                 >
                   <OrgHeader
@@ -687,6 +682,7 @@ export default function ServeFremontApp() {
                       active={l.id === activeId}
                       distance={distances.get(l.id)}
                       flushLeft={useGrid || isMobile}
+                      enterDelay={enterDelay()}
                       onClick={() => {
                         if (activeId === l.id) setDetailId(l.id);
                         else setActiveId(l.id);
@@ -862,6 +858,7 @@ function ListingRow({
   active,
   distance,
   flushLeft,
+  enterDelay,
   onClick,
 }: {
   listing: Listing;
@@ -870,6 +867,7 @@ function ListingRow({
   // True in the 2-col grid (map hidden) and on mobile — both drop the
   // org-relative 36px indent since there's no room/reason to keep it.
   flushLeft?: boolean;
+  enterDelay?: string;
   onClick: () => void;
 }) {
   // Quiet outlined chips — color is reserved for information that changes
@@ -906,7 +904,7 @@ function ListingRow({
     <button
       id={`row-${listing.id}`}
       onClick={onClick}
-      className="sf-card"
+      className="sf-card sf-enter"
       style={{
         display: "block",
         width: flushLeft ? "100%" : "calc(100% - 36px)",
@@ -926,11 +924,15 @@ function ListingRow({
         boxShadow: active
           ? "0 4px 16px var(--sf-shadow)"
           : "0 1px 3px var(--sf-shadow)",
-        transition: "box-shadow 0.18s, border-color 0.18s",
+        // Includes transform so the sf-card hover/press lift (set only via
+        // the CSS class) actually eases instead of snapping — an inline
+        // transition wins over the class's for any property listed here.
+        transition: "box-shadow 0.18s, border-color 0.18s, transform 0.15s ease",
         borderRadius: 10,
         padding: "13px 15px",
         marginBottom: 9,
         marginLeft: flushLeft ? 0 : 36,
+        animationDelay: enterDelay,
       }}
     >
       {listing.priority && (
@@ -1133,6 +1135,13 @@ function DetailView({
   onBack: () => void;
 }) {
   const [saved, setSaved] = useState(false);
+  // Plays a quick exit animation before actually calling onBack (which
+  // unmounts this component), instead of unmounting instantly.
+  const [closing, setClosing] = useState(false);
+  const handleBack = () => {
+    setClosing(true);
+    setTimeout(onBack, 140);
+  };
   const org = listing.org.replace(" - Placeholder", "");
   const startUrl = listing.howToStartUrl ?? listing.website;
   const isMailto = startUrl?.startsWith("mailto:") ?? false;
@@ -1174,6 +1183,7 @@ function DetailView({
 
   return (
     <div
+      className={closing ? "sf-detail-exit" : "sf-detail-enter"}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -1193,7 +1203,7 @@ function DetailView({
           }}
         >
           <button
-            onClick={onBack}
+            onClick={handleBack}
             className="sf-link"
             style={{
               border: "none",
@@ -1538,7 +1548,11 @@ function DetailView({
             {listing.accepting ? "Accepting volunteers" : "Waitlist open"}
           </div>
           <div style={{ fontSize: 11, color: "var(--sf-text-muted)" }}>
-            {listing.signsHourForms ? "Signs hour forms" : "Hours not signed"}
+            {listing.signsHourForms === true
+              ? "Signs hour forms"
+              : listing.signsHourForms === false
+                ? "Hours not signed"
+                : "Hour forms unconfirmed"}
           </div>
         </div>
         <button

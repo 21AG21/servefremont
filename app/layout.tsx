@@ -1,18 +1,11 @@
 import type { Metadata } from "next";
-import { Inter, Fraunces } from "next/font/google";
+import { Inter } from "next/font/google";
+import { InlineScript } from "@/components/InlineScript";
 import "./globals.css";
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
-});
-
-// Kept for a few legacy Tailwind pages (for-organizations, org detail,
-// not-found) that still use the serif `font-display` utility class.
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
-  subsets: ["latin"],
-  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
@@ -27,23 +20,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${inter.variable} ${fraunces.variable} h-full antialiased`}
-      suppressHydrationWarning
-    >
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
         {/* Set the initial theme before paint so there's no flash. No storage —
             we always start from the OS preference. The in-app toggle is
             session-only and resets on reload. */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html:
-              "(function(){try{var m=window.matchMedia('(prefers-color-scheme: dark)');document.documentElement.dataset.theme=m.matches?'dark':'light';}catch(e){}})();",
-          }}
-        />
+        <InlineScript html="(function(){try{var m=window.matchMedia('(prefers-color-scheme: dark)');document.documentElement.dataset.theme=m.matches?'dark':'light';}catch(e){}})();" />
       </head>
-      <body className="min-h-full">
+      <body>
         {children}
         {/* Cookieless analytics (GoatCounter). Off until NEXT_PUBLIC_GOATCOUNTER
             is set to your site code, e.g. "mysite". No cookies, no personal data. */}

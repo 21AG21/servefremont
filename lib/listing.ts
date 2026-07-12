@@ -15,7 +15,7 @@ export type Listing = {
   distance?: string;
   accepting: boolean;
   schedule?: string; // Recurring / One-time / Drop-in
-  signsHourForms: boolean;
+  signsHourForms: boolean | null; // null = not yet confirmed either way
   nearTransit: boolean;
   groupsOK: boolean;
   priority: boolean;

@@ -48,10 +48,23 @@ const modeButtonStyle: CSSProperties = {
   whiteSpace: "nowrap",
 };
 
-function numberedIcon(n: number, active: boolean, priority: boolean): L.DivIcon {
+function numberedIcon(
+  n: number,
+  active: boolean,
+  priority: boolean,
+  enterDelayMs?: number
+): L.DivIcon {
   const accent = priority ? "var(--sf-priority-accent)" : "var(--sf-accent)";
   const size = active ? 30 : 26;
   const half = size / 2;
+  // Only the marker's first-ever icon gets the pop-in — every later call
+  // (active/priority toggling) omits it, since Leaflet's setIcon() rebuilds
+  // this element on every change and an unconditional animation would
+  // replay on every click instead of just on mount.
+  const enterStyle =
+    enterDelayMs != null
+      ? `animation:sf-pin-pop 0.3s cubic-bezier(0.34,1.56,0.64,1) ${enterDelayMs}ms both;`
+      : "";
   return L.divIcon({
     className: "",
     html: `<div class="sf-map-pin" style="
@@ -61,7 +74,7 @@ function numberedIcon(n: number, active: boolean, priority: boolean): L.DivIcon 
       border:1.5px solid ${accent};
       box-shadow:0 1px 2px var(--sf-shadow), 0 4px 10px var(--sf-shadow-strong);
       display:flex;align-items:center;justify-content:center;
-      cursor:pointer;
+      cursor:pointer;${enterStyle}
       font-family:${UI};font-size:${active ? 13 : 12}px;font-weight:700;">${n}</div>`,
     iconSize: [size, size],
     iconAnchor: [half, half],
@@ -121,6 +134,11 @@ export default function ListingMap({
 }) {
   const [directionsOrg, setDirectionsOrg] = useState<string | null>(null);
   const markerRefs = useRef<Map<string, L.Marker>>(new Map());
+  // Orgs whose pin has already played its pop-in — read/written during
+  // render (not an effect) so the very first icon computed for an org is
+  // the one that gets the animation; every later icon swap for that org
+  // (active toggling) is skipped.
+  const enteredOrgs = useRef<Set<string>>(new Set());
 
   const groupsWithCoords = orgGroups.filter(
     (g) => g.lat != null && g.lng != null
@@ -184,11 +202,18 @@ export default function ListingMap({
           ?.transitNotes;
         const destination =
           address ?? `${g.orgName}, Fremont, CA`;
+        const isFirstAppearance = !enteredOrgs.current.has(g.orgName);
+        if (isFirstAppearance) enteredOrgs.current.add(g.orgName);
         return (
           <Marker
             key={g.orgName}
             position={[g.lat!, g.lng!]}
-            icon={numberedIcon(orgIdx, isActive, isPriority)}
+            icon={numberedIcon(
+              orgIdx,
+              isActive,
+              isPriority,
+              isFirstAppearance ? Math.min(orgIdx - 1, 12) * 20 : undefined
+            )}
             ref={(m) => {
               if (m) markerRefs.current.set(g.orgName, m);
               else markerRefs.current.delete(g.orgName);

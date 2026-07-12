@@ -27,7 +27,7 @@ export type Opportunity = {
   minAge?: number;
   guardianRequiredUnder?: number;
   adultsOnly: boolean;
-  signsHourForms: boolean;
+  signsHourForms: boolean | null; // null = not yet confirmed either way
   accepting: "yes" | "no" | "waitlist" | "unknown";
   scheduleType?: string;
   scheduleNotes?: string;

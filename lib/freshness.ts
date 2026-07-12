@@ -36,9 +36,3 @@ export function getFreshness(verifiedAt?: string): Freshness {
   if (months <= 6) return { level: "aging", monthYear };
   return { level: "stale", monthYear };
 }
-
-// Higher = more recently verified. Unverified sinks to the bottom.
-export function verifiedSortKey(verifiedAt?: string): number {
-  const date = parse(verifiedAt);
-  return date ? date.getTime() : -Infinity;
-}
