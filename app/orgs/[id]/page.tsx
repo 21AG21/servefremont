@@ -6,6 +6,16 @@ import OpportunityCard from "@/components/OpportunityCard";
 
 type Params = { params: Promise<{ id: string }> };
 
+// Lets Vercel's edge cache absorb repeat hits on the same org page instead of
+// re-invoking the origin function on every request (see
+// docs/abuse-protection-plan.md). Returning [] from generateStaticParams is
+// required for a dynamic segment to get ISR-at-runtime instead of being
+// fully dynamic — Next renders each id on first visit, then caches it.
+export const revalidate = 60;
+export async function generateStaticParams() {
+  return [];
+}
+
 const UI =
   '-apple-system, BlinkMacSystemFont, var(--font-inter), "Segoe UI", system-ui, sans-serif';
 
