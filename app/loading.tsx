@@ -7,11 +7,11 @@ const UI =
 function Bar({ w, h = 12 }: { w: number | string; h?: number }) {
   return (
     <div
+      className="sf-shimmer"
       style={{
         width: w,
         height: h,
         borderRadius: 6,
-        background: "var(--sf-pill-track)",
       }}
     />
   );

@@ -216,7 +216,8 @@ body {
 /* Map pins — the inner div (not the Leaflet wrapper, which carries
    Leaflet's own positioning transform and can't be touched). */
 .sf-map-pin {
-  transition: transform 0.15s ease;
+  transition: transform 0.15s ease, background-color 0.25s ease,
+    border-color 0.25s ease;
 }
 .sf-map-pin:hover {
   transform: scale(1.12);
@@ -255,6 +256,20 @@ body {
 }
 .sf-menu-item:active {
   opacity: 0.45;
+}
+
+/* Theme cross-fade — dark/light toggling melts instead of snapping. This is
+   the one place a background-color/color transition applies broadly rather
+   than only on hover/press, since the change source is a single CSS
+   variable flip (html[data-theme]) rather than per-state inline styling.
+   Components with their own faster transition (.sf-btn, .sf-card, etc.)
+   naturally win here — a class selector is more specific than `*`, so
+   interactive feedback keeps its snappier 0.15s duration. */
+*,
+*::before,
+*::after {
+  transition: background-color 0.25s ease, color 0.25s ease,
+    border-color 0.25s ease;
 }
 
 /* Entrance animations — cards, map pins, and the detail view animate in
@@ -330,13 +345,49 @@ body {
   animation: sf-slide-out 0.14s ease-in both;
 }
 
+@keyframes sf-heart-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.sf-heart-pop {
+  display: inline-block;
+  animation: sf-heart-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Loading-skeleton shimmer — a moving gradient sweep on the placeholder
+   bars, since loading.tsx is a real cold-start screen, not a rare edge
+   case (every fresh server fetch shows it). */
+@keyframes sf-shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: 200px 0;
+  }
+}
+.sf-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    var(--sf-pill-track) 0%,
+    var(--sf-surface-hover) 50%,
+    var(--sf-pill-track) 100%
+  );
+  background-size: 400px 100%;
+  background-repeat: no-repeat;
+  animation: sf-shimmer 1.4s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .sf-btn,
-  .sf-card,
-  .sf-link,
-  .sf-menu-item,
-  .sf-map-pin,
-  .leaflet-control-zoom a {
+  *,
+  *::before,
+  *::after {
     transition: none !important;
   }
   .sf-btn:hover,
@@ -353,10 +404,15 @@ body {
   .sf-map-pin,
   .sf-detail-enter,
   .sf-detail-exit,
-  .sf-dropdown-enter {
+  .sf-dropdown-enter,
+  .sf-heart-pop {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+  .sf-shimmer {
+    animation: none !important;
+    background: var(--sf-pill-track) !important;
   }
 }
 
@@ -370,5 +426,14 @@ body {
   }
   .filter-scroll::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Safety net for the header subtitle: isMobile is JS-computed and only
+     corrects after hydration, so the SSR HTML briefly ships the desktop
+     header (subtitle included) to every viewport. This CSS-only rule hides
+     it immediately on narrow screens regardless of JS timing, so it can
+     never wrap to 3 lines and squeeze the top bar before React catches up. */
+  .sf-subtitle {
+    display: none !important;
   }
 }

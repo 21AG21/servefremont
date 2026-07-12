@@ -120,6 +120,7 @@ export async function getListings(): Promise<Listing[]> {
         nearTransit: !!str(f.Transit_Notes) || isYes(f.Near_Transit),
         groupsOK: isYes(f.Group_Friendly) || isYes(f.Groups_OK),
         priority: f.Priority === true,
+        walkableFrom: selectNames(f.Near_School),
         description: str(f.Description),
         onboarding: selectNames(f.Onboarding).join(", ") || undefined,
         onboardingTime: str(f.Onboarding_Time),

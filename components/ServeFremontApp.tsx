@@ -7,6 +7,7 @@ import type { Listing } from "@/lib/listing";
 import { haversineMiles, formatMiles } from "@/lib/distance";
 import LocateButton from "@/components/LocateButton";
 import { useIsMobile } from "@/lib/useIsMobile";
+import { useSavedIds } from "@/lib/useSavedIds";
 
 const ListingMap = dynamic(() => import("@/components/ListingMap"), {
   ssr: false,
@@ -26,6 +27,13 @@ const UI =
 
 const AGES = [13, 14, 15, 16, 17, 18];
 const SCHEDULES = ["Shifts", "Drop-in", "Events", "Flexible/Remote"];
+const SCHOOLS = [
+  "American",
+  "Irvington",
+  "Kennedy",
+  "Mission San Jose",
+  "Washington",
+];
 const REQUIREMENTS: { key: string; label: string }[] = [
   { key: "signs", label: "Signs hour forms" },
   { key: "transit", label: "Near transit" },
@@ -50,15 +58,19 @@ function center(color: string): React.CSSProperties {
 type Filters = {
   categories: string[];
   schedules: string[];
+  schools: string[];
   requirements: string[];
   statuses: string[];
+  savedOnly: boolean;
 };
 
 const EMPTY: Filters = {
   categories: [],
   schedules: [],
+  schools: [],
   requirements: [],
   statuses: [],
+  savedOnly: false,
 };
 
 function toggle(arr: string[], v: string): string[] {
@@ -76,7 +88,7 @@ export default function ServeFremontApp({
   const [filters, setFilters] = useState<Filters>(EMPTY);
   // Which dropdown-facet menu is open (Civic Block v2 filter bar). One at a time.
   const [openFacet, setOpenFacet] = useState<
-    "age" | "cause" | "schedule" | "req" | "status" | null
+    "age" | "cause" | "schedule" | "school" | "req" | "status" | null
   >(null);
   // Starts true so the client's first render matches the server HTML (no
   // hydration mismatch); corrected for small screens before first paint.
@@ -118,6 +130,8 @@ export default function ServeFremontApp({
       return next;
     });
 
+  const { savedIds, toggleSaved } = useSavedIds();
+
   useEffect(() => {
     if (!activeId || detailId) return;
     document
@@ -144,6 +158,12 @@ export default function ServeFremontApp({
       !(l.schedule && filters.schedules.includes(l.schedule))
     )
       return false;
+    if (
+      filters.schools.length &&
+      !filters.schools.some((s) => l.walkableFrom.includes(s))
+    )
+      return false;
+    if (filters.savedOnly && !savedIds.has(l.id)) return false;
     for (const req of filters.requirements) {
       if (req === "signs" && !l.signsHourForms) return false;
       if (req === "transit" && !l.nearTransit) return false;
@@ -220,8 +240,10 @@ export default function ServeFremontApp({
     activeAge != null ||
     filters.categories.length > 0 ||
     filters.schedules.length > 0 ||
+    filters.schools.length > 0 ||
     filters.requirements.length > 0 ||
-    filters.statuses.length > 0;
+    filters.statuses.length > 0 ||
+    filters.savedOnly;
 
   const clearAll = () => {
     setActiveAge(null);
@@ -396,6 +418,16 @@ export default function ServeFremontApp({
         )
       )}
       {facet(
+        "school",
+        filters.schools.length ? `School: ${filters.schools.length}` : "School",
+        filters.schools.length > 0,
+        SCHOOLS.map((s) =>
+          menuRow(`sch2-${s}`, s, filters.schools.includes(s), () =>
+            setFilters((f) => ({ ...f, schools: toggle(f.schools, s) }))
+          )
+        )
+      )}
+      {facet(
         "req",
         filters.requirements.length
           ? `Requirements: ${filters.requirements.length}`
@@ -423,6 +455,17 @@ export default function ServeFremontApp({
             setFilters((f) => ({ ...f, statuses: toggle(f.statuses, s.key) }))
           )
         )
+      )}
+      {savedIds.size > 0 && (
+        <button
+          onClick={() =>
+            setFilters((f) => ({ ...f, savedOnly: !f.savedOnly }))
+          }
+          className="sf-btn"
+          style={ddStyle(filters.savedOnly)}
+        >
+          {filters.savedOnly ? "♥" : "♡"} Saved ({savedIds.size})
+        </button>
       )}
       {anyFilter && (
         <button
@@ -501,6 +544,7 @@ export default function ServeFremontApp({
           </span>
           {!isMobile && (
             <span
+              className="sf-subtitle"
               style={{
                 fontFamily: UI,
                 fontSize: 12,
@@ -626,11 +670,26 @@ export default function ServeFremontApp({
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 6,
+              justifyContent: "space-between",
+              gap: 12,
               flexWrap: "wrap",
             }}
           >
-            {filterFacets}
+            <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+              {filterFacets}
+            </div>
+            <span
+              style={{
+                fontFamily: UI,
+                fontSize: 12,
+                color: "var(--sf-text-muted)",
+                flexShrink: 0,
+              }}
+            >
+              {anyFilter
+                ? `${sorted.length} of ${listings.length} match`
+                : `${listings.length} opportunit${listings.length === 1 ? "y" : "ies"}`}
+            </span>
           </div>
         )}
       </div>
@@ -664,13 +723,43 @@ export default function ServeFremontApp({
                 )?.listings.length ?? 1
               }
               onBack={() => setDetailId(null)}
+              saved={savedIds.has(detail.id)}
+              onToggleSaved={() => toggleSaved(detail.id)}
             />
           ) : error ? (
             <p style={{ padding: 6, color: "var(--sf-text-muted)", fontSize: 13 }}>{error}</p>
           ) : sorted.length === 0 ? (
-            <p style={{ padding: 6, color: "var(--sf-text-muted)", fontSize: 13 }}>
-              No opportunities match these filters.
-            </p>
+            <div style={{ padding: 6, position: "relative", zIndex: 41 }}>
+              <p
+                style={{
+                  color: "var(--sf-text-muted)",
+                  fontSize: 13,
+                  margin: 0,
+                }}
+              >
+                No opportunities match these filters.
+              </p>
+              {anyFilter && (
+                <button
+                  onClick={clearAll}
+                  className="sf-link"
+                  style={{
+                    marginTop: 8,
+                    border: "none",
+                    background: "none",
+                    color: "var(--sf-accent)",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    textDecoration: "underline",
+                    textUnderlineOffset: 3,
+                    cursor: "pointer",
+                    padding: 0,
+                  }}
+                >
+                  Clear all filters
+                </button>
+              )}
+            </div>
           ) : (() => {
             const useGrid = !showMap && !isMobile;
             // Staggers each row/header's entrance by its reading-order
@@ -1034,6 +1123,11 @@ function ListingRow({
         {listing.schedule && <span style={tagBase}>{listing.schedule}</span>}
         {listing.nearTransit && <span style={tagBase}>Near transit</span>}
         {listing.groupsOK && <span style={tagBase}>Groups OK</span>}
+        {listing.walkableFrom.length > 0 && (
+          <span style={tagBase}>
+            Walkable from {listing.walkableFrom.join(", ")}
+          </span>
+        )}
       </div>
 
       {notes.length > 0 && (
@@ -1166,13 +1260,16 @@ function DetailView({
   distance,
   orgOppCount,
   onBack,
+  saved,
+  onToggleSaved,
 }: {
   listing: Listing;
   distance?: number;
   orgOppCount: number;
   onBack: () => void;
+  saved: boolean;
+  onToggleSaved: () => void;
 }) {
-  const [saved, setSaved] = useState(false);
   // Plays a quick exit animation before actually calling onBack (which
   // unmounts this component), instead of unmounting instantly.
   const [closing, setClosing] = useState(false);
@@ -1343,6 +1440,9 @@ function DetailView({
           ))}
           {listing.nearTransit && <Pill label="Near transit" />}
           {listing.groupsOK && <Pill label="Groups OK" />}
+          {listing.walkableFrom.length > 0 && (
+            <Pill label={`Walkable from ${listing.walkableFrom.join(", ")}`} />
+          )}
         </div>
 
         {/* Next-session callout */}
@@ -1594,7 +1694,7 @@ function DetailView({
           </div>
         </div>
         <button
-          onClick={() => setSaved((s) => !s)}
+          onClick={onToggleSaved}
           aria-label={saved ? "Remove from saved" : "Save for later"}
           aria-pressed={saved}
           className="sf-btn"
@@ -1614,7 +1714,9 @@ function DetailView({
             transition: "border-color 0.15s, color 0.15s, background 0.15s",
           }}
         >
-          {saved ? "♥" : "♡"}
+          <span key={saved ? "on" : "off"} className="sf-heart-pop">
+            {saved ? "♥" : "♡"}
+          </span>
         </button>
         {startUrl ? (
           <a

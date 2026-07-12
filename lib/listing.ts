@@ -19,6 +19,7 @@ export type Listing = {
   nearTransit: boolean;
   groupsOK: boolean;
   priority: boolean;
+  walkableFrom: string[]; // high schools this is walkable from
   // Detail-page fields
   description?: string;
   onboarding?: string;
