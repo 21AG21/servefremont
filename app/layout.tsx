@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { InlineScript } from "@/components/InlineScript";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -47,17 +48,18 @@ export default function RootLayout({
         <InlineScript html="(function(){try{var m=window.matchMedia('(prefers-color-scheme: dark)');document.documentElement.dataset.theme=m.matches?'dark':'light';}catch(e){}})();" />
       </head>
       <body>
-        {children}
-        {/* Cookieless analytics (GoatCounter). Off until NEXT_PUBLIC_GOATCOUNTER
-            is set to your site code, e.g. "mysite". No cookies, no personal data. */}
-        {process.env.NEXT_PUBLIC_GOATCOUNTER && (
-          <script
-            data-goatcounter={`https://${process.env.NEXT_PUBLIC_GOATCOUNTER}.goatcounter.com/count`}
-            async
-            src="//gc.zgo.at/count.js"
-          />
-        )}
-      </body>
+      {children}
+      {/* Cookieless analytics (GoatCounter). Off until NEXT_PUBLIC_GOATCOUNTER
+          is set to your site code, e.g. "mysite". No cookies, no personal data. */}
+      {process.env.NEXT_PUBLIC_GOATCOUNTER && (
+        <script
+          data-goatcounter={`https://${process.env.NEXT_PUBLIC_GOATCOUNTER}.goatcounter.com/count.js`}
+          async
+          src="//gc.zgo.at/count.js"
+        />
+      )}
+      <Analytics />
+    </body>
     </html>
   );
 }

@@ -18,6 +18,24 @@ should I actually be talking to. Framed after the `4.1` quarterly-check-in
 template in the founders packet, run for the first time instead of the
 fourth.
 
+**Part C** (added 2026-07-12) is one org: Tri-City Free Breakfast Program,
+already in Airtable as `Paused`/`Unverified` since a 2026-07-07 fact-check
+pass that hit a dead end — the program's own website had gone dark and no
+coordinator email could be found anywhere. A newly-found church office
+contact, and then a detailed program listing with Sherry Hsu's own email,
+reopened that dead end, so this is the same "before I list this" framing
+as Garin, not a Part B check-in.
+
+**Part D** (added 2026-07-12) is five brand-new orgs, found by a research
+pass rather than an existing lead: Bountiful Blossom, Shinn Historical
+Park & Arboretum, Mission San José, Kaiser Permanente Fremont Medical
+Center, and Habitat for Humanity East Bay/Silicon Valley. None of these
+existed in Airtable before today. Two — Bountiful Blossom and Kaiser —
+were declined same-day (accessibility fit for the target demographic, see
+below) and never sent. The other three are `Paused`/`Unverified`, same as
+Garin; Shinn's first draft didn't get sent either (bad question) and was
+rewritten.
+
 ---
 
 ## Part A — new org
@@ -194,6 +212,156 @@ confirmed.*
 
 ---
 
+## Part C — blocked org, dead end reopened
+
+### Tri-City Free Breakfast Program
+
+**To:** sherryaohsu@yahoo.com *(Sherry Hsu, the program's volunteer
+coordinator — found via a detailed program listing that also matches her
+already-on-file mobile number, more direct than the general church office)*
+**Subject:** Question about the Tri-City Free Breakfast volunteer program
+
+> Hi Sherry,
+>
+> I run ServeFremont, a directory of Fremont volunteer opportunities for
+> high schoolers. I'd like to list the Tri-City Free Breakfast Program — I
+> have the basics (Mon/Wed/Fri, general volunteers 6:15-9:15am, kitchen
+> volunteers 5-9:15am), but a couple of things I couldn't confirm from
+> what's public: is there a minimum age for teen volunteers, and does the
+> program sign community-service hour forms? The program's own website
+> seems to be down, so I wanted to check directly rather than guess.
+>
+> Thanks,
+> Arjun
+
+*A detailed program listing found 2026-07-12 gave a direct email for Sherry
+(matches the mobile number already on file, so likely current) and split
+out the general-vs-kitchen shift times more precisely than what was on
+record — both now folded into Airtable. That resolves "is Sherry still the
+contact" and "what's the real schedule" without needing to ask. Min age and
+hour-forms are the two things nothing public has ever stated, so those are
+the only asks left. The program's own site is still dead, and if this
+address bounces, office@irvingtonpres.org (the church, found 2026-07-11) is
+the fallback. Stays Paused until she actually replies.*
+
+---
+
+## Part D — new orgs, found by research (2026-07-12)
+
+### Shinn Historical Park & Arboretum
+
+**Sent 2026-07-12 → Angie replied 2026-07-13. Active.**
+
+Confirmed: 14+ minimum age, garden club signs hour forms. Regular schedule
+is Tuesdays. She also flagged two time-sensitive asks — volunteers for a
+Saturday 7/18 festival (light weeding), and whether anyone could be there
+by Tuesday 7/14 morning ("we really need help"). Airtable is updated
+(Status → Active, Verified_At 2026-07-13, Next_Session notes the 7/18
+festival). Arjun is going himself Tuesday morning — the site's brand new
+and doesn't have other volunteer connections yet. No commitment made for
+Saturday.
+
+**Reply:**
+
+> Hi Angie,
+>
+> Thanks for confirming — we don't need a copy of the form, you can just
+> handle that directly with whoever comes. I can actually come by myself
+> tomorrow (Tuesday) morning to help out. We're still just getting this
+> volunteer directory off the ground, so I don't have other volunteers to
+> send your way for Saturday yet, but I'll keep it in mind as we grow.
+>
+> See you tomorrow,
+> Arjun
+
+**To:** angela_schmidt@sbcglobal.net *(Angie Schmidt, who runs the Friends
+of Heirloom Flowers garden club that actually coordinates volunteers here
+— she isn't city staff, so this doesn't go to a city inbox)*
+**Subject:** Teen volunteering at the Shinn Park garden — quick question
+
+> Hi Angie,
+>
+> I run ServeFremont, a directory of Fremont volunteer opportunities for
+> high schoolers, and I'd like to list the garden volunteer role at Shinn
+> Park. Quick question: is 14 still the minimum age for volunteers, and
+> does the garden club sign community-service hour forms for students?
+>
+> Thanks,
+> Arjun
+
+*Revised 2026-07-12 — the first draft opened by asking whether a 2021-era
+COVID vaccination requirement was still enforced, which read badly enough
+that it didn't get sent. Dropped that entirely and led with the actual
+ask instead. Age (14+) is still worth a one-line confirmation since it's
+the only source in this whole backlog that states a number at all.*
+
+---
+
+### Mission San José
+
+**To:** mission@saintjosephmsj.org *(general mission contact — no named
+docent coordinator turned up anywhere)*
+**Subject:** Teen volunteering as a Mission San José docent
+
+> Hi,
+>
+> I run ServeFremont, a directory of Fremont volunteer opportunities for
+> high schoolers. I'd like to list the docent program at Mission San
+> José — is there a minimum age for volunteers, and does the mission sign
+> community-service hour forms for students?
+>
+> Thanks,
+> Arjun
+
+*No age policy stated anywhere found — docent programs at religious sites
+sometimes end up adult-only in practice without ever saying so publicly,
+so this is a real open question, not a formality. Two different phone
+numbers turned up for this org in search (657-1797 vs. 656-3644); email
+sidesteps having to guess which is current.*
+
+---
+
+### Habitat for Humanity East Bay/Silicon Valley
+
+**To:** Volunteer@HabitatEBSV.org
+**Subject:** Fremont teen volunteers — a couple of questions
+
+> Hi,
+>
+> I run ServeFremont, a directory of Fremont volunteer opportunities for
+> high schoolers. Your site already lists the 16+/minor-waiver policy for
+> build days, which is great — the two things I couldn't find: is there a
+> current or upcoming Fremont build site I should point students to
+> specifically, and does Habitat sign community-service hour forms?
+>
+> Thanks,
+> Arjun
+
+*The only org in this batch with no fixed address — they're regional
+(nearest ReStore is San Jose), but their own site confirms real Fremont
+builds happen. The Airtable entry has a placeholder pin (Fremont City
+Hall) standing in until this reply gives something real to plot — don't
+flip this one Active without fixing the pin first, a wrong location on
+the map is worse than a missing one.*
+
+---
+
+### Bountiful Blossom — declined, not pursuing
+
+**Status: Declined (2026-07-12).** User call: might not be easy access
+for the targeted demographic. Airtable org + opportunity both flipped to
+Declined/Archived. Left in place, not deleted, in case that changes later.
+
+---
+
+### Kaiser Permanente Fremont Medical Center — declined, not pursuing
+
+**Status: Declined (2026-07-12).** Same call as Bountiful Blossom — might
+not be easy access for the targeted demographic. Airtable org +
+opportunity both flipped to Declined/Archived.
+
+---
+
 ## After each reply
 
 Same procedure as the 2026-07-07 batch:
@@ -203,6 +371,9 @@ Same procedure as the 2026-07-07 batch:
 3. Set `Verification_Method` (Email) + `Verified_At` — for Part B, this is
    the first time these six actually earn that field, even though they've
    been `Active` for weeks.
-4. Garin only: flip org **and** opportunity `Status` → `Active` once hour-forms
-   is confirmed either way (a "no" doesn't disqualify it — D-11 in the
-   founders packet — it just needs the field set honestly).
+4. New-org entries (Parts A, C, D): flip org **and** opportunity `Status` →
+   `Active` once the open questions are confirmed either way (a "no" on
+   hour-forms doesn't disqualify it — D-11 in the founders packet — it just
+   needs the field set honestly). For Habitat specifically, also replace
+   the placeholder Fremont City Hall pin with a real build-site address
+   before flipping — don't publish a wrong location.
