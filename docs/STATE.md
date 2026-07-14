@@ -2,10 +2,15 @@
 
 Single source of truth for session continuity. **Updated after every working
 message** — read this first instead of re-fetching Airtable / re-reading
-files. Last updated: 2026-07-14 (added a site-wide service-hour-form
+files. Last updated: 2026-07-14 (added a header "Forms" dropdown —
+pick your school, get its hour-verification form; only Washington has a
+real PDF on file, other 4 schools show "Coming soon" honestly rather
+than link to the wrong one. Also fixed a mobile header overflow this
+introduced — see §6/§8. Uncommitted. Earlier: added a service-hour-form
 download to the About page + a "bring your own form" step on Shinn's
-listing — see §6/§8, first real code change since the 2026-07-11 audit.
-Also: Shinn upgraded to In-Person verified — confirmed today's listing
+listing, first real code change since the 2026-07-11 audit (that one's
+pushed, commit ddfa771). Also: Shinn upgraded to In-Person verified —
+confirmed today's listing
 update (email-only onboarding, Tuesdays 10am-noon, various roles,
 template email) came from Arjun actually volunteering on-site, not a
 follow-up email. Strongest verification tier in the roster now. Photo
@@ -232,6 +237,14 @@ components/
   ServeFremontApp.tsx (1843 ln) → nearly everything: filters, search,
       list, detail panel, dropdowns. Category facet built dynamically
       from data — new Categories values need NO code change.
+      2026-07-14: added a "Forms" header dropdown (left of About), reuses
+      the openFacet/menuPos facet-menu machinery. SCHOOL_FORMS maps each
+      SCHOOLS entry to a form URL or null ("Coming soon") — only
+      Washington has a real file. Adding a school's form later is a
+      one-line change. Also made the header button row `.filter-scroll`
+      (+ minWidth:0/flexShrink:1) since 4 buttons no longer fit on
+      mobile without it — same horizontal-scroll pattern the filter row
+      already used.
   ListingMap.tsx (382)    → react-leaflet, Carto Voyager/dark_matter tiles
   OpportunityCard / FreshnessBadge / ReportOutdated / SubmitForm /
   LocateButton / InlineScript
@@ -321,6 +334,14 @@ Ran `servefremont-audit` again. Full writeup:
 
 ## 8. Known loose ends
 
+- **Need 4 more schools' hour forms**: American, Irvington, Kennedy,
+  Mission San Jose all show "Coming soon" in the new Forms picker — only
+  Washington's is on file. Get each from that school's counseling/service
+  office (they're usually not published online), then add the file to
+  `public/` and flip its `SCHOOL_FORMS` entry in ServeFremontApp.tsx from
+  `null` to the path. Don't substitute Washington's or any other school's
+  form for a different school — wrong drop-box/coordinator, hours won't
+  get counted.
 - **Masonic Homes needs ONE thing: real Lat/Lng.** Everything else is
   done — 14+/hour-forms confirmed by Jennifer MacRae 2026-07-13, contact
   corrected to jtriana@mhcuc.org. Address (34400 Mission Blvd, Union
@@ -347,7 +368,6 @@ Ran `servefremont-audit` again. Full writeup:
   org, 15+ open volunteer positions, but no verifiable direct email, only
   a contact form + general phone (510-996-8420). Not in Airtable, not
   drafted. Worth a phone call, or revisit if an email surfaces.
-- Uncommitted: outreach doc edits + this file (user hasn't asked to push).
 - Two junk Onboarding options in Airtable schema ("text", "a") — harmless,
   cleanable someday.
 - `How_To_Start_UTL` field-name typo is load-bearing (code maps it) —

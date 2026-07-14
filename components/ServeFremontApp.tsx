@@ -32,6 +32,16 @@ const SCHOOLS = [
   "Mission San Jose",
   "Washington",
 ];
+// null = we don't have this school's own hour-verification form yet.
+// Don't link to another school's form here — wrong drop-box/coordinator
+// means the student's hours don't get counted.
+const SCHOOL_FORMS: Record<string, string | null> = {
+  American: null,
+  Irvington: null,
+  Kennedy: null,
+  "Mission San Jose": null,
+  Washington: "/community-service-hours-form.pdf",
+};
 const REQUIREMENTS: { key: string; label: string }[] = [
   { key: "signs", label: "Signs hour forms" },
   { key: "transit", label: "Near transit" },
@@ -88,7 +98,7 @@ export default function ServeFremontApp({
   const [query, setQuery] = useState("");
   // Which dropdown-facet menu is open (Civic Block v2 filter bar). One at a time.
   const [openFacet, setOpenFacet] = useState<
-    "age" | "cause" | "schedule" | "school" | "req" | "status" | null
+    "age" | "cause" | "schedule" | "school" | "req" | "status" | "forms" | null
   >(null);
   // Trigger button's measured on-screen position for the currently-open
   // facet menu — see the facet()/floating-menu comment below for why this
@@ -566,6 +576,67 @@ export default function ServeFremontApp({
     </>
   );
 
+  // "Forms" lives in the top bar, not the filter row, but reuses the same
+  // openFacet/menuPos dropdown machinery for consistent open/close/Escape
+  // behavior. Each school links to its own form — never a different
+  // school's, since the drop-box/coordinator won't match.
+  menuRowsById["forms"] = SCHOOLS.map((school) => {
+    const url = SCHOOL_FORMS[school];
+    if (url) {
+      return (
+        <a
+          key={school}
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => setOpenFacet(null)}
+          className="sf-menu-item"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "8px 9px",
+            width: "100%",
+            borderRadius: 6,
+            textAlign: "left",
+            textDecoration: "none",
+            boxSizing: "border-box",
+            fontFamily: UI,
+            fontSize: 12.5,
+            fontWeight: 500,
+            color: "var(--sf-text-soft)",
+          }}
+        >
+          {school}
+          <span aria-hidden style={{ fontSize: 11, color: "var(--sf-text-muted)" }}>
+            ↓
+          </span>
+        </a>
+      );
+    }
+    return (
+      <div
+        key={school}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "8px 9px",
+          width: "100%",
+          borderRadius: 6,
+          boxSizing: "border-box",
+          fontFamily: UI,
+          fontSize: 12.5,
+          fontWeight: 500,
+          color: "var(--sf-text-faint)",
+        }}
+      >
+        {school}
+        <span style={{ fontSize: 10.5 }}>Coming soon</span>
+      </div>
+    );
+  });
+
   return (
     <div
       style={{
@@ -655,7 +726,51 @@ export default function ServeFremontApp({
             </span>
           )}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+        <div
+          className="filter-scroll"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            flexShrink: 1,
+            minWidth: 0,
+            maxWidth: "100%",
+          }}
+        >
+          <span style={{ position: "relative", flexShrink: 0 }}>
+            <button
+              onClick={(e) => {
+                if (openFacet === "forms") {
+                  setOpenFacet(null);
+                  return;
+                }
+                const rect = e.currentTarget.getBoundingClientRect();
+                const menuWidth = 210;
+                setMenuPos({
+                  left: Math.min(
+                    Math.max(8, rect.left),
+                    window.innerWidth - menuWidth - 8
+                  ),
+                  top: rect.bottom + 6,
+                });
+                setOpenFacet("forms");
+              }}
+              className="sf-btn"
+              style={{
+                fontFamily: UI,
+                fontSize: isMobile ? 12.5 : 12,
+                fontWeight: isMobile ? 600 : 500,
+                border: "1px solid var(--sf-border)",
+                borderRadius: isMobile ? 8 : 7,
+                padding: isMobile ? "7px 13px" : "6px 12px",
+                background: "var(--sf-surface)",
+                color: "var(--sf-text-soft)",
+                cursor: "pointer",
+              }}
+            >
+              Forms
+            </button>
+          </span>
           <Link
             href="/about"
             className="sf-btn"
