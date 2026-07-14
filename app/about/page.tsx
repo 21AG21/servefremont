@@ -105,6 +105,62 @@ export default function AboutPage() {
           actually get to — in under two minutes.
         </p>
 
+        <div
+          style={{
+            marginTop: 32,
+            padding: "18px 20px",
+            background: "var(--sf-callout-bg)",
+            border: "1px solid var(--sf-callout-border)",
+            borderRadius: 12,
+          }}
+        >
+          <h2
+            style={{
+              fontFamily: UI,
+              fontSize: 16,
+              fontWeight: 700,
+              margin: 0,
+              color: "var(--sf-callout-strong)",
+            }}
+          >
+            Need a service-hour form?
+          </h2>
+          <p
+            style={{
+              fontFamily: UI,
+              fontSize: 14.5,
+              lineHeight: 1.6,
+              margin: "8px 0 0",
+              color: "var(--sf-callout-text)",
+            }}
+          >
+            Most organizations will sign a form — they just don&apos;t provide
+            one, so bring your own printed copy. This is Washington High
+            School&apos;s official form; if you go to a different school, use
+            your own school&apos;s version instead.
+          </p>
+          <a
+            href="/community-service-hours-form.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="sf-btn"
+            style={{
+              marginTop: 14,
+              display: "inline-block",
+              borderRadius: 10,
+              padding: "10px 18px",
+              background: "var(--sf-accent)",
+              color: "var(--sf-on-accent)",
+              fontFamily: UI,
+              fontSize: 13.5,
+              fontWeight: 600,
+              textDecoration: "none",
+            }}
+          >
+            Download your own form now
+          </a>
+        </div>
+
         <Section heading="The verification promise">
           Every listing is verified directly with a real person at the
           organization — by visit, phone, or email — and re-confirmed each

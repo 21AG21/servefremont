@@ -2,11 +2,21 @@
 
 Single source of truth for session continuity. **Updated after every working
 message** — read this first instead of re-fetching Airtable / re-reading
-files. Last updated: 2026-07-13 (Angie Schmidt replied — Shinn confirmed
-and flipped Active, first reply of this batch; her volunteer-capacity
-follow-up still needs Arjun's answer. Also: scheduled audit of the
-then-13 Active orgs vs. live web sources — see §7a, two items need a
-human call/email).
+files. Last updated: 2026-07-14 (added a site-wide service-hour-form
+download to the About page + a "bring your own form" step on Shinn's
+listing — see §6/§8, first real code change since the 2026-07-11 audit.
+Also: Shinn upgraded to In-Person verified — confirmed today's listing
+update (email-only onboarding, Tuesdays 10am-noon, various roles,
+template email) came from Arjun actually volunteering on-site, not a
+follow-up email. Strongest verification tier in the roster now. Photo
+permission still unasked, see §8. Prior day, 2026-07-13: Jennifer MacRae
+replied re:
+Masonic Homes — 14+/hour-forms confirmed, but held at Paused since it
+still has no real map pin. Parent asked for a bigger outreach backlog
+since the son sends ~5 emails/day — added 4 more orgs + 3 more drafts,
+Part F; Angie Schmidt replied — Shinn confirmed and flipped Active;
+Salaam's Part E got corrected after user pushback; a
+scheduled audit flagged two orgs needing a human check, see §7a).
 
 ---
 
@@ -18,21 +28,29 @@ contact each** → then the **counselor pitch** (drafted in
 High first). The pitch is gated on the org count and an honest verification
 claim — plus a real domain (a `.vercel.app` URL undercuts it).
 
-**Current count: 14 Active / 25 needed.** 7 Paused in the pipeline (if all
-convert: 21 — still 4 short; more sourcing needed even in the best case).
+**Current count: 14 Active / 25 needed.** 11 Paused in the pipeline (if
+all convert: 25 — hits the bar exactly, so there's now no real slack for
+any pipeline org to fall through without more sourcing).
 
 ## 2. Must happen before the pitch (in order)
 
 1. **Send the outreach emails** — staged in `outreach-drafts-2026-07-11.md`,
-   Parts A–D. User declined to send some of the checklist batch (Don
-   Edwards, Washington Hospital, Fremont Main Library, SOS MOW remain
-   unsent by choice).
+   Parts A–F (11 emails, ~13 orgs, ready to send — plenty for 5/day). User
+   declined to send some of the checklist batch (Don Edwards, Washington
+   Hospital, Fremont Main Library, SOS MOW remain unsent by choice).
    **Replied → Active:** Shinn Historical Park (2026-07-13) — confirmed
    14+/hour-forms, Next_Session notes the 7/18 festival. Angie's follow-up
    (can we get volunteers there Tue 7/14 or Sat 7/18) still needs a reply —
    gated on Arjun's real-world capacity call, see §8.
+   **Replied, held at Paused (not Active):** Masonic Homes Union City
+   (2026-07-13) — Jennifer confirmed 14+/hour-forms, but no real Lat/Lng
+   exists yet, same never-publish-a-wrong-pin rule as Habitat. Also: she
+   replied from jtriana@mhcuc.org, not the jmacrae@mhcuc.org published on
+   their site — Internal_Contact_Email corrected to match.
    **Not yet sent:** Garin, Abode, Tri-City Free Breakfast (to Sherry Hsu),
-   Mission San José, Habitat EBSV, + the Part B six.
+   Mission San José, Habitat EBSV, Salaam Food Pantry (Part E), League of
+   Volunteers, Mission Peak + Quarry Lakes (Part F, one combined email),
+   + the Part B six.
 2. **Process replies**: Internal_Notes + date → fill missing fields →
    Verification_Method + Verified_At → flip org AND opportunity Status →
    Active. Habitat: replace placeholder pin (Fremont City Hall) with real
@@ -80,7 +98,30 @@ convert: 21 — still 4 short; more sourcing needed even in the best case).
   Verified_At set, Next_Session notes the 7/18 festival. Her follow-up ask
   (volunteers by Tue 7/14 or Sat 7/18) is a real-world capacity question,
   not a listing-data one — flagged to Arjun rather than answered
-  automatically.
+  automatically. Also: drafted a Salaam Food Pantry verification email
+  (Part E) around the named contact found in the audit — user pushed
+  back, wanted age/hour-forms asked instead. Re-checked
+  salaamfoodpantry.org/volunteer directly and found the site states
+  neither; both had been filled into Airtable as unconfirmed guesses
+  during the original 2026-06-22 sourcing pass (Signs_Hour_Forms showed
+  "Yes" live on the site with no real basis). Cleared Signs_Hour_Forms
+  back to blank on both opportunities and rewrote Part E to ask age and
+  hour-forms directly. Same day: parent said the son should be sending
+  ~5 emails/day and asked for more — added 4 more orgs (Masonic Homes
+  Union City, League of Volunteers, Mission Peak, Quarry Lakes) and 3
+  more drafts (Part F; the two EBRPD parks share one email, same inbox).
+  Applied the Salaam lesson throughout: age/hour-forms asked directly
+  wherever not literally stated on the org's own site, nothing
+  paraphrased in as fact. One candidate (Niles Canyon Railway) found but
+  not drafted — no verifiable direct contact, noted in Part F instead.
+  Same day, Jennifer MacRae replied re: Masonic Homes — confirmed 14+ and
+  hour-form signing, both real answers this time (unlike Salaam). Held at
+  Paused rather than flipping Active, because Lat/Lng was never geocoded
+  (address is correct, just no coordinates) — same rule applied to
+  Habitat. Also caught a contact-info drift: she replied from
+  jtriana@mhcuc.org, not the jmacrae@mhcuc.org published on their own
+  site — corrected Internal_Contact_Email to the address that's proven
+  to actually work.
 
 ## 4. Airtable — base `appLVhrmvogCNfv1O`
 
@@ -135,22 +176,35 @@ publicly; never hard-delete (Status flip only); nothing auto-publishes.
 Moderation queues (self-submit form / report-outdated form). Nothing
 auto-publishes. Reports has a 48h fix policy.
 
-## 5. Org roster (25 records)
+## 5. Org roster (29 records)
 
 **Active (14):** Math Science Nucleus · Washington Township Museum ·
 Kids Against Hunger · Niles Essanay Film Museum · Ohlone Humane · Afghan
 Coalition · Ardenwood · Fremont Main Library · Tri-City Animal Shelter ·
 SOS Meals on Wheels · Salaam Food Pantry · Age Well Center · Tri-City
 Volunteers · **Shinn Historical Park & Arboretum** (Angie Schmidt,
-confirmed 14+/hour-forms 2026-07-13). (~8 truly person-verified; Part B
+**In-Person verified 2026-07-14** — Arjun volunteered on-site, the
+strongest tier in the roster; just email her, Tuesdays 10am-noon, various
+roles, template email on file; photo permission still unasked). (~8 truly
+person-verified — Shinn was already one, just upgraded tiers; Part B
 closes the rest of the gap.)
 
-**Paused pipeline (7):** Tri-City Free Breakfast (email Sherry directly —
+**Paused pipeline (11):** Tri-City Free Breakfast (email Sherry directly —
 strongest lead) · Garin · Abode · Don Edwards · Washington Hospital
 (waitlist closed till fall 2026) · Mission San José
 (mission@saintjosephmsj.org, age unknown — may be adult-only) · Habitat
 EBSV (Volunteer@HabitatEBSV.org, 16+ waiver, **placeholder pin**, still
-needs fixing before Active).
+needs fixing before Active) · **new 2026-07-13:** Masonic Homes Union
+City (**14+/hour-forms CONFIRMED** by Jennifer MacRae, real address is
+jtriana@mhcuc.org not the jmacrae@ published on their site — only
+blocker left is Lat/Lng, never geocoded; this is the closest org in the
+whole pipeline to Active, just needs coordinates) · League of Volunteers
+(lov@lov.org, teen program confirmed
+13-17, **same no-Lat/Lng gap**) · Mission Peak Regional Preserve + Quarry
+Lakes Regional Recreation Area (both volunteers@ebparks.org, one combined
+email — these two DO have coordinates already, sourced from a trail
+guide and Wikipedia respectively, good enough to trust but worth a
+sanity-check before Active).
 
 **Declined (3):** Coyote Hills · Bountiful Blossom (2026-07-12, user call —
 accessibility fit) · Kaiser Fremont (2026-07-12, same call). **Archived
@@ -166,6 +220,9 @@ app/
   page.tsx                 → renders ServeFremontApp (main map+list SPA)
   layout.tsx               → metadata/OG defaults, GoatCounter (env-gated)
   about/ · for-organizations/ · loading · not-found
+      about/page.tsx now has a callout card linking to
+      /community-service-hours-form.pdf (2026-07-14) — it's Washington
+      High's own form, labeled as such; other schools need their own.
   opportunities/[id]/ · orgs/[id]/   → standalone ISR pages
                              (generateStaticParams() => [], revalidate 60)
   api/submit · api/report  → write to Airtable queues; honeypot +
@@ -186,6 +243,8 @@ lib/
   types.ts · listing.ts · distance.ts · useIsMobile · useSavedIds
 proxy.ts                  → per-IP rate limiter, 60 req/min
 app/globals.css           → --sf-* tokens, no Tailwind
+public/                   → static assets; now also
+                             community-service-hours-form.pdf
 ```
 
 **Layout:** desktop = filter bar on top, list sidebar left, map right,
@@ -202,7 +261,7 @@ report-outdated link.
 - `founders-packet.md` — the spec (Part 0 = definition of done, §3.x)
 - `roadmap.md` — state vs. spec as of 2026-07-11 (superseded by this file
   for day-to-day; still the deeper writeup)
-- `outreach-drafts-2026-07-11.md` — ALL current drafts, Parts A–D
+- `outreach-drafts-2026-07-11.md` — ALL current drafts, Parts A–F
 - `counselor-pitch-draft.md` — the pitch, gated on 25 orgs
 - `fact-check-queue-2026-07-07.md`, `outreach-drafts-2026-07-07.md`,
   `airtable-fill-plan-2026-07-07.md` — earlier passes, mostly executed
@@ -236,18 +295,58 @@ weren't found on 2026-07-07 (salaamfoodpantry@gmail.com, (510) 519-7250) —
 worth a verification email; Age Well Center was formerly "Fremont Senior
 Center" (confirmed rename, same org).
 
+## 7b. 2026-07-14 scheduled audit (all 14 Active orgs, follow-up pass)
+
+Ran `servefremont-audit` again. Full writeup:
+`~/.claude/scheduled-tasks/servefremont-audit/plan.md`. No Airtable changes
+— nothing surfaced was an unambiguous fix.
+
+- **Tri-City Volunteers — escalated.** Second consecutive day independent
+  web sources report TCV closed Saturdays/Sundays and use phone (510)
+  793-4583, contradicting the on-file Saturday AM 9–12 shift (confirmed by
+  Anju Sharma 2026-06-17) and phone (510) 598-4066. Recommend an actual
+  call/email to Anju before routing more teens to a Saturday shift.
+- **Tri-City Animal Shelter — resolved, no action needed.** Confirmed the
+  public 18+ minimum applies only to in-shelter volunteering; Airtable
+  already correctly separates that from the all-ages "Community Service
+  Hours Projects (From Home)" opportunity (no Min_Age set). Yesterday's
+  flag was based on not yet having checked how the record was modeled —
+  it turns out fine as-is.
+- **Shinn Historical Park & Arboretum** (added Active 2026-07-13, too late
+  for that day's audit): checked against public sources today — phone,
+  age (14+), and Tuesday 10am-noon schedule all match what's on file.
+  Nothing to change.
+- No new Fremont-area nonprofit closures found affecting any org on the
+  roster.
+
 ## 8. Known loose ends
 
-- **Arjun personally volunteering at Shinn Tue 7/14 morning** — reply to
-  Angie's "can you get anyone there Tuesday" ask; he's going himself since
-  the site has no other volunteer connections yet. No commitment made for
-  the Sat 7/18 festival. Worth checking back after Tuesday — this could
-  double as an in-person verification touchpoint (photo permission, closer
-  look at the role) beyond the email-only confirmation already on file.
-- **From the 2026-07-13 audit (§7a):** confirm Tri-City Volunteers'
-  Saturday shift isn't affected by a possible weekend closure; confirm
-  Tri-City Animal Shelter actually has a teen-eligible role given its
-  public 18+ minimum.
+- **Masonic Homes needs ONE thing: real Lat/Lng.** Everything else is
+  done — 14+/hour-forms confirmed by Jennifer MacRae 2026-07-13, contact
+  corrected to jtriana@mhcuc.org. Address (34400 Mission Blvd, Union
+  City, CA 94587) is correct, just never successfully geocoded — a quick
+  Google Maps lookup would unblock flipping both org (`recqYS2yLv7hwQC0S`)
+  and opportunity (`recLWorgiFbgCsTLm`) to Active. Cheapest win available
+  right now.
+- **Shinn photo permission** — confirmed 2026-07-14 the listing update
+  came from Arjun's in-person visit, so Verification_Method is now
+  In-Person (upgraded from Email, `recBaWMkzyZuSvbtA`). One thing not yet
+  asked while he was there: `Photo_Permission` checkbox is still unset —
+  worth a quick follow-up with Angie if he goes back, otherwise low
+  priority.
+- **Tri-City Volunteers — escalated (§7b).** Two consecutive daily audits
+  (7/13, 7/14) contradict the on-file Saturday AM 9–12 shift and phone
+  number. Actually call/email Anju Sharma before routing more teens there.
+  (Tri-City Animal Shelter's 18+ question from the 7/13 audit is resolved
+  — the from-home project is correctly modeled with no age floor.)
+- **Dev server "stale" runtime errors** (Runtime SyntaxError / can't find
+  global-error.js module) — not a real bug, just a stale `.next` Turbopack
+  cache after `@vercel/analytics` was added. Fix: `rm -rf .next`, restart
+  the dev server. Hit and fixed 2026-07-14.
+- **Niles Canyon Railway** (Pacific Locomotive Association, Niles) — real
+  org, 15+ open volunteer positions, but no verifiable direct email, only
+  a contact form + general phone (510-996-8420). Not in Airtable, not
+  drafted. Worth a phone call, or revisit if an email surfaces.
 - Uncommitted: outreach doc edits + this file (user hasn't asked to push).
 - Two junk Onboarding options in Airtable schema ("text", "a") — harmless,
   cleanable someday.

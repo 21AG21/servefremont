@@ -362,6 +362,141 @@ opportunity both flipped to Declined/Archived.
 
 ---
 
+## Part E — verification backlog, found later (2026-07-13)
+
+Same situation as Part B, just surfaced later: Salaam Food Pantry is
+already `Active` and public on the site, but has never actually been
+person-verified. First draft of this asked about the named coordinator —
+wrong call. Re-checked salaamfoodpantry.org/volunteer directly and found
+it states nothing about minimum age or hour-form signing; the "no firm
+age floor" description text and the opportunities' Signs_Hour_Forms=Yes
+were both unsupported guesses from the original 2026-06-22 sourcing pass,
+not real site content. Signs_Hour_Forms has been cleared back to blank in
+Airtable rather than leave an unconfirmed claim live. Age and hour-forms
+are the two things that actually matter here, not the contact question.
+
+### Salaam Food Pantry
+
+**To:** salaamfoodpantry@gmail.com
+**Subject:** Quick check on your ServeFremont listing
+
+> Hi,
+>
+> I run ServeFremont, a directory of Fremont volunteer opportunities for
+> high schoolers — I've listed your Pantry Packing Day and Distribution
+> Day roles. Two things I couldn't find on your site: is there an actual
+> minimum age for volunteers (or a floor for how young is too young, even
+> with an adult), and does Salaam Food Pantry sign community-service hour
+> forms for students?
+>
+> Thanks,
+> Arjun
+
+*Neither question is answered anywhere on salaamfoodpantry.org — both
+were previously filled in as guesses rather than confirmed, which is
+worse than leaving them blank. No named-contact question here; the email
+and phone from the contact page (salaamfoodpantry@gmail.com,
+510-519-7250) are already on file as the address to use.*
+
+---
+
+## Part F — new orgs, found by research (2026-07-13)
+
+Three more emails, four more orgs in the pipeline (Mission Peak and Quarry
+Lakes share one email since both route to the same general EBRPD inbox).
+Same discipline as the Salaam correction above: age and hour-forms are
+asked directly wherever the org's own site didn't already state them —
+nothing paraphrased or guessed into a field as if confirmed.
+
+### Masonic Homes of California — Union City
+
+**Sent 2026-07-13 → Jennifer replied same day. Confirmed 14+ and hour-form
+signing — held at Paused, not Active, only because Lat/Lng was never
+geocoded (see STATE.md §8). She replied from jtriana@mhcuc.org, not the
+jmacrae@mhcuc.org below — Airtable's contact field corrected to match.**
+
+**To:** jmacrae@mhcuc.org *(Jennifer MacRae, Volunteer Engagement — named
+directly on their own volunteer page; her real address turned out to be
+jtriana@mhcuc.org)*
+**Subject:** Teen volunteering at Masonic Homes Union City — quick questions
+
+> Hi Jennifer,
+>
+> I run ServeFremont, a directory of Tri-City-area volunteer opportunities
+> for high schoolers, and I'd like to list volunteering at the Union City
+> campus — visiting with residents, activities, clerical support. Two
+> things I couldn't find on your site: what's the minimum age to
+> volunteer, and does Masonic Homes sign community-service hour forms for
+> students?
+>
+> Thanks,
+> Arjun
+
+*A secondary search result mentioned "16+ for certain areas," but their
+own volunteer page doesn't say that anywhere — not entered as fact,
+asked directly instead.*
+
+---
+
+### League of Volunteers (LOV)
+
+**To:** lov@lov.org *(general inbox — Ramona McMaster is named as the
+teen coordinator, but her listed email looked Thanksgiving-event-specific
+rather than general-purpose)*
+**Subject:** Teen volunteering with LOV — quick question
+
+> Hi,
+>
+> I run ServeFremont, a directory of Tri-City-area volunteer opportunities
+> for high schoolers, and I'd like to list your teen program for ages
+> 13-17 — I saw Ramona McMaster is the contact for that. One thing I
+> couldn't find on your site: does LOV sign community-service hour forms
+> for students?
+>
+> Thanks,
+> Arjun
+
+*Age (13-17) is a direct quote from their own site ("Calling All Teen
+Volunteers (Ages 13-17)!"), not a guess — so hour-forms is the only real
+open question here.*
+
+---
+
+### Mission Peak Regional Preserve + Quarry Lakes Regional Recreation Area
+
+**To:** volunteers@ebparks.org *(general EBRPD inbox — neither park has a
+named contact the way Garin has garin@ebparks.org, and both route to the
+same address, so one combined email instead of two near-duplicates)*
+**Subject:** Teen volunteering at Mission Peak and Quarry Lakes — quick questions
+
+> Hi,
+>
+> I run ServeFremont, a directory of Fremont-area volunteer opportunities
+> for high schoolers. I'd like to list trail and stewardship volunteering
+> at Mission Peak Regional Preserve and Quarry Lakes Regional Recreation
+> Area. Two things I couldn't find published for either: what's the
+> minimum age, and does EBRPD sign community-service hour forms for these
+> programs?
+>
+> Thanks,
+> Arjun
+
+*Garin's own EBRPD portal page states 13+ with a parent-permission form
+under 17 — but that's Garin's listing specifically, not a district-wide
+policy, so it wasn't assumed to carry over to these two parks.*
+
+---
+
+**Also found, not sent:** Niles Canyon Railway (Pacific Locomotive
+Association, Niles district) — an all-volunteer heritage railway with
+15+ open positions, but no publicly listed volunteer email, only a
+contact form and a general phone (510-996-8420). A WebSearch result
+claimed a coordinator name and email, but it didn't check out against
+any direct source, so it wasn't used. Worth a phone call rather than an
+email, or revisit once a real address surfaces.
+
+---
+
 ## After each reply
 
 Same procedure as the 2026-07-07 batch:
