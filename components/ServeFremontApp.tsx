@@ -1046,6 +1046,10 @@ export default function ServeFremontApp({
               flex: isMobile ? 1 : 1.3,
               minWidth: 0,
               position: "relative",
+              // Trap Leaflet's internal z-indexes (tiles 200 … controls 1000)
+              // in their own stacking context — without this the map paints
+              // over the app's fixed dropdown (50) and click-away layer (40).
+              isolation: "isolate",
             }}
           >
             <ListingMap

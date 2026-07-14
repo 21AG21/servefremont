@@ -2,11 +2,17 @@
 
 Single source of truth for session continuity. **Updated after every working
 message** — read this first instead of re-fetching Airtable / re-reading
-files. Last updated: 2026-07-14 (added a header "Forms" dropdown —
+files. Last updated: 2026-07-14 (fixed the Forms dropdown rendering
+INVISIBLY BEHIND the map — Leaflet pane z-indexes (200–1000) leaked into
+the root stacking context and beat the menu (50) + click-away layer (40);
+one-line fix: `isolation: "isolate"` on the map wrapper in
+ServeFremontApp.tsx. User-reported; last session's "screenshot artifact"
+dismissal of the clipped-menu screenshot was wrong — the screenshot was
+showing this bug. Uncommitted. Earlier today: added a header "Forms" dropdown —
 pick your school, get its hour-verification form; only Washington has a
 real PDF on file, other 4 schools show "Coming soon" honestly rather
 than link to the wrong one. Also fixed a mobile header overflow this
-introduced — see §6/§8. Uncommitted. Earlier: added a service-hour-form
+introduced — see §6/§8. Pushed, commit 27d1a35. Earlier: added a service-hour-form
 download to the About page + a "bring your own form" step on Shinn's
 listing, first real code change since the 2026-07-11 audit (that one's
 pushed, commit ddfa771). Also: Shinn upgraded to In-Person verified —
@@ -244,7 +250,14 @@ components/
       one-line change. Also made the header button row `.filter-scroll`
       (+ minWidth:0/flexShrink:1) since 4 buttons no longer fit on
       mobile without it — same horizontal-scroll pattern the filter row
-      already used.
+      already used. Later on 2026-07-14: map wrapper got
+      `isolation:"isolate"` — Leaflet's internal z-indexes (tiles 200 …
+      controls 1000) otherwise escape into the root stacking context and
+      paint over the app's fixed dropdown (z 50) and click-away overlay
+      (z 40). Filter menus never showed it (they drop over the list, not
+      the map); the header Forms menu drops onto the map and was fully
+      hidden. Any future fixed/floating UI stays safe as long as that
+      isolation stays on the map wrapper.
   ListingMap.tsx (382)    → react-leaflet, Carto Voyager/dark_matter tiles
   OpportunityCard / FreshnessBadge / ReportOutdated / SubmitForm /
   LocateButton / InlineScript
